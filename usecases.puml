@@ -1,0 +1,24 @@
+@startuml Usecases Library
+
+/'
+Reservation system for the library. Allows the user to search for a book,
+save it to favorites, reserve it and borrow it for the standard loan period.
+A loan can be extended if it does not conflict
+with another reservation. The user can write a review on the borrowed book.
+'/
+
+actor User as user
+actor Admin as admin
+actor Librarian as librarian
+
+usecase "Add book to library"
+usecase "Add book to favourite"
+usecase "Add book to "
+
+usecase "Register" as register
+usecase "Log-in" as login
+
+
+
+
+@enduml
