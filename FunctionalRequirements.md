@@ -20,23 +20,23 @@
 
 
 # Prihlásený používateľ
-...
-3. Používateľ môže posielať dotazy cez formulár, ale má predvyplnené údaje.
-4. Používateľ si môže pridať knihy do zoznamu na rezerváciu a následne zarezervovať knihy.
-5. Používateľ môže napísať recenziu na knihy, ktoré mal niekedy požičané
-6. Používateľ si môže nechať poslať notifikáciu, keď bude kniha dostupná.
-7. Používateľ si môže predĺžiť požičaciu lehotu.
-8. Používateľ si môže pozrieť históriu výpožičiek.
-9. Používateľ si môže pozrieť aktuálne požičané knihy.
-10. Používateľ vidí termín vrátenia knihy.
-11. Používateľ dostáva upozornenia na blížiaci sa termín vrátenia.
-12. Používateľ môže zaplatiť pokuty online.
-13. Používateľ môže spravovať svoj profil: (zmena hesla/aktualizácia údajov)
-14. Používateľ si môže vytvoriť zoznam obľúbených kníh (wishlist).
-15. Používateľ môže hodnotiť knihy (napr. hviezdičky).
-16. Používateľ môže vidieť svoje rezervácie a ich stav.
-17. Používateľ môže zrušiť rezerváciu.
-18. Používateľ môže dostávať personalizované odporúčania kníh.
+
+1. Používateľ môže posielať dotazy cez formulár, ale má predvyplnené údaje.
+2. Používateľ si môže pridať knihy do zoznamu na rezerváciu a následne zarezervovať knihy.
+3. Používateľ môže napísať recenziu na knihy, ktoré mal niekedy požičané
+4. Používateľ si môže nechať poslať notifikáciu, keď bude kniha dostupná.
+5. Používateľ si môže predĺžiť požičaciu lehotu.
+6. Používateľ si môže pozrieť históriu výpožičiek.
+7. Používateľ si môže pozrieť aktuálne požičané knihy.
+8. Používateľ vidí termín vrátenia knihy.
+9. Používateľ dostáva upozornenia na blížiaci sa termín vrátenia.
+10. Používateľ môže zaplatiť pokuty online.
+11. Používateľ môže spravovať svoj profil: (zmena hesla/aktualizácia údajov)
+12. Používateľ si môže vytvoriť zoznam obľúbených kníh (wishlist).
+13. Používateľ môže hodnotiť knihy (napr. hviezdičky).
+14. Používateľ môže vidieť svoje rezervácie a ich stav.
+15. Používateľ môže zrušiť rezerváciu.
+16. Používateľ môže dostávať personalizované odporúčania kníh.
 
 
 # Zamestnanec
