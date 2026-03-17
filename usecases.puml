@@ -1,24 +1,129 @@
-@startuml Usecases Library
+@startuml UseCasesLibrary
+left to right direction
+skinparam packageStyle rectangle
 
-/'
-Reservation system for the library. Allows the user to search for a book,
-save it to favorites, reserve it and borrow it for the standard loan period.
-A loan can be extended if it does not conflict
-with another reservation. The user can write a review on the borrowed book.
-'/
+actor "Pouzivatel" as user
+actor "Neprihlaseny pouzivatel" as guest
+actor "Prihlaseny pouzivatel" as member
+actor "Zamestnanec" as staff
+actor "Admin" as admin
 
-actor User as user
-actor Admin as admin
-actor Librarian as librarian
+guest --|> user
+member --|> user
 
-usecase "Add book to library"
-usecase "Add book to favourite"
-usecase "Add book to "
+rectangle "Katalog kniznice" {
+	usecase "Prehladavat ponuku kniznice" as UC_Browse
+	usecase "Vyhladat konkretnu knihu" as UC_Search
+	usecase "Filtrovat knihy\n(autor/zaner/rok/dostupnost)" as UC_Filter
+	usecase "Zobrazit detail knihy" as UC_BookDetail
+	usecase "Zobrazit dostupnost knihy" as UC_Availability
+	usecase "Zobrazit lokaciu knihy" as UC_Location
+	usecase "Zobrazit recenzie a hodnotenia" as UC_Reviews
+	usecase "Zobrazit detail autora alebo vydavatela" as UC_AuthorDetail
+	usecase "Zobrazit novinky a odporucane knihy" as UC_News
+	usecase "Zobrazit otvaracie hodiny" as UC_Hours
+	usecase "Zobrazit kontakty a mapu kniznice" as UC_Contact
+	usecase "Poslat dotaz cez formular" as UC_ContactForm
+	usecase "Poziadat o notifikaciu pri dostupnosti knihy" as UC_AvailNotify
+}
 
-usecase "Register" as register
-usecase "Log-in" as login
+rectangle "Pristup a ucet" {
+	usecase "Registrovat sa" as UC_Register
+	usecase "Prihlasit sa" as UC_Login
+}
 
+rectangle "Funkcie prihlaseneho pouzivatela" {
+	usecase "Spravovat profil\n(zmena hesla a udajov)" as UC_Profile
+	usecase "Vytvorit wishlist" as UC_Wishlist
+	usecase "Pridat knihu do zoznamu na rezervaciu" as UC_ReserveList
+	usecase "Rezervovat knihu" as UC_Reserve
+	usecase "Zobrazit rezervacie a ich stav" as UC_Reservations
+	usecase "Zrusit rezervaciu" as UC_CancelReservation
+	usecase "Zobrazit aktualne vypozicky" as UC_CurrentLoans
+	usecase "Zobrazit historiu vypoziciek" as UC_LoanHistory
+	usecase "Zobrazit termin vratenia knihy" as UC_DueDate
+	usecase "Predlzit vypozicnu lehotu" as UC_ExtendLoan
+	usecase "Dostavat upozornenia na termin vratenia" as UC_DueNotify
+	usecase "Zaplatit pokuty online" as UC_PayFine 
+    'Ak chceme aj platobné veci možno robiť
+	usecase "Napisat recenziu na pozicanu knihu" as UC_WriteReview
+	usecase "Hodnotit knihu (hviezdicky)" as UC_RateBook
+	usecase "Dostat personalizovane odporucania knih" as UC_PersonalRecs
+	usecase "Poslat dotaz cez formular\n(predvyplnene udaje)" as UC_PrefilledForm
+}
 
+rectangle "Funkcie zamestnanca" {
+	usecase "Pridat knihu do ponuky kniznice" as UC_AddBook
+	usecase "Zrusit rezervaciu zakaznikovi" as UC_StaffCancelReservation
+	usecase "Oznacit knihu ako stratenu alebo poskodenu" as UC_MarkLost
+	usecase "Zobrazit statistiky jednotlivych knih" as UC_BookStats
+	usecase "Zobrazit statistiky vsetkych knih" as UC_AllStats
+	usecase "Zobrazit cakacie zoznamy" as UC_WaitingLists
+	usecase "Upravovat pokuty" as UC_ManageFines
+	usecase "Informovat pouzivatela" as UC_InformUser
+	usecase "Napisat newsletter" as UC_Newsletter
+	usecase "Posielat notifikacie" as UC_SendNotifications
+}
 
+rectangle "Administracia systemu" {
+	usecase "Upravovat pravidla vypoziciek\n(maximalny pocet knih a dlzka vypozicky)" as UC_LoanRules
+	usecase "Spravovat obsah webu" as UC_WebContent
+}
+
+user --> UC_Browse
+user --> UC_BookDetail
+user --> UC_News
+user --> UC_Hours
+user --> UC_Contact
+user --> UC_ContactForm
+user --> UC_AvailNotify
+
+guest --> UC_Register
+guest --> UC_Login
+
+member --> UC_Profile
+member --> UC_Wishlist
+member --> UC_ReserveList
+member --> UC_Reserve
+member --> UC_Reservations
+member --> UC_CancelReservation
+member --> UC_CurrentLoans
+member --> UC_LoanHistory
+member --> UC_DueDate
+member --> UC_ExtendLoan
+member --> UC_DueNotify
+member --> UC_PayFine
+member --> UC_WriteReview
+member --> UC_RateBook
+member --> UC_PersonalRecs
+member --> UC_PrefilledForm
+
+staff --> UC_AddBook
+staff --> UC_StaffCancelReservation
+staff --> UC_MarkLost
+staff --> UC_BookStats
+staff --> UC_AllStats
+staff --> UC_WaitingLists
+staff --> UC_ManageFines
+staff --> UC_InformUser
+staff --> UC_Newsletter
+staff --> UC_SendNotifications
+
+admin --> UC_LoanRules
+admin --> UC_WebContent
+
+UC_Browse .> UC_Search : <<include>>
+UC_Browse .> UC_Filter : <<include>>
+UC_BookDetail .> UC_Availability : <<include>>
+UC_BookDetail .> UC_Location : <<include>>
+UC_BookDetail .> UC_Reviews : <<include>>
+UC_BookDetail .> UC_AuthorDetail : <<extend>>
+
+UC_Reserve .> UC_ReserveList : <<include>>
+UC_CancelReservation .> UC_Reservations : <<include>>
+UC_DueNotify .> UC_DueDate : <<include>>
+UC_PrefilledForm .> UC_ContactForm : <<extend>>
+UC_WriteReview .> UC_RateBook : <<extend>>
+UC_SendNotifications .> UC_InformUser : <<include>>
 
 @enduml
