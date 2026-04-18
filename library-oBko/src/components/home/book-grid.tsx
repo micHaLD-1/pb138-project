@@ -1,4 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel"
+import BookCard from "./book-card"
 
 type Book = {
   id: string
@@ -8,6 +9,7 @@ type Book = {
   image: string
   description: string
 }
+
 
 const books: Book[] = [
   {
@@ -89,36 +91,22 @@ const books: Book[] = [
 export default function BookGrid() {
   return (
     <div className="w-full px-4 py-6 md:px-8">
+        <Carousel className="w-full max-w-5xl mx-auto">
+            <CarouselContent>
+                {books.map((book) => (
+                <CarouselItem key={book.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                    <BookCard book={book} />
+                </CarouselItem>
+                ))}
+            </CarouselContent>
+
+            <CarouselPrevious />
+            <CarouselNext />
+        </Carousel>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-10">
         {books.map((book) => (
-          <Card
-            key={book.id}
-            className="overflow-hidden transition-transform duration-300 hover:scale-103 hover:shadow-lg"
-          >
-            <CardContent className="">
-              <div className="aspect-[3/4] overflow-hidden">
-                <img
-                  src={book.image}
-                  alt={book.title}
-                  className="block h-full w-full object-cover"
-                />
-              </div>
-
-              <div className="p-3" w-full h-full>
-                <h1 className="text-lg font-semibold text-card-foreground">
-                  {book.title} - {book.author}
-                </h1>
-
-                <span className="mt-1 inline-block text-xs text-card-foreground">
-                  {book.genre}
-                </span>
-                <p className="mt-2 text-xs text-muted-foreground leading-snug line-clamp-3 font-medium text-card-foreground">
-                    {book.description}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <BookCard book={book} />
         ))}
       </div>
     </div>
