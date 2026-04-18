@@ -1,5 +1,6 @@
-import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
+
 import * as schema from "./schema";
 
 const pool = new Pool({
@@ -11,23 +12,4 @@ const pool = new Pool({
 });
 
 export const db = drizzle(pool, { schema });
-
-export type Database = typeof db;
-
-// Export all tables for direct imports
-export {
-  publishers,
-  authors,
-  genres,
-  branches,
-  books,
-  bookAuthors,
-  bookGenres,
-  bookCopies,
-  users,
-  reviews,
-  notifications,
-  reservations,
-  fines,
-  loans,
-} from "./schema";
+export * from "./schema";

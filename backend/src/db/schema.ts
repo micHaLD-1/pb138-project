@@ -1,120 +1,185 @@
-import { pgTable, serial, varchar, text, timestamp, integer, boolean, decimal, pgEnum, date, doublePrecision } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { pgTable, serial, varchar, text, timestamp, integer, pgEnum, date, doublePrecision } from "drizzle-orm/pg-core";
 
-// Enums
-export const userRoleEnum = pgEnum("user_role", ["guest", "member", "staff", "admin"]);
-export const bookCopyStatusEnum = pgEnum("book_copy_status", ["available", "borrowed", "reserved", "maintenance"]);
-export const fineStatusEnum = pgEnum("fine_status", ["pending", "paid"]);
+export const userRoleEnum = pgEnum("user_role", ["GUEST", "MEMBER", "STAFF", "ADMIN"]);
+export const bookCopyStatusEnum = pgEnum("book_copy_status", ["AVAILABLE", "BORROWED", "RESERVED"]);
 
-// PUBLISHER table
-export const publishers = pgTable("publishers", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
+export const fineStatusEnum = pgEnum("fine_status", ["PENDING", "PAID"]);
+export const loanStatusEnum = pgEnum("loan_status", ["ACTIVE", "RETURNED", "RETURNED_LATE"]);
+export const reservationStatusEnum = pgEnum("reservation_status", ["PENDING", "AVAILABLE", "FULFILLED", "CANCELLED"]);
+
+export const branch = pgTable("branch", {
+  id: serial("id_branch").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique()
 });
 
-// AUTHOR table
-export const authors = pgTable("authors", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
+export const genre = pgTable("genre", {
+  id: serial("id_genre").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique()
 });
 
-// GENRE table
-export const genres = pgTable("genres", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
+export const author = pgTable("author", {
+  id: serial("id_author").primaryKey(),
+  firstName: varchar("first_name", { length: 255 }).notNull(),
+  lastName: varchar("last_name", { length: 255 }).notNull()
 });
 
-// BRANCH table
-export const branches = pgTable("branches", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  address: text("address"),
-  contact: varchar("contact", { length: 255 }),
+export const publisher = pgTable("publisher", {
+  id: serial("id_publisher").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique()
 });
 
-// BOOK table
-export const books = pgTable("books", {
-  id: serial("id").primaryKey(),
+export const book = pgTable("book", {
+  id: serial("id_book").primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
-  publisherId: integer("publisher_id").references(() => publishers.id),
-  yearPublished: integer("year_published"),
-  language: varchar("language", { length: 100 }),
-  description: text("description"),
+  yearPublished: integer("year_published").notNull(),
+  language: varchar("language", { length: 100 }).notNull(),
+  description: varchar("description", { length: 500 }).notNull(),
+  publisherId: integer("id_publisher").notNull().references(() => publisher.id, { onDelete: "restrict"})
 });
 
-// BOOK_AUTHOR junction table (many-to-many)
-export const bookAuthors = pgTable("book_authors", {
-  bookId: integer("book_id").notNull().references(() => books.id),
-  authorId: integer("author_id").notNull().references(() => authors.id),
+export const bookGenre = pgTable("book_genre", {
+  bookId: integer("id_book").notNull().references(() => book.id, { onDelete: "cascade" }),
+  genreId: integer("id_genre").notNull().references(() => genre.id, { onDelete: "cascade" })
 });
 
-// BOOK_GENRE junction table (many-to-many)
-export const bookGenres = pgTable("book_genres", {
-  bookId: integer("book_id").notNull().references(() => books.id),
-  genreId: integer("genre_id").notNull().references(() => genres.id),
+export const bookAuthor = pgTable("book_author", {
+  bookId: integer("id_book").notNull().references(() => book.id, { onDelete: "cascade" }),
+  authorId: integer("id_author").notNull().references(() => author.id, { onDelete: "cascade" })
 });
 
-// BOOK_COPY table (physical copies)
-export const bookCopies = pgTable("book_copies", {
+export const bookCopy = pgTable("book_copy", {
   id: serial("id").primaryKey(),
-  bookId: integer("book_id").notNull().references(() => books.id),
-  branchId: integer("branch_id").notNull().references(() => branches.id),
-  status: bookCopyStatusEnum("status").default("available").notNull(),
+  status: bookCopyStatusEnum("status").notNull(),
+  bookId: integer("id_book").notNull().references(() => book.id, { onDelete: "cascade" }),
+  branchId: integer("id_branch").notNull().references(() => branch.id, { onDelete: "cascade" })
 });
 
-// USER table
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
+export const user = pgTable("user", {
+  id: serial("id_user").primaryKey(),
+  role: userRoleEnum("role").notNull(),
+  firstName: varchar("first_name", { length: 255 }).notNull(),
+  lastName: varchar("last_name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  passwordHash: varchar("password_hash", { length: 255 }).notNull(),
-  role: userRoleEnum("role").default("member").notNull(),
-  contact: varchar("contact", { length: 255 }),
+  phone: varchar("phone", { length: 50 }).notNull().unique(),
+  passwordHash: varchar("password_hash", { length: 255 }).notNull()
 });
 
-// REVIEW table
-export const reviews = pgTable("reviews", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  bookId: integer("book_id").notNull().references(() => books.id),
-  text: text("text"),
-  rating: integer("rating").notNull(),
-  createdAt: date("created_at").defaultNow().notNull(),
-});
-
-// NOTIFICATION table
-export const notifications = pgTable("notifications", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  text: text("text").notNull(),
-  sentAt: date("sent_at").defaultNow().notNull(),
-});
-
-// RESERVATION table
-export const reservations = pgTable("reservations", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  bookCopyId: integer("book_copy_id").notNull().references(() => bookCopies.id),
+export const reservation = pgTable("reservation", {
+  id: serial("id_reservation").primaryKey(),
   fromDate: date("from_date").notNull(),
   toDate: date("to_date").notNull(),
-  price: doublePrecision("price"),
+  price: doublePrecision("price").notNull(),
+  status: reservationStatusEnum("status").notNull(),
+  dateOfReservation: date("date_of_reservation").notNull(),
+  validityOfPickUpUntil: date("validity_of_pick_up_until").notNull(),
+  userId: integer("id_user").notNull().references(() => user.id),
+  bookCopyId: integer("id_book_copy").notNull().references(() => bookCopy.id)
 });
 
-// FINE table
-export const fines = pgTable("fines", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+export const loan = pgTable("loan", {
+  id: serial("id_loan").primaryKey(),
+  price: doublePrecision("price"),
+  status: loanStatusEnum("status").notNull(),
+  loanDate: date("loan_date").notNull(),
+  actualReturnDate: date("actual_return_date"),
+  expectedReturnDate: date("expected_return_date").notNull(),
+  userId: integer("id_user").notNull().references(() => user.id),
+  bookCopyId: integer("id_book_copy").notNull().references(() => bookCopy.id)
+});
+
+export const fine = pgTable("fine", {
+  id: serial("id_fine").primaryKey(),
   amount: doublePrecision("amount").notNull(),
   description: text("description"),
-  status: fineStatusEnum("status").default("pending").notNull(),
+  status: fineStatusEnum("status").notNull(),
+  userId: integer("id_user").notNull().references(() => user.id, { onDelete: "cascade" })
 });
 
-// LOAN table
-export const loans = pgTable("loans", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  bookCopyId: integer("book_copy_id").notNull().references(() => bookCopies.id),
-  loanDate: date("loan_date").notNull(),
-  dueDate: date("due_date").notNull(),
-  returnDate: date("return_date"),
-  price: doublePrecision("price"),
+export const notification = pgTable("notification", {
+  id: serial("id_notification").primaryKey(),
+  content: varchar("content", { length: 500 }).notNull(),
+  sentAt: date("sent_at").defaultNow().notNull(),
+  userId: integer("id_user").notNull().references(() => user.id, { onDelete: "cascade" })
 });
+
+export const review = pgTable("review", {
+  id: serial("id_review").primaryKey(),
+  rating: integer("rating").notNull(),
+  content: varchar("content", { length: 1000 }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  userId: integer("id_user").notNull().references(() => user.id, { onDelete: "cascade" }),
+  bookId: integer("id_book").notNull().references(() => book.id, { onDelete: "cascade" })
+});
+
+export const branchRelations = relations(branch, ({ many }) => ({
+  bookCopies: many(bookCopy),
+}));
+
+export const genreRelations = relations(genre, ({ many }) => ({
+  bookGenres: many(bookGenre),
+}));
+
+export const authorRelations = relations(author, ({ many }) => ({
+  bookAuthors: many(bookAuthor),
+}));
+
+export const publisherRelations = relations(publisher, ({ many }) => ({
+  books: many(book),
+}));
+
+export const bookRelations = relations(book, ({ one, many }) => ({
+  publisher: one(publisher, {fields: [book.publisherId], references: [publisher.id],}),
+  bookAuthors: many(bookAuthor),
+  bookGenres: many(bookGenre),
+  reviews: many(review),
+  bookCopies: many(bookCopy),
+}));
+
+export const bookAuthorRelations = relations(bookAuthor, ({ one }) => ({
+  book: one(book, {fields: [bookAuthor.bookId], references: [book.id],}),
+  author: one(author, {fields: [bookAuthor.authorId], references: [author.id],}),
+}));
+
+export const bookGenreRelations = relations(bookGenre, ({ one }) => ({
+  book: one(book, {fields: [bookGenre.bookId], references: [book.id],}),
+  genre: one(genre, {fields: [bookGenre.genreId], references: [genre.id],}),
+}));
+
+export const bookCopyRelations = relations(bookCopy, ({ one, many }) => ({
+  book: one(book, { fields: [bookCopy.bookId], references: [book.id] }),
+  branch: one(branch, { fields: [bookCopy.branchId], references: [branch.id] }),
+  loans: many(loan),
+  reservations: many(reservation),
+}));
+
+export const userRelations = relations(user, ({ many }) => ({
+  reservations: many(reservation),
+  loans: many(loan),
+  fines: many(fine),
+  notifications: many(notification),
+  reviews: many(review),
+}));
+
+export const reservationRelations = relations(reservation, ({ one }) => ({
+  user: one(user, { fields: [reservation.userId], references: [user.id] }),
+  bookCopy: one(bookCopy, { fields: [reservation.bookCopyId], references: [bookCopy.id] }),
+}));
+
+export const loanRelations = relations(loan, ({ one }) => ({
+  user: one(user, { fields: [loan.userId], references: [user.id] }),
+  bookCopy: one(bookCopy, { fields: [loan.bookCopyId], references: [bookCopy.id] }),
+}));
+
+export const fineRelations = relations(fine, ({ one }) => ({
+  user: one(user, { fields: [fine.userId], references: [user.id] }),
+}));
+
+export const notificationRelations = relations(notification, ({ one }) => ({
+  user: one(user, { fields: [notification.userId], references: [user.id] }),
+}));
+
+export const reviewRelations = relations(review, ({ one }) => ({
+  user: one(user, { fields: [review.userId], references: [user.id] }),
+  book: one(book, { fields: [review.bookId], references: [book.id] }),
+}));
