@@ -1,20 +1,30 @@
 import { Elysia } from "elysia";
-import { ConflictError, NotFoundError, UnprocessableError } from "./errors";
+
+import {ConflictError, ForbiddenError, NotFoundError, UnauthorizedError, UnprocessableError} from "./errors";
 
 import { authModule } from "./modules/auth";
-import { booksModule } from "./modules/books";
-import { authorsModule } from "./modules/authors";
-import { genresModule } from "./modules/genres";
-import { loansModule } from "./modules/loans";
-import { reservationsModule } from "./modules/reservations";
-import { usersModule } from "./modules/users";
-import { staffModule } from "./modules/staff";
+import { authorModule } from "./modules/author";
+import { bookModule } from "./modules/book";
+import { genreModule } from "./modules/genre";
+import { loanModule } from "./modules/loan";
+import { reservationModule } from "./modules/reservation";
+
+// TODO - ten exception handling by som dal niekam inam nech je to clean
+// TODO - asi by bolo spraviť aj OpenApi kvôli FE, ale idk asi to nie je nutne, treba sa ich spytat
 
 const app = new Elysia()
   .onError(({ code, error, set }) => {
     if (code === "VALIDATION") {
       set.status = 400;
       return { message: error.message };
+    }
+    if (error instanceof UnauthorizedError) {
+      set.status = 401;
+      return { message: error.message };
+    }
+    if (error instanceof ForbiddenError) {
+          set.status = 403;
+          return { message: error.message };
     }
     if (error instanceof NotFoundError) {
       set.status = 404;
@@ -31,13 +41,11 @@ const app = new Elysia()
   })
   .get("/", () => "Library API")
   .use(authModule)
-  .use(authorsModule)
-  .use(booksModule)
-  .use(genresModule)
-  .use(loansModule)
-  .use(reservationsModule)
-  .use(staffModule)
-  .use(usersModule)
+  .use(authorModule)
+  .use(bookModule)
+  .use(genreModule)
+  .use(loanModule)
+  .use(reservationModule)
   .listen(3000);
 
 console.log(

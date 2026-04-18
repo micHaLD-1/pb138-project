@@ -18,3 +18,17 @@ export class ConflictError extends Error {
     this.name = "ConflictError";
   }
 }
+
+export class UnauthorizedError extends Error {
+  constructor(message = "Unauthorized: Missing or invalid token") {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
+export class ForbiddenError extends Error {
+  constructor(message = "Forbidden: You do not have permission to perform this action") {
+    super(message);
+    this.name = "ForbiddenError";
+  }
+}
