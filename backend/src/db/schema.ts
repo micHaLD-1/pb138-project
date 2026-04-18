@@ -1,16 +1,20 @@
 import { relations } from "drizzle-orm";
 import { pgTable, serial, varchar, text, timestamp, integer, pgEnum, date, doublePrecision } from "drizzle-orm/pg-core";
 
-export const userRoleEnum = pgEnum("user_role", ["GUEST", "MEMBER", "STAFF", "ADMIN"]);
-export const bookCopyStatusEnum = pgEnum("book_copy_status", ["AVAILABLE", "BORROWED", "RESERVED"]);
+import {BookCopyStatus, FineStatus, LoanStatus, ReservationStatus, UserRole} from "../enums";
 
-export const fineStatusEnum = pgEnum("fine_status", ["PENDING", "PAID"]);
-export const loanStatusEnum = pgEnum("loan_status", ["ACTIVE", "RETURNED", "RETURNED_LATE"]);
-export const reservationStatusEnum = pgEnum("reservation_status", ["PENDING", "AVAILABLE", "FULFILLED", "CANCELLED"]);
+export const userRoleEnum = pgEnum("user_role", Object.values(UserRole) as [string, ...string[]]);
+export const loanStatusEnum = pgEnum("loan_status", Object.values(LoanStatus) as [string, ...string[]]);
+export const fineStatusEnum = pgEnum("fine_status", Object.values(FineStatus) as [string, ...string[]]);
+export const bookCopyStatusEnum = pgEnum("book_copy_status", Object.values(BookCopyStatus) as [string, ...string[]]);
+export const reservationStatusEnum = pgEnum("reservation_status", Object.values(ReservationStatus) as [string, ...string[]]);
 
 export const branch = pgTable("branch", {
   id: serial("id_branch").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull().unique()
+  name: varchar("name", { length: 255 }).notNull().unique(),
+  address: varchar("address", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 20 }).notNull()
 });
 
 export const genre = pgTable("genre", {
@@ -79,7 +83,7 @@ export const reservation = pgTable("reservation", {
 
 export const loan = pgTable("loan", {
   id: serial("id_loan").primaryKey(),
-  price: doublePrecision("price"),
+  price: doublePrecision("price").notNull(),
   status: loanStatusEnum("status").notNull(),
   loanDate: date("loan_date").notNull(),
   actualReturnDate: date("actual_return_date"),
