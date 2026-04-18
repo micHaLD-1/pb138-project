@@ -1,18 +1,42 @@
 import { Elysia } from "elysia";
+import { ChangePasswordSchema, CreateReviewSchema, UpdateProfileSchema } from "./model";
 
-export const usersModule = new Elysia({ prefix: "/users" })
-  // Profile management
-  .get("/me", () => "Get my profile (name, email, contact)")
-  .patch("/me", () => "Update my profile")
-  .patch("/me/password", () => "Change password")
+export const usersModule = new Elysia({ prefix: "/users" });
 
-  // Fines
-  .get("/me/fines", () => "My fines")
-  .post("/me/fines/:id/pay", ({ params: { id } }) => `Pay fine ${id} online`)
+usersModule.get("/me", () => {
+  return { data: { id: 0, name: "", email: "", role: "member", contact: null } };
+});
 
-  // Reviews
-  .get("/me/reviews", () => "My reviews")
-  .post("/me/reviews", () => "Write review for a book")
+usersModule.patch("/me", ({ body }) => {
+  return { data: { id: 0, name: body.name ?? "", email: body.email ?? "", role: "member", contact: body.contact ?? null } };
+}, {
+  body: UpdateProfileSchema,
+});
 
-  // Notifications
-  .get("/me/notifications", () => "My notifications");
+usersModule.patch("/me/password", ({ body }) => {
+  return { message: "Password changed" };
+}, {
+  body: ChangePasswordSchema,
+});
+
+usersModule.get("/me/fines", () => {
+  return { data: [] };
+});
+
+usersModule.post("/me/fines/:id/pay", ({ params: { id } }) => {
+  return { data: { id: Number(id), userId: 0, amount: 0, description: null, status: "paid" } };
+});
+
+usersModule.get("/me/reviews", () => {
+  return { data: [] };
+});
+
+usersModule.post("/me/reviews", ({ body }) => {
+  return { data: { id: 0, userId: 0, bookId: body.bookId, text: body.text ?? null, rating: body.rating, createdAt: new Date().toISOString() } };
+}, {
+  body: CreateReviewSchema,
+});
+
+usersModule.get("/me/notifications", () => {
+  return { data: [] };
+});

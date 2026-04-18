@@ -1,25 +1,63 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
+import { booksService} from "./service";
+import { BookCreationRequest, BookUpdateRequest} from "./model";
 
-export const booksModule = new Elysia({ prefix: "/books" })
-  // Book catalog
-  .get("/", () => "List all books - browse, search, filter by title/genre/author")
-  .get("/:id", ({ params: { id } }) => `Get book ${id} with details, authors, genres`)
-  .post("/", () => "Create new book (staff)")
-  .patch("/:id", ({ params: { id } }) => `Update book ${id} (staff)`)
-  .delete("/:id", ({ params: { id } }) => `Delete book ${id} (staff)`)
+export const booksModule = new Elysia({ prefix: "/books" });
 
-  // Book copies (physical instances)
-  .get("/:id/copies", ({ params: { id } }) => `Get all copies of book ${id} with branch/status`)
-  .post("/:id/copies", ({ params: { id } }) => `Add new copy of book ${id} (staff)`)
-  .patch("/copies/:copyId", ({ params: { copyId } }) => `Update copy ${copyId} status (staff)`)
+booksModule.get("/", async ({ query: { page, size } }) => {
+  return await booksService.findAll(page, size);
+}, {
+    query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1 })})
+});
 
-  // Authors
-  .get("/:id/authors", ({ params: { id } }) => `Get authors for book ${id}`)
-  .post("/:id/authors", ({ params: { id } }) => `Add author to book ${id} (staff)`)
+booksModule.get("/:id", async ({ params: { id } }) => {
+  return await booksService.findById(Number(id));
+});
 
-  // Genres
-  .get("/:id/genres", ({ params: { id } }) => `Get genres for book ${id}`)
-  .post("/:id/genres", ({ params: { id } }) => `Add genre to book ${id} (staff)`)
+booksModule.post("/", async ({ body, set }) => {
+  set.status = 201;
+  return { author: await booksService.create(body) };
+}, {
+  body: BookCreationRequest,
+});
 
-  // Reviews
-  .get("/:id/reviews", ({ params: { id } }) => `Get reviews for book ${id}`);
+booksModule.put("/:id", async ({ params: { id }, body, set }) => {
+  await booksService.update(Number(id), body);
+  set.status = 204;
+}, {
+  body: BookUpdateRequest,
+});
+
+booksModule.delete("/:id", async ({ params: { id }, set }) => {
+  await booksService.remove(Number(id));
+  set.status = 204;
+});
+
+// TODO
+booksModule.get("/:id/reviews", ({ params: { id } }) => {
+  return { data: [] };
+});
+
+// TODO - bud pridame do creation/update requestu  IDčka autorov a žanrov alebo implementujeme tieto endpointy dole nižšie
+
+// Authors - we'll see
+// booksModule.get("/:id/authors", ({ params: { id } }) => {
+//   return { data: [] };
+// });
+//
+// booksModule.post("/:id/authors", ({ params: { id }, body }) => {
+//   return { message: `Author ${body.authorId} added to book ${id}` };
+// }, {
+//   body: BookAuthorRequest,
+// });
+
+// Genres - we'll see
+// booksModule.get("/:id/genres", ({ params: { id } }) => {
+//   return { data: [] };
+// });
+//
+// booksModule.post("/:id/genres", ({ params: { id }, body }) => {
+//   return { message: `Genre ${body.genreId} added to book ${id}` };
+// }, {
+//   body: BookGenreRequest,
+// });

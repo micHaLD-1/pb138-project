@@ -1,41 +1,126 @@
 import { Elysia } from "elysia";
+import {
+  CreateAuthorSchema,
+  CreateBranchSchema,
+  CreateCopySchema,
+  CreateGenreSchema,
+  CreatePublisherSchema,
+  SendNewsletterSchema,
+  SendNotificationSchema,
+  UpdateAuthorSchema,
+  UpdateBranchSchema,
+  UpdateCopyStatusSchema,
+  UpdateFineSchema,
+} from "./model";
 
-export const staffModule = new Elysia({ prefix: "/staff" })
-  // Book management (in /books module, but staff access)
-  // Book copies management
-  .post("/copies", () => "Add new book copy")
-  .patch("/copies/:id", ({ params: { id } }) => `Update copy ${id} status`)
-  .delete("/copies/:id", ({ params: { id } }) => `Remove copy ${id}`)
+export const staffModule = new Elysia({ prefix: "/staff" });
 
-  // Branch management
-  .get("/branches", () => "List all branches")
-  .post("/branches", () => "Add new branch")
-  .patch("/branches/:id", ({ params: { id } }) => `Update branch ${id}`)
+staffModule.post("/copies", ({ body }) => {
+  return { data: { id: 0, bookId: body.bookId, branchId: body.branchId, status: "available" } };
+}, {
+  body: CreateCopySchema,
+});
 
-  // Author management
-  .get("/authors", () => "List all authors")
-  .post("/authors", () => "Add new author")
-  .patch("/authors/:id", ({ params: { id } }) => `Update author ${id}`)
+staffModule.patch("/copies/:id", ({ params: { id }, body }) => {
+  return { data: { id: Number(id), bookId: 0, branchId: 0, status: body.status } };
+}, {
+  body: UpdateCopyStatusSchema,
+});
 
-  // Genre management
-  .get("/genres", () => "List all genres")
-  .post("/genres", () => "Add new genre")
+staffModule.delete("/copies/:id", ({ params: { id } }) => {
+  return { message: `Copy ${id} removed` };
+});
 
-  // Publisher management
-  .get("/publishers", () => "List all publishers")
-  .post("/publishers", () => "Add new publisher")
+// Branch management
+staffModule.get("/branches", () => {
+  return { data: [] };
+});
 
-  // Reservation management
-  .delete("/reservations/:id", ({ params: { id } }) => `Cancel reservation ${id} for user`)
+staffModule.post("/branches", ({ body }) => {
+  return { data: { id: 0, name: body.name, address: body.address ?? null, contact: body.contact ?? null } };
+}, {
+  body: CreateBranchSchema,
+});
 
-  // Fine management
-  .patch("/fines/:id", ({ params: { id } }) => `Update fine ${id} (waive/adjust)`)
+staffModule.patch("/branches/:id", ({ params: { id }, body }) => {
+  return { data: { id: Number(id), name: body.name ?? "", address: body.address ?? null, contact: body.contact ?? null } };
+}, {
+  body: UpdateBranchSchema,
+});
 
-  // Notifications
-  .post("/notifications", () => "Send notification to user")
-  .post("/newsletter", () => "Send newsletter to all users")
+// Author management
+staffModule.get("/authors", () => {
+  return { data: [] };
+});
 
-  // Statistics
-  .get("/stats", () => "All statistics")
-  .get("/stats/books", () => "Book statistics")
-  .get("/stats/loans", () => "Loan statistics");
+staffModule.post("/authors", ({ body }) => {
+  return { data: { id: 0, name: body.name } };
+}, {
+  body: CreateAuthorSchema,
+});
+
+staffModule.patch("/authors/:id", ({ params: { id }, body }) => {
+  return { data: { id: Number(id), name: body.name } };
+}, {
+  body: UpdateAuthorSchema,
+});
+
+// Genre management
+staffModule.get("/genres", () => {
+  return { data: [] };
+});
+
+staffModule.post("/genres", ({ body }) => {
+  return { data: { id: 0, name: body.name } };
+}, {
+  body: CreateGenreSchema,
+});
+
+// Publisher management
+staffModule.get("/publishers", () => {
+  return { data: [] };
+});
+
+staffModule.post("/publishers", ({ body }) => {
+  return { data: { id: 0, name: body.name } };
+}, {
+  body: CreatePublisherSchema,
+});
+
+// Reservation management
+staffModule.delete("/reservations/:id", ({ params: { id } }) => {
+  return { message: `Reservation ${id} cancelled` };
+});
+
+// Fine management
+staffModule.patch("/fines/:id", ({ params: { id }, body }) => {
+  return { data: { id: Number(id), userId: 0, amount: body.amount, description: body.description ?? null, status: body.status } };
+}, {
+  body: UpdateFineSchema,
+});
+
+// Notifications
+staffModule.post("/notifications", ({ body }) => {
+  return { message: `Notification sent to user ${body.userId}` };
+}, {
+  body: SendNotificationSchema,
+});
+
+staffModule.post("/newsletter", ({ body }) => {
+  return { message: "Newsletter sent" };
+}, {
+  body: SendNewsletterSchema,
+});
+
+// Statistics
+staffModule.get("/stats", () => {
+  return { data: {} };
+});
+
+staffModule.get("/stats/books", () => {
+  return { data: {} };
+});
+
+staffModule.get("/stats/loans", () => {
+  return { data: {} };
+});
