@@ -1,5 +1,7 @@
+import { Filter } from "lucide-react"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel"
 import BookCard from "./book-card"
+import FilterPanel from "./filter-panel"
 
 type Book = {
   id: string
@@ -103,6 +105,13 @@ export default function BookGrid() {
             <CarouselPrevious />
             <CarouselNext />
         </Carousel>
+        <FilterPanel 
+            authors={["Tolkien", "Orwell", "Herbert", "Rowling"]}
+            genres={["Fantasy", "Sci-Fi", "Dystopian"]}
+            onAuthorSelect={(a) => console.log("author:", a)}
+            onGenreSelect={(g) => console.log("genre:", g)}
+            onSearch={(s) => console.log("search:", s)}
+        />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-10">
         {books.map((book) => (
