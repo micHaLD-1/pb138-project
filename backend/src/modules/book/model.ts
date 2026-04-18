@@ -20,16 +20,6 @@ export const BookUpdateRequest = z.object({
   authorIds: z.array(z.number().int().positive())
 });
 
-export const GenreResponse = z.object({
-  id: z.number().int(),
-  name: z.string(),
-});
-
-export const AuthorResponse = z.object({
-  id: z.number().int(),
-  name: z.string()
-});
-
 export const BookResponse = z.object({
   id: z.number().int(),
   title: z.string(),
@@ -37,8 +27,8 @@ export const BookResponse = z.object({
   publisherId: z.number().int(),
   yearPublished: z.number().int(),
   description: z.string(),
-  authors: z.array(AuthorResponse),
-  genres: z.array(GenreResponse),
+  authors: z.array(z.string()),
+  genres: z.array(z.string())
 });
 
 export const BooksResponse = z.object({

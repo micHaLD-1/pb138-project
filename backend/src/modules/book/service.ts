@@ -2,83 +2,49 @@ import { eq, sql } from "drizzle-orm";
 
 import { NotFoundError } from "../../errors";
 import { db, book, bookAuthor, bookGenre } from "../../db";
+
+import {mapToBookDTO, mapToBooksDTOs} from "./mapper";
 import type { BookCreationDTO, BookUpdateDTO, BookDTO, BooksDTO } from "./model";
 
 export const booksService = {
 
     findAll: async (page: number, pageSize: number): Promise<BooksDTO> => {
-
         const offset = (page - 1) * pageSize;
         const [totalRecords] = await db.select({ count: sql<number>`count(*)` }).from(book);
 
-        const rawBooks = await db.query.book.findMany({
+        const result = await db.query.book.findMany({
             limit: pageSize,
             offset,
             with: {
                 bookAuthors: {
-                    with: { author: true },
-                },
+                    with: { author: true } },
                 bookGenres: {
-                    with: { genre: true },
-                },
+                    with: { genre: true } },
             },
         });
 
-        const formattedBooks: BookDTO[] = rawBooks.map((b) => ({
-            id: b.id,
-            title: b.title,
-            language: b.language,
-            publisherId: b.publisherId,
-            yearPublished: b.yearPublished,
-            description: b.description,
-            genres: b.bookGenres.map((bg) => ({
-                id: bg.genre.id,
-                name: bg.genre.name,
-            })),
-            authors: b.bookAuthors.map((ba) => ({
-                id: ba.author.id,
-                name: `${ba.author.firstName} ${ba.author.lastName}`.trim(),
-            }))
-        }));
-        return {
-            books: formattedBooks,
-            total: Number(totalRecords.count),
-            page,
-            pageSize,
-        };
+        return mapToBooksDTOs(result, Number(totalRecords.count), page, pageSize);
     },
 
     findById: async (id: number): Promise<BookDTO> => {
-        const rawBook = await db.query.book.findFirst({
+        console.log("Prijatý request pre ID:", id);
+
+        const result = await db.query.book.findFirst({
             where: eq(book.id, id),
             with: {
-                bookAuthors: { with: { author: true } },
-                bookGenres: { with: { genre: true } }
+                bookAuthors: {
+                    with: { author: true } },
+                bookGenres: {
+                    with: { genre: true } }
             }
         });
 
-        if (!rawBook) throw new NotFoundError(`Book ${id} not found`);
-
-        return {
-            id: rawBook.id,
-            title: rawBook.title,
-            language: rawBook.language,
-            publisherId: rawBook.publisherId,
-            yearPublished: rawBook.yearPublished,
-            description: rawBook.description,
-            genres: rawBook.bookGenres.map((bg) => ({
-                id: bg.genre.id,
-                name: bg.genre.name,
-            })),
-            authors: rawBook.bookAuthors.map((ba) => ({
-                id: ba.author.id,
-                name: `${ba.author.firstName} ${ba.author.lastName}`.trim(),
-            }))
-        };
+        if (!result) throw new NotFoundError(`Book ${id} not found`);
+        return mapToBookDTO(result);
     },
+
     create: async (data: BookCreationDTO) => {
         return await db.transaction(async (tx) => {
-
             const { authorIds, genreIds, ...bookData } = data;
             const [newBook] = await tx.insert(book).values(bookData).returning();
 
@@ -130,8 +96,6 @@ export const booksService = {
                     await tx.insert(bookGenre).values(genreInserts);
                 }
             }
-
-            return updatedBook;
         });
     },
 
