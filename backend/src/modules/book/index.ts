@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 
 import { booksService} from "./service";
+import { reviewsService } from "../reviews/service";
 import { BookCreationRequest, BookUpdateRequest} from "./model";
 
 export const bookModule = new Elysia({ prefix: "/books" });
@@ -34,9 +35,10 @@ bookModule.delete("/:id", async ({ params: { id }, set }) => {
   set.status = 204;
 });
 
-// TODO
-bookModule.get("/:id/reviews", ({ params: { id } }) => {
-  return { data: [] };
+bookModule.get("/:id/reviews", async ({ params: { id }, query: { page, size } }) => {
+  return await reviewsService.findByBookId(Number(id), page, size);
+}, {
+  query: t.Object({ page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1 }) })
 });
 
 // TODO - bud pridame do creation/update requestu  IDčka autorov a žanrov alebo implementujeme tieto endpointy dole nižšie
