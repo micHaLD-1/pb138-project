@@ -5,22 +5,19 @@ import {LoanCreationRequest, LoanUpdateRequest} from "./model";
 
 export const loanModule = new Elysia({ prefix: "/loans" });
 
-// TODO - response
-loanModule.get("/", async ({ query: { page, pageSize } } ) => {
-  await loanService.findAll(page, pageSize);
+loanModule.get("/", async ({ query: {page, size} }) => {
+  return await loanService.findAll(page, size);
 }, {
-  query: t.Object({page: t.Numeric({ minimum: 1 }), pageSize: t.Numeric({ minimum: 1 })})
+  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1 })})
 });
 
-// TODO - response
 loanModule.get("/:id", async ({ params: { id } }) => {
- await loanService.findById(Number(id));
+  return { loan: await loanService.findById(Number(id)) };
 });
 
-// TODO - response
 loanModule.post("/", async ({ body, set }) => {
-  await loanService.create(body);
   set.status = 201;
+  return { loan: await loanService.create(body) };
 }, {
   body: LoanCreationRequest,
 });

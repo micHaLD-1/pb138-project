@@ -5,19 +5,19 @@ import { GenreCreationRequest } from "./model";
 
 export const genreModule = new Elysia({ prefix: "/genres" });
 
-genreModule.get("/", async ({ query: { page, pageSize } } ) => {
-  return await genreService.findAll(page, pageSize);
+genreModule.get("/", async ({ query: {page, size} }) => {
+  return await genreService.findAll(page, size);
 }, {
-  query: t.Object({page: t.Numeric({ minimum: 1 }), pageSize: t.Numeric({ minimum: 1 })})
+  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1 })})
 });
 
 genreModule.get("/:id", async ({ params: { id } }) => {
-  return await genreService.findById(Number(id));
+  return { genre: await genreService.findById(Number(id)) };
 });
 
 genreModule.post("/", async ({ body, set }) => {
   set.status = 201;
-  return await genreService.create(body);
+  return { genre: await genreService.create(body) };
 }, {
   body: GenreCreationRequest,
 });
