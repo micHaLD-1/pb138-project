@@ -1,7 +1,7 @@
 import {eq, sql} from "drizzle-orm";
 
-import {db, author} from "../../db";
-import { NotFoundError } from "../../errors";
+import {db, author, bookAuthor} from "../../db";
+import { NotFoundError, ConflictError } from "../../errors";
 
 import {mapToAuthorDTO, mapToAuthorsDTOs} from "./mapper";
 import type {AuthorCreationDTO, AuthorUpdateDTO, AuthorDTO, AuthorsDTO} from "./model";
@@ -32,7 +32,14 @@ export const authorService = {
   },
 
   remove: async (id: number): Promise<void> => {
-    // TODO - kontrola či ma priradene nejake kinhy, ak ano tak vyhodime vyjimku
+    const [bookCount] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(bookAuthor)
+      .where(eq(bookAuthor.authorId, id));
+
+    if (Number(bookCount.count) > 0) {
+      throw new ConflictError(`Author ${id} has assigned books and cannot be deleted`);
+    }
 
     const [deleted] = await db.delete(author).where(eq(author.id, id)).returning();
     if (!deleted) throw new NotFoundError(`Author ${id} not found`);
