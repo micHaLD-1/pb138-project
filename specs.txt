@@ -1,0 +1,52 @@
+* = required field
+Fieldy platia pre FE, BE si doplnte podľa potreby 
+
+Registrácia: { 
+    Email: string; *
+    Meno: string; *
+    Priezvisko: string; *
+    Heslo: string; *
+    Potvrdiť heslo: string *
+}
+
+Prihlásenie {
+    Email: string; *
+    Heslo: string; *
+}
+
+Vytvorenie zamestnanca { 
+admin má k dispozícii tlačítko vytvoriť zamestnanca. Toto otvorí Dialog:
+
+    Email: string; *
+    Meno: string; *
+    Priezvisko: string; *
+    Heslo: string; *
+    Potvrdiť heslo: string *
+}
+
+Pridanie knihy {
+    Zamestnanec aj admin majú k dispozícii tlačitko pridať knihu. 
+    Pri viacerých kópiach knihy sa jej identifikátoru môže pridať číslo indexu napríklad.
+    Máš UUID pre knihu - index? Pri hlavnej verzii knihy máš count na Dostupné/Požičané a z toho vieš vypočítať rezervované aj.
+
+    Názov: string; *
+    Vydavateľ: string
+    Autor: stirng; *
+    Tagy: stirng[];
+    Žáner: Enum;*
+    Popis: string; *
+    Počet kopii: int; *
+
+    Algoritmus na odporučanie môže fungovať z popisov alebo tagov, pri tagoch si ušetríme prácu a výpočetnú silu.
+}
+
+Vypožičanie knihy {
+    V tele stránky sa zobrazujú knihy, ktoré si používateľ môže vypožičať. Máme stavy Dostupná/Rezervovaná/Požičaná.
+    Keď používateľ klikne pridať do wishlistu len sa pridá odkaz na knihu. Keď klikne na pridať do rezervácii, kniha sa označí ako rezervovaná a po 48 hodinách, sa odstráni z rezervácii, ak neni potvrdené požičanie.
+    Po potvrdení požičania sa kniha zmení na požičanú a atribúty hlavnej verzie knihy sa prenastavia.
+
+    Nevolí si konkrétnu knihu, ale kniha je pridelená z dostupných (queue) -> rezervované, a tá je -> požičanú
+
+    Dať si pozor na požičanie z 0 dostupných.
+}
+
