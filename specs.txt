@@ -50,6 +50,26 @@ Vypožičanie knihy {
     Dať si pozor na požičanie z 0 dostupných.
 }
 
+Uprava pravidiel {
+    Admin a Zamestnanec môže upravovať pravidlá, jedná sa o políčka v ktorých je vypísaný aktuálny údaj
+    a môže sa prepísať a potvrdiť, aktuálne:
+
+    výška pokuty za zmeškaný deň: float;*
+
+    Iba admin:
+
+    Limit na knihy, ktorý môže byť požičaný: int;*
+    Doba od ktorej sa počíta pokuta: int; *
+
+    Tieto údaje aj keď sa prepíše iba jeden sa asi môžu poslať všetky v rámci updatu.
+}
+
+
+Newsletter {
+    
+}
+
+
 Odstránenie knihy zo zoznamu {
     Prebehne kliknutim na X pri objednavke daneho človeka, do Remove sa pošle id objednavky a knihy
 }
