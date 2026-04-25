@@ -70,3 +70,22 @@ Newsletter {
 }
 
 
+Odstránenie knihy zo zoznamu {
+    Prebehne kliknutim na X pri objednavke daneho človeka, do Remove sa pošle id objednavky a knihy
+}
+
+Uprava profilu {
+    Update, ktorý konkretnej osobe umožní zmeniť heslo,
+    Původné, Nové, Potvrdenie nového. Porovnajú sa hashe pre používateľa
+    Nové heslo: ;* 
+    Potvrdenie: ;*
+    Staré heslo: ;*
+}
+
+Napísať recenziu {
+    Id použivateľa: UUID;*
+    Meno a Priezvisko použivateľa: stirng x 2;*
+    Text: stirng;*
+    Id recenzie: uuid;*
+}
+
