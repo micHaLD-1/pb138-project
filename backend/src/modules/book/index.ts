@@ -3,8 +3,11 @@ import { Elysia, t } from "elysia";
 import { booksService} from "./service";
 import { reviewsService } from "../reviews/service";
 import { BookCreationRequest, BookUpdateRequest} from "./model";
+import { authMiddleware, hasRole } from "../auth/middleware";
+import { UserRole } from "../../enums";
 
-export const bookModule = new Elysia({ prefix: "/books" });
+export const bookModule = new Elysia({ prefix: "/books" })
+  .use(authMiddleware);
 
 bookModule.get("/", async ({ query: { page, size } }) => {
   return await booksService.findAll(page, size);
@@ -16,23 +19,26 @@ bookModule.get("/:id", async ({ params: { id } }) => {
   return await booksService.findById(Number(id));
 });
 
-bookModule.post("/", async ({ body, set }) => {
-  set.status = 201;
-  return await booksService.create(body);
+bookModule.post("/", async (ctx: any) => {
+  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
+  ctx.set.status = 201;
+  return await booksService.create(ctx.body);
 }, {
   body: BookCreationRequest,
 });
 
-bookModule.put("/:id", async ({ params: { id }, body, set }) => {
-  await booksService.update(Number(id), body);
-  set.status = 204;
+bookModule.put("/:id", async (ctx: any) => {
+  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
+  await booksService.update(Number(ctx.params.id), ctx.body);
+  ctx.set.status = 204;
 }, {
   body: BookUpdateRequest,
 });
 
-bookModule.delete("/:id", async ({ params: { id }, set }) => {
-  await booksService.remove(Number(id));
-  set.status = 204;
+bookModule.delete("/:id", async (ctx: any) => {
+  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
+  await booksService.remove(Number(ctx.params.id));
+  ctx.set.status = 204;
 });
 
 bookModule.get("/:id/reviews", async ({ params: { id }, query: {page, size} }) => {

@@ -2,8 +2,11 @@ import { Elysia, t } from "elysia";
 
 import { reviewsService } from "./service";
 import { ReviewCreationRequest, ReviewUpdateRequest } from "./model";
+import { authMiddleware, isAuthenticated } from "../auth/middleware";
+import { UnauthorizedError } from "../../errors";
 
-export const reviewsModule = new Elysia({ prefix: "/reviews" });
+export const reviewsModule = new Elysia({ prefix: "/reviews" })
+    .use(authMiddleware);
 
 // idk ci dava viac zmysel toto alebo /books/:id/reviews cize su obe
 reviewsModule.get("/book/:bookId", async ({ params: { bookId }, query: {page, size} }) => {
@@ -12,26 +15,24 @@ reviewsModule.get("/book/:bookId", async ({ params: { bookId }, query: {page, si
   query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1 })})
 });
 
-// TODO - userId auth
-
-reviewsModule.post("/", async ({ body, set }) => {
-  set.status = 201;
-  const userId = 1; // TODO
-  return { review: await reviewsService.create(userId, body) };
+reviewsModule.post("/", async (ctx: any) => {
+  isAuthenticated(ctx.user);
+  ctx.set.status = 201;
+  return { review: await reviewsService.create(ctx.user.userId, ctx.body) };
 }, {
   body: ReviewCreationRequest
 });
 
-reviewsModule.put("/:id", async ({ params: { id }, body, set }) => {
-  set.status = 204;
-  const userId = 1; // TODO
-  await reviewsService.update(Number(id), userId, body);
+reviewsModule.put("/:id", async (ctx: any) => {
+  isAuthenticated(ctx.user);
+  ctx.set.status = 204;
+  await reviewsService.update(Number(ctx.params.id), ctx.user.userId, ctx.body);
 }, {
   body: ReviewUpdateRequest
 });
 
-reviewsModule.delete("/:id", async ({ params: { id }, set }) => {
-  const userId = 1; // TODO
-  await reviewsService.remove(Number(id), userId);
-  set.status = 204;
+reviewsModule.delete("/:id", async (ctx: any) => {
+  isAuthenticated(ctx.user);
+  await reviewsService.remove(Number(ctx.params.id), ctx.user.userId);
+  ctx.set.status = 204;
 });

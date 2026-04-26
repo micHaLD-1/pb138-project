@@ -2,8 +2,11 @@ import {Elysia, t} from "elysia";
 
 import {genreService} from "./service";
 import { GenreCreationRequest } from "./model";
+import { authMiddleware, hasRole } from "../auth/middleware";
+import { UserRole } from "../../enums";
 
-export const genreModule = new Elysia({ prefix: "/genres" });
+export const genreModule = new Elysia({ prefix: "/genres" })
+  .use(authMiddleware);
 
 genreModule.get("/", async ({ query: {page, size} }) => {
   return await genreService.findAll(page, size);
@@ -15,14 +18,16 @@ genreModule.get("/:id", async ({ params: { id } }) => {
   return { genre: await genreService.findById(Number(id)) };
 });
 
-genreModule.post("/", async ({ body, set }) => {
-  set.status = 201;
-  return { genre: await genreService.create(body) };
+genreModule.post("/", async (ctx: any) => {
+  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
+  ctx.set.status = 201;
+  return { genre: await genreService.create(ctx.body) };
 }, {
   body: GenreCreationRequest,
 });
 
-genreModule.delete("/:id", async ({ params: { id }, set }) => {
-  await genreService.remove(Number(id));
-  set.status = 204;
+genreModule.delete("/:id", async (ctx: any) => {
+  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
+  await genreService.remove(Number(ctx.params.id));
+  ctx.set.status = 204;
 });

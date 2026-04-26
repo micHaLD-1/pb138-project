@@ -1,13 +1,22 @@
 import { Elysia } from "elysia";
-import { jwt } from "@elysiajs/jwt";
+import { cookie } from "@elysiajs/cookie";
+import { sessionStoreManager } from "./session";
 
 export const authMiddleware = new Elysia()
-    .use(jwt({ name: 'jwt', secret: process.env.JWT_SECRET || 'super-secret-key' }))
-    .derive(async ({ jwt, headers: { authorization } }) => {
-        if (!authorization) return { user: null };
-        const token = authorization.split(' ')[1];
-        const payload = await jwt.verify(token);
-        return { user: payload };
+    .use(cookie())
+    .derive(async ({ cookie }) => { // prida user do kontextu pre vsetky routy
+        const sessionId = cookie.sessionId as unknown as string | undefined; // prečita sessionId z cookie
+        if (!sessionId) return { user: null };
+
+        const session = sessionStoreManager.get(sessionId);
+        if (!session) return { user: null };
+
+        return {
+            user: {
+                userId: session.userId,
+                role: session.role,
+            }
+        };
     });
 
 export const isAuthenticated = (user: any) => {

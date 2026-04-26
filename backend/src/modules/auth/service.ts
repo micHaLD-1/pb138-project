@@ -3,7 +3,8 @@ import { db, user } from "../../db";
 
 import type { RegistrationDTO, LoginDTO } from "./model";
 import { ConflictError, UnprocessableError } from "../../errors";
-import {UserRole} from "../../enums";
+import { UserRole } from "../../enums";
+import { sessionStoreManager } from "./session";
 
 export const authService = {
 
@@ -30,5 +31,9 @@ export const authService = {
         if (!isPasswordValid) throw new UnprocessableError("Invalid email or password");
 
         return foundUser;
+    },
+
+    logout: async (sessionId: string) => {
+        sessionStoreManager.delete(sessionId); // toto by mohlo byt kludne aj rovno v index ale clarity
     }
 };

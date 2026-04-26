@@ -10,7 +10,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@elysiajs/jwt": "^1.4.1",
+    "@elysiajs/cookie": "^1.0.0",
     "drizzle-orm": "^0.45.2",
     "elysia": "latest",
     "pg": "^8.20.0",
