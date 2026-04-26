@@ -3,7 +3,7 @@ import { z } from "zod";
 export const BookCreationRequest = z.object({
   title: z.string().min(1),
   language: z.string().min(1),
-  publisherName: z.string().optional(),
+  publisherId: z.number().int().positive(),
   yearPublished: z.number().int().positive(),
   description: z.string().max(1000),
   genreIds: z.array(z.number().int().positive()),

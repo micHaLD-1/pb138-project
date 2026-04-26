@@ -57,32 +57,13 @@ export const booksService = {
 
     create: async (data: BookCreationDTO) => {
         return await db.transaction(async (tx) => {
-            const { authorIds, genreIds, copyCount, publisherName, ...bookData } = data;
+            const { authorIds, genreIds, copyCount, publisherId, ...bookData } = data;
             // const { tagIds, copyCount, ...bookData } = data; // TODO: Implement tags feature
 
-            // je tu kinda chaos v name vs id
-            let publisherId: number;
-            if (publisherName) {
-                let [pub] = await tx.select().from(publisher).where(eq(publisher.name, publisherName));
-                if (!pub) {
-                    [pub] = await tx.insert(publisher).values({ name: publisherName }).returning();
-                }
-                publisherId = pub.id;
-            } else {
-                // Nenasiel som publisher, pouzijem prveho autora ako publisher
-                if (!authorIds || authorIds.length === 0) {
-                    throw new Error("Either publisherName or authorIds must be provided");
-                }
-                const [firstAuthor] = await tx.select().from(author).where(eq(author.id, authorIds[0]));
-                if (!firstAuthor) {
-                    throw new Error("Author not found");
-                }
-                const authorFullName = `${firstAuthor.firstName} ${firstAuthor.lastName}`;
-                let [pub] = await tx.select().from(publisher).where(eq(publisher.name, authorFullName));
-                if (!pub) {
-                    [pub] = await tx.insert(publisher).values({ name: authorFullName }).returning();
-                }
-                publisherId = pub.id;
+            // Verify publisher exists
+            const [pub] = await tx.select().from(publisher).where(eq(publisher.id, publisherId));
+            if (!pub) {
+                throw new NotFoundError(`Publisher ${publisherId} not found`);
             }
 
             const [newBook] = await tx.insert(book).values({

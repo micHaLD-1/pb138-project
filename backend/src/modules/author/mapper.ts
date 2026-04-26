@@ -5,6 +5,8 @@ type AuthorEntity = typeof author.$inferSelect;
 
 export const mapToAuthorDTO = (entity: AuthorEntity): AuthorDTO => ({
     id: entity.id,
+    firstName: entity.firstName,
+    lastName: entity.lastName,
     name: `${entity.firstName} ${entity.lastName}`
 });
 

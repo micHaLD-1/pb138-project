@@ -7,6 +7,7 @@ import { authorModule } from "./modules/author";
 import { bookModule } from "./modules/book";
 import { genreModule } from "./modules/genre";
 import { loanModule } from "./modules/loan";
+import { publisherModule } from "./modules/publisher";
 import { reservationModule } from "./modules/reservation";
 import { reviewsModule } from "./modules/reviews";
 import { rulesModule } from "./modules/rules";
@@ -47,6 +48,7 @@ const app = new Elysia()
   .use(authorModule)
   .use(bookModule)
   .use(genreModule)
+  .use(publisherModule)
   .use(loanModule)
   .use(reservationModule)
   .use(reviewsModule)

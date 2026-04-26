@@ -12,6 +12,8 @@ export const AuthorUpdateRequest = z.object({
 
 export const AuthorResponse = z.object({
   id: z.number(),
+  firstName: z.string(),
+  lastName: z.string(),
   name: z.string()
 });
 
