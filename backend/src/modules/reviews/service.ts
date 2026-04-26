@@ -39,8 +39,9 @@ export const reviewsService = {
     const [created] = await db
       .insert(review)
       .values({
-        ...data,
         userId,
+        bookId: data.bookId,
+        content: data.content,
         createdAt: new Date()
       })
       .returning();

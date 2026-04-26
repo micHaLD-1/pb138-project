@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const ReservationCreationRequest = z.object({
   userId: z.number().int().positive(),
-  bookCopyId: z.number().int().positive(),
+  bookId: z.number().int().positive(),
   fromDate: z.string().date(),
   toDate: z.string().date(),
   price: z.number().nonnegative(),
@@ -17,6 +17,7 @@ export const ReservationUpdateRequest = z.object({
 export const ReservationResponse = z.object({
   id: z.number().int(),
   userId: z.number().int(),
+  bookId: z.number().int(),
   bookCopyId: z.number().int(),
   fromDate: z.string(),
   toDate: z.string(),

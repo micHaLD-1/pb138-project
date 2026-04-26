@@ -3,11 +3,13 @@ import { z } from "zod";
 export const BookCreationRequest = z.object({
   title: z.string().min(1),
   language: z.string().min(1),
-  publisherId: z.number().int().positive(),
+  publisherName: z.string().optional(),
   yearPublished: z.number().int().positive(),
   description: z.string().max(1000),
   genreIds: z.array(z.number().int().positive()),
-  authorIds: z.array(z.number().int().positive())
+  authorIds: z.array(z.number().int().positive()),
+  // tagIds: z.array(z.number().int().positive()).optional(), // TODO: Tagy
+  copyCount: z.number().int().min(1).default(1)
 });
 
 export const BookUpdateRequest = z.object({
@@ -17,7 +19,8 @@ export const BookUpdateRequest = z.object({
   yearPublished: z.number().int().positive(),
   description: z.string().max(1000),
   genreIds: z.array(z.number().int().positive()),
-  authorIds: z.array(z.number().int().positive())
+  authorIds: z.array(z.number().int().positive()),
+  // tagIds: z.array(z.number().int().positive()).optional() // TODO: Tagy
 });
 
 export const BookResponse = z.object({
@@ -25,10 +28,14 @@ export const BookResponse = z.object({
   title: z.string(),
   language: z.string(),
   publisherId: z.number().int(),
+  publisherName: z.string(),
   yearPublished: z.number().int(),
   description: z.string(),
   authors: z.array(z.string()),
-  genres: z.array(z.string())
+  genres: z.array(z.string()),
+  // tags: z.array(z.string()), // TODO: Tagy
+  availableCopies: z.number().int(),
+  totalCopies: z.number().int()
 });
 
 export const BooksResponse = z.object({

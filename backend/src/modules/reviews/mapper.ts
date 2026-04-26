@@ -10,10 +10,11 @@ interface ReviewWithUser extends ReviewEntity {
 
 export const mapToReviewDTO = (entity: ReviewWithUser): ReviewDTO => ({
   id: entity.id,
-  rating: entity.rating,
   content: entity.content,
   createdAt: entity.createdAt.toISOString(),
-  userName: `${entity.user.firstName} ${entity.user.lastName}`
+  userId: entity.userId,
+  userFirstName: entity.user.firstName,
+  userLastName: entity.user.lastName
 });
 
 export const mapToReviewsDTOs = (

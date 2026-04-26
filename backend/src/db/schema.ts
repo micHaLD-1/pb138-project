@@ -65,7 +65,6 @@ export const user = pgTable("user", {
   firstName: varchar("first_name", { length: 255 }).notNull(),
   lastName: varchar("last_name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  phone: varchar("phone", { length: 50 }).notNull().unique(),
   passwordHash: varchar("password_hash", { length: 255 }).notNull()
 });
 
@@ -109,7 +108,6 @@ export const notification = pgTable("notification", {
 
 export const review = pgTable("review", {
   id: serial("id_review").primaryKey(),
-  rating: integer("rating").notNull(),
   content: varchar("content", { length: 1000 }).notNull(),
   createdAt: timestamp("created_at").notNull(),
   userId: integer("id_user").notNull().references(() => user.id, { onDelete: "cascade" }),
