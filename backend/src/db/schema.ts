@@ -185,3 +185,9 @@ export const reviewRelations = relations(review, ({ one }) => ({
   user: one(user, { fields: [review.userId], references: [user.id] }),
   book: one(book, { fields: [review.bookId], references: [book.id] }),
 }));
+
+export const librarySetting = pgTable("library_setting", {
+  key: varchar("key", { length: 100 }).primaryKey(),
+  value: varchar("value", { length: 255 }).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});

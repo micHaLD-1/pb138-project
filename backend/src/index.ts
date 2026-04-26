@@ -9,6 +9,8 @@ import { genreModule } from "./modules/genre";
 import { loanModule } from "./modules/loan";
 import { reservationModule } from "./modules/reservation";
 import { reviewsModule } from "./modules/reviews";
+import { rulesModule } from "./modules/rules";
+import { rulesService } from "./modules/rules/service";
 
 // TODO - ten exception handling by som dal niekam inam nech je to clean
 // TODO - asi by bolo spraviť aj OpenApi kvôli FE, ale idk asi to nie je nutne, treba sa ich spytat
@@ -48,8 +50,12 @@ const app = new Elysia()
   .use(loanModule)
   .use(reservationModule)
   .use(reviewsModule)
+  .use(rulesModule)
   .listen(3000);
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
 );
+
+// Initialize default library settings
+rulesService.initializeDefaults().catch(console.error);
