@@ -10,6 +10,7 @@ import { Field, FieldLabel, FieldSet } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import userIcon from "@/assets/user.svg"
+import { useAuth } from '@/context/AuthContext'
 import { signInSchema, registerSchema, type SignInFormData, type RegisterFormData } from "@/lib/schemas"
 
 type DialogStage = "chooser" | "signin" | "register" | null
@@ -21,6 +22,8 @@ function AuthDialog() {
   const [stage, setStage] = useState<DialogStage>(null)
   const [signInErrors, setSignInErrors] = useState<SignInErrors>({})
   const [registerErrors, setRegisterErrors] = useState<RegisterErrors>({})
+  // TODO: Replace with backend API calls for authentication
+  const { login } = useAuth()
 
   async function handleSignInSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -45,13 +48,11 @@ function AuthDialog() {
     }
     
     // Mock backend call result for now.
-    const isSignInSuccessful = true
+    login()
 
-    if (isSignInSuccessful) {
-      event.currentTarget.reset()
-      setStage(null)
-      return
-    }
+    event.currentTarget.reset()
+    setStage(null)
+    return
   }
 
   async function handleRegisterSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -157,6 +158,8 @@ function AuthDialog() {
               <Button type="button" variant="ghost" onClick={() => setStage("chooser")}>
                 Späť
               </Button>
+
+              { /* Send data to BE */}
               <Button 
                 type="submit"
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -251,6 +254,8 @@ function AuthDialog() {
               <Button type="button" variant="ghost" onClick={() => setStage("chooser")}>
                 Späť
               </Button>
+              
+              { /* Send data to BE */}
               <Button 
                 type="submit"
                 className="bg-primary text-primary-foreground hover:bg-primary/90"

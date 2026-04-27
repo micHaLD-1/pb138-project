@@ -10,6 +10,7 @@ import {
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Textarea } from "@/components/ui/textarea"
 import { footerMessageSchema, type FooterMessageData } from "@/lib/schemas"
+import { useAuth } from '@/context/AuthContext'
 
 type FooterMessageErrors = Partial<Record<keyof FooterMessageData, string>>
 
@@ -23,14 +24,12 @@ const openingHours = [
     "Ne Zatvorené",
 ]
 
-type FooterProps = {
-    userEmail?: string
-}
-
-function Footer({ userEmail = "" }: FooterProps) {
+function Footer() {
     const [footerErrors, setFooterErrors] = useState<FooterMessageErrors>({})
     const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const { user } = useAuth()
 
     async function handleMessageSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -59,7 +58,6 @@ function Footer({ userEmail = "" }: FooterProps) {
         }
 
         // Form is valid, proceed with submission
-        console.log("Message valid:", result.data)
         setSubmitStatus("success")
         // TODO: Add actual message submission logic here
         
@@ -102,7 +100,7 @@ function Footer({ userEmail = "" }: FooterProps) {
                                                     id="footer-email"
                                                     type="email"
                                                     name="email"
-                                                    defaultValue={userEmail}
+                                                    defaultValue={user?.email ?? ''}
                                                     placeholder="vas@email.com"
                                                     autoComplete="email"
                                                     aria-invalid={!!footerErrors.email}
