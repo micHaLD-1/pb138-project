@@ -55,3 +55,17 @@ export const footerMessageSchema = z.object({
 });
 
 export type FooterMessageData = z.infer<typeof footerMessageSchema>;
+
+export const bookSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  author: z.string().min(1),
+  description: z.string().min(1),
+  totalCopies: z.number().int().nonnegative(),
+  availableCopies: z.number().int().nonnegative(),
+  rating: z.number().min(0).max(5),
+  genre: z.string().min(1),
+  imageUrl: z.string().url(),
+});
+
+export type Book = z.infer<typeof bookSchema>;
