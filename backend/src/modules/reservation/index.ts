@@ -5,22 +5,20 @@ import {ReservationCreationRequest, ReservationUpdateRequest} from "./model";
 
 export const reservationModule = new Elysia({ prefix: "/reservations" });
 
-// TODO - response
 reservationModule.get("/", async ({ query: { page, pageSize } } ) => {
- await reservationService.findAll(page, pageSize);
+  return await reservationService.findAll(page, pageSize);
 }, {
   query: t.Object({page: t.Numeric({ minimum: 1 }), pageSize: t.Numeric({ minimum: 1 })})
 });
 
-// TODO - response
 reservationModule.get("/:id", async ({ params: { id } }) => {
-  await reservationService.findById(Number(id));
+  return await reservationService.findById(Number(id));
 });
 
-// TODO - response
 reservationModule.post("/", async ({ body, set }) => {
-  await reservationService.create(body);
+  const result = await reservationService.create(body);
   set.status = 201;
+  return result;
 }, {
   body: ReservationCreationRequest,
 });

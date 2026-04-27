@@ -56,7 +56,7 @@ export const bookCopy = pgTable("book_copy", {
   id: serial("id").primaryKey(),
   status: bookCopyStatusEnum("status").notNull(),
   bookId: integer("id_book").notNull().references(() => book.id, { onDelete: "cascade" }),
-  branchId: integer("id_branch").notNull().references(() => branch.id, { onDelete: "cascade" })
+  branchId: integer("id_branch").references(() => branch.id)
 });
 
 export const user = pgTable("user", {
@@ -114,10 +114,6 @@ export const review = pgTable("review", {
   bookId: integer("id_book").notNull().references(() => book.id, { onDelete: "cascade" })
 });
 
-export const branchRelations = relations(branch, ({ many }) => ({
-  bookCopies: many(bookCopy),
-}));
-
 export const genreRelations = relations(genre, ({ many }) => ({
   bookGenres: many(bookGenre),
 }));
@@ -150,7 +146,6 @@ export const bookGenreRelations = relations(bookGenre, ({ one }) => ({
 
 export const bookCopyRelations = relations(bookCopy, ({ one, many }) => ({
   book: one(book, { fields: [bookCopy.bookId], references: [book.id] }),
-  branch: one(branch, { fields: [bookCopy.branchId], references: [branch.id] }),
   loans: many(loan),
   reservations: many(reservation),
 }));

@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 
 import { NotFoundError } from "../../errors";
-import { db, book, bookAuthor, bookGenre, bookCopy, branch, publisher, author } from "../../db";
+import { db, book, bookAuthor, bookGenre, bookCopy, publisher, author, genre } from "../../db";
 // import { bookTag } from "../../db"; // TODO: Tagy
 import { BookCopyStatus } from "../../enums";
 
@@ -34,8 +34,6 @@ export const booksService = {
     },
 
     findById: async (id: number): Promise<BookDTO> => {
-        console.log("Prijatý request pre ID:", id);
-
         const result = await db.query.book.findFirst({
             where: eq(book.id, id),
             with: {
@@ -64,6 +62,22 @@ export const booksService = {
             const [pub] = await tx.select().from(publisher).where(eq(publisher.id, publisherId));
             if (!pub) {
                 throw new NotFoundError(`Publisher ${publisherId} not found`);
+            }
+
+            // Verify authors exist
+            if (authorIds && authorIds.length > 0) {
+                const authors = await tx.select().from(author).where(eq(author.id, authorIds[0]));
+                if (authors.length === 0) {
+                    throw new NotFoundError(`Author ${authorIds[0]} not found`);
+                }
+            }
+
+            // Verify genres exist
+            if (genreIds && genreIds.length > 0) {
+                const genres = await tx.select().from(genre).where(eq(genre.id, genreIds[0]));
+                if (genres.length === 0) {
+                    throw new NotFoundError(`Genre ${genreIds[0]} not found`);
+                }
             }
 
             const [newBook] = await tx.insert(book).values({
@@ -96,15 +110,8 @@ export const booksService = {
             //     await tx.insert(bookTag).values(tagInserts);
             // }
 
-            // TODO: V ktorej Branchi sa maju tie book copies vytvorit?
-            const [defaultBranch] = await tx.select().from(branch).limit(1);
-            if (!defaultBranch) {
-                throw new Error("No branch found to create book copies");
-            }
-
             const copyInserts = Array.from({ length: copyCount }, () => ({
                 bookId: newBook.id,
-                branchId: defaultBranch.id,
                 status: BookCopyStatus.AVAILABLE
             }));
             await tx.insert(bookCopy).values(copyInserts);

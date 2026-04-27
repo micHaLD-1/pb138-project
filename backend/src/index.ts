@@ -12,6 +12,7 @@ import { reservationModule } from "./modules/reservation";
 import { reviewsModule } from "./modules/reviews";
 import { rulesModule } from "./modules/rules";
 import { rulesService } from "./modules/rules/service";
+import { authService } from "./modules/auth/service";
 
 // TODO - ten exception handling by som dal niekam inam nech je to clean
 // TODO - asi by bolo spraviť aj OpenApi kvôli FE, ale idk asi to nie je nutne, treba sa ich spytat
@@ -59,5 +60,6 @@ console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
 );
 
-// Initialize default library settings
+// Initialize default library settings and admin user
 rulesService.initializeDefaults().catch(console.error);
+authService.initializeDefaults().catch(console.error);

@@ -1,12 +1,34 @@
 import { Elysia, t } from "elysia";
+import { cookie } from "@elysiajs/cookie";
 
 import { reviewsService } from "./service";
 import { ReviewCreationRequest, ReviewUpdateRequest } from "./model";
-import { authMiddleware, isAuthenticated } from "../auth/middleware";
+import { isAuthenticated } from "../auth/middleware";
+import { sessionStoreManager } from "../auth/session";
 import { UnauthorizedError } from "../../errors";
 
 export const reviewsModule = new Elysia({ prefix: "/reviews" })
-    .use(authMiddleware);
+  .use(cookie())
+  .derive(async ({ cookie }) => {
+    const sessionCookie = cookie.sessionId;
+    const sessionId = typeof sessionCookie === 'string' ? sessionCookie : sessionCookie?.value;
+    
+    if (!sessionId || typeof sessionId !== 'string') {
+      return { user: null };
+    }
+
+    const session = sessionStoreManager.get(sessionId);
+    if (!session) {
+      return { user: null };
+    }
+
+    return {
+      user: {
+        userId: session.userId,
+        role: session.role,
+      }
+    };
+  });
 
 // idk ci dava viac zmysel toto alebo /books/:id/reviews cize su obe
 reviewsModule.get("/book/:bookId", async ({ params: { bookId }, query: {page, size} }) => {
