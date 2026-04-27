@@ -1,0 +1,205 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { Star } from 'lucide-react'
+import fallbackImage from '@/assets/hero.png'
+import wishlistIcon from '@/assets/Subtract.png'
+import reservationIcon from '@/assets/Union.png'
+import { mockBooksById } from '@/lib/mock-books'
+// TODO: Replace WishlistContext with backend API calls
+import { useWishlist } from '@/context/WishlistContext'
+
+const STAR_COUNT = 5
+
+type LoadState = 'loading' | 'ready' | 'not-found'
+
+function formatAvailability(available: number, total: number): string {
+    return `${available} / ${total}`
+}
+
+function formatRating(value: number): string {
+    return `${value.toFixed(1)} / 5`
+}
+
+export default function BookDetail() {
+    const { id } = useParams<{ id: string }>()
+    const [loadState, setLoadState] = useState<LoadState>('loading')
+    const [imageFailed, setImageFailed] = useState(false)
+    const [selectedRating, setSelectedRating] = useState<number | null>(null)
+    const [activePop, setActivePop] = useState<string | null>(null)
+
+    const book = useMemo(() => {
+        if (!id) {
+            return null
+        }
+        return mockBooksById[id] ?? null
+    }, [id])
+
+    // TODO: Replace with backend API calls for wishlist/reservations
+    const { addToWishlist, addToReservations } = useWishlist()
+
+    useEffect(() => {
+        if (!id) {
+            setLoadState('not-found')
+            return
+        }
+        if (!book) {
+            setLoadState('not-found')
+            return
+        }
+        setLoadState('ready')
+    }, [book, id])
+
+    useEffect(() => {
+        setImageFailed(false)
+    }, [id])
+
+    const triggerPop = (controlId: string) => {
+        setActivePop(controlId)
+        window.setTimeout(() => {
+            setActivePop((current) => (current === controlId ? null : current))
+        }, 220)
+    }
+
+    if (loadState === 'loading') {
+        return (
+            <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+                <div className="rounded-xl border bg-card p-8 shadow-sm">
+                    <p className="text-muted-foreground">Loading book details...</p>
+                </div>
+            </section>
+        )
+    }
+
+    if (loadState === 'not-found' || !book) {
+        return (
+            <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+                <div className="rounded-xl border bg-card p-8 shadow-sm">
+                    <h1 className="text-2xl font-extrabold">Book Not Found</h1>
+                    <p className="mt-3 text-muted-foreground">
+                        We could not find the requested book.
+                    </p>
+                </div>
+            </section>
+        )
+    }
+
+    const uiRating = selectedRating ?? book.rating
+
+    return (
+        <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+            <div className="grid gap-6 md:min-h-105 md:grid-cols-[minmax(280px,1fr)_minmax(320px,1fr)] md:grid-rows-[auto_auto] md:items-stretch">
+                <article className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                    <div className="h-full min-h-0 w-full bg-muted">
+                        <img
+                            src={imageFailed ? fallbackImage : book.imageUrl}
+                            alt={`Book cover for ${book.name}`}
+                            className="h-full w-full object-cover"
+                            onError={() => setImageFailed(true)}
+                        />
+                    </div>
+                </article>
+
+                <div className="grid gap-5">
+                    <section className="rounded-xl border bg-card p-5 shadow-sm">
+                        <div className="mt-4 flex flex-col gap-4">
+                            <div className="flex flex-wrap items-center gap-4">
+                                <div
+                                    role="group"
+                                    aria-label="Book rating"
+                                    className="flex items-center gap-1"
+                                >
+                                    {Array.from({ length: STAR_COUNT }, (_, index) => {
+                                        const starValue = index + 1
+                                        const isFilled = starValue <= Math.round(uiRating)
+                                        const popClass = activePop === `star-${starValue}`
+                                            ? 'animate-[bounce_220ms_ease-out_1]'
+                                            : ''
+
+                                        return (
+                                            <button
+                                                key={starValue}
+                                                type="button"
+                                                aria-label={`Set rating to ${starValue} star${starValue > 1 ? 's' : ''}`}
+                                                className={`rounded-md p-1 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${popClass}`}
+                                                onClick={() => {
+                                                    setSelectedRating(starValue)
+                                                    triggerPop(`star-${starValue}`)
+                                                }}
+                                            >
+                                                <Star
+                                                    className={`h-6 w-6 ${isFilled ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
+                                                />
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+
+                                <p className="text-sm text-muted-foreground">{formatRating(uiRating)}</p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-3">
+                                {/* TODO: Replace with backend API for wishlist management */}
+                                <button
+                                    type="button"
+                                    aria-label="Add to wishlist"
+                                    className={`rounded-md border border-border p-2 transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activePop === 'wishlist' ? 'animate-[bounce_220ms_ease-out_1]' : ''}`}
+                                    onClick={() => {
+                                        if (book) {
+                                            addToWishlist(book)
+                                        }
+                                        triggerPop('wishlist')
+                                    }}
+                                >
+                                    <img src={wishlistIcon} alt="" className="h-5 w-5" aria-hidden="true" />
+                                </button>
+
+                                {/* TODO: Replace with backend API for reservation management */}
+                                <button
+                                    type="button"
+                                    aria-label="Reserve book"
+                                    className={`rounded-md border border-border p-2 transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activePop === 'reservation' ? 'animate-[bounce_220ms_ease-out_1]' : ''}`}
+                                    onClick={() => {
+                                        if (book) addToReservations(book)
+                                        triggerPop('reservation')
+                                    }}
+                                >
+                                    <img src={reservationIcon} alt="" className="h-5 w-5" aria-hidden="true" />
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="rounded-xl border bg-card p-5 shadow-sm">
+                        <h1 className="mb-5 text-3xl font-extrabold leading-tight">{book.name}</h1>
+
+                        <div className="flex items-baseline gap-2">
+                            <p className="text-md uppercase tracking-wide text-muted-foreground">Genre:</p>
+                            <p className="text-md">{book.genre}</p>
+                        </div>
+
+                        <div className="mt-4 flex items-baseline gap-2">
+                            <p className="text-md uppercase tracking-wide text-muted-foreground">Availability:</p>
+                            <p className="text-md">
+                                {formatAvailability(book.availableCopies, book.totalCopies)} copies
+                            </p>
+                        </div>
+
+                        <div className="mt-4 flex items-baseline gap-2">
+                            <p className="text-md uppercase tracking-wide text-muted-foreground">Author:</p>
+                            <p className="text-md font-bold">{book.author}</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <section className="rounded-xl border bg-card p-5 shadow-sm">
+                <h2 className="text-xl font-extrabold">Description</h2>
+                <div className="mt-3 max-h-80 overflow-auto pr-1">
+                    <p className="whitespace-pre-line leading-relaxed text-muted-foreground">
+                        {book.description}
+                    </p>
+                </div>
+            </section>
+        </section>
+    )
+}
