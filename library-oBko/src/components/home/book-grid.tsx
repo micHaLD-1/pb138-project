@@ -2,8 +2,9 @@ import { Filter } from "lucide-react"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel"
 import BookCard from "./book-card"
 import FilterPanel from "./filter-panel"
+import { useState } from "react"
 
-type Book = {
+export type Book = {
   id: string
   title: string
   author: string
@@ -13,7 +14,7 @@ type Book = {
 }
 
 
-const books: Book[] = [
+const allBooks: Book[] = [
   {
     id: "1",
     title: "The Hobbit",
@@ -91,11 +92,12 @@ const books: Book[] = [
 ]
 
 export default function BookGrid() {
+  const [books, setBooks] = useState(allBooks);
   return (
     <div className="w-full px-4 py-6 md:px-8">
         <Carousel className="w-full max-w-5xl mx-auto">
             <CarouselContent>
-                {books.map((book) => (
+                {allBooks.map((book) => (
                 <CarouselItem key={book.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                     <BookCard book={book} />
                 </CarouselItem>
@@ -106,11 +108,10 @@ export default function BookGrid() {
             <CarouselNext />
         </Carousel>
         <FilterPanel 
-            authors={["Tolkien", "Orwell", "Herbert", "Rowling"]}
+            authors={["J.R.R. Tolkien", "George Orwell", "Frank Herbert", "J.K. Rowling"]}
             genres={["Fantasy", "Sci-Fi", "Dystopian"]}
-            onAuthorSelect={(a) => console.log("author:", a)}
-            onGenreSelect={(g) => console.log("genre:", g)}
-            onSearch={(s) => console.log("search:", s)}
+            allBooks={allBooks}
+            setFilteredBooks={setBooks}
         />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-10">

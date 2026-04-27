@@ -5,29 +5,25 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerClose,
 } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Checkbox } from "../ui/checkbox"
 import { Label } from "../ui/label"
+import type { Book } from "./book-grid"
 
 type Props = {
   authors: string[]
   genres: string[]
-  onAuthorSelect?: (author: string) => void
-  onGenreSelect?: (genre: string) => void
-  onSearch?: (value: string) => void
+  allBooks: Book[],
+  setFilteredBooks: (books: Book[]) => void
 }
 
 export default function FilterPanel({
   authors,
   genres,
-  onAuthorSelect,
-  onGenreSelect,
-  onSearch,
+  allBooks,
+  setFilteredBooks
 }: Props) {
-  const [search, setSearch] = useState("")
   const [selectedGenres, setSelectedGenres] = useState<string[]>([])
   const [selectedAuthors, setSelectedAuthors] = useState<string[]>([])
 
@@ -46,6 +42,15 @@ export default function FilterPanel({
         : [...prev, author]
     )
  }
+
+ const handleFilter = () => {
+  const filtered = allBooks.filter((book) => {
+    const authorMatch = selectedAuthors.length === 0 || selectedAuthors.includes(book.author)
+    const genreMatch = selectedGenres.length === 0 || selectedGenres.includes(book.genre)
+    return authorMatch && genreMatch
+  })
+  setFilteredBooks(filtered)
+}
 
   return (
     <div className="w-full flex flex-col gap-4 md:flex-row md:items-center md:justify-center my-6">
@@ -80,7 +85,7 @@ export default function FilterPanel({
         </DrawerContent>
       </Drawer>
 
-      <Button className="rounded-lg bg-primary text-primary-foreground hover:bg-primary mx-15 px-14">
+      <Button className="rounded-lg bg-primary text-primary-foreground hover:bg-primary mx-15 px-14" onClick={handleFilter}>
         Filtruj
       </Button>
 
