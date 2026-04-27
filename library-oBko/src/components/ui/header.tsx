@@ -1,15 +1,22 @@
 import logo from "@/assets/Logo.png"
-import AuthDialog from "@/components/ui/auth-dialog"
+import AuthDialog from "@/components/ui/AuthDialog"
+import UserMenu from "@/components/ui/UserMenu"
+import { Link } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
 import { Input } from "@/components/ui/input"
 
 function Header() {
+	// TODO: Replace with backend API calls for authentication state
+	const { isLoggedIn, user } = useAuth()
+
 	return (
 		<header className="w-full border-b border-border bg-background text-foreground">
 			<div className="mx-auto w-full max-w-7xl px-4 py-3 md:px-6 md:py-4">
 				<div className="grid grid-cols-[auto,minmax(0,1fr)] items-center gap-x-3 gap-y-3 md:grid-cols-[auto,minmax(0,1fr),auto] md:gap-x-5 md:gap-y-0">
-					<a href="/" aria-label="Domovská stránka" className="justify-self-start">
+					<Link to="/" aria-label="Profil" className="justify-self-start">
 						<img src={logo} alt="OBKO logo" className="h-10 w-auto md:h-24" />
-					</a>
+					</Link>
+
 
 					<div className="col-span-2 row-start-2 w-full md:col-span-1 md:col-start-2 md:row-start-1">
 						<form role="search" className="w-full">
@@ -24,11 +31,20 @@ function Header() {
 					</div>
 
 					<div className="col-start-2 row-start-1 w-full justify-self-end md:col-start-3 md:row-start-1 md:w-auto md:justify-self-end">
-						<AuthDialog />
+						{isLoggedIn && user
+						? <UserMenu user={user} />
+						: <AuthDialog />
+          }
 					</div>
 				</div>
 			</div>
+
+			<div className="flex justify-around gap-4">
+				<Link to="/" className="text-sm font-bold hover:text-primary">Domov</Link>
+				<Link to="/o_nas" className="text-sm font-bold hover:text-primary">O nás</Link>
+			</div>
 		</header>
+		
 	)
 }
 
