@@ -41,6 +41,7 @@ function Header() {
 
 			<div className="flex justify-around gap-4">
 				<Link to="/" className="text-sm font-bold hover:text-primary">Domov</Link>
+				<Link to="/authors" className="text-sm font-bold hover:text-primary">Administrace autoru</Link>
 				<Link to="/o_nas" className="text-sm font-bold hover:text-primary">O nás</Link>
 			</div>
 		</header>

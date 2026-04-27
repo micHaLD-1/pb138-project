@@ -8,6 +8,7 @@ import UserProfile from '@/pages/UserProfile'
 import AboutUs from '@/pages/AboutUs'
 import Wishlist from '@/pages/Wishlist'
 import ProtectedRoute from '@/components/ui/ProtectedRoutes'
+import AuthorAdministrationPage from './pages/AuthorAdministrationPage'
 
 function NotFound() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/o_nas" element={<AboutUs />} />
+          <Route path="/authors" element={<AuthorAdministrationPage />} />
 
           <Route path="/wishlist" element={
             <ProtectedRoute>
