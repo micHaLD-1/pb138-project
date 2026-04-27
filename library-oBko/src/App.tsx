@@ -1,6 +1,7 @@
 import './App.css'
 import Header from '@/components/ui/header'
 import Footer from '@/components/ui/footer'
+import HomePage from './pages/homepage'
 import { Route, Routes } from 'react-router-dom'
 import BookDetail from '@/pages/BookDetail'
 import UserProfile from '@/pages/UserProfile'
@@ -25,9 +26,10 @@ function App() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main className="min-h-[60vh]">
+
+      <main className="min-h-[60vh] mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         <Routes>
-          <Route path="/" element={<NotFound />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/o_nas" element={<AboutUs />} />
 
           <Route path="/wishlist" element={
