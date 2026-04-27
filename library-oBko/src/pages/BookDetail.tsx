@@ -34,6 +34,10 @@ export default function BookDetail() {
         return mockBooksById[id] ?? null
     }, [id])
 
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
+
     // TODO: Replace with backend API calls for wishlist/reservations
     const { addToWishlist, addToReservations } = useWishlist()
 

@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card"
+import { Link } from "react-router-dom"
 
 type Book = {
   id: string
@@ -15,6 +16,7 @@ type BookCardProps = {
 
 export default function BookCard({ book }: BookCardProps) {
   return (
+    <Link to={`/books/${book.id}`}>
     <Card className="overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-lg">
       <CardContent className="p-0">
         <div className="aspect-[3/4] overflow-hidden">
@@ -40,5 +42,6 @@ export default function BookCard({ book }: BookCardProps) {
         </div>
       </CardContent>
     </Card>
+    </Link>
   )
 }
