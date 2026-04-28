@@ -15,15 +15,6 @@ type PublisherFormData = {
   name: string
 }
 
-// ── Mock data (replace with real fetch when backend is ready) ─────────────────
-
-const mockPublishers: PublisherDTO[] = [
-  { id: 1, name: "Penguin Books" },
-  { id: 2, name: "HarperCollins" },
-  { id: 3, name: "Random House" },
-  { id: 4, name: "Bloomsbury" },
-  { id: 5, name: "Knopf" },
-]
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 
@@ -31,15 +22,11 @@ const BASE = "/api/publishers"
 
 async function fetchPublishers(page: number, size: number): Promise<{ publishers: PublisherDTO[]; total: number }> {
   // Mock — replace with real fetch when backend is ready:
-  // const res = await fetch(`${BASE}?page=${page}&size=${size}`, { credentials: "include" })
-  // if (!res.ok) throw new Error("Failed to fetch publishers")
-  // const data = await res.json()
-  // return { publishers: data.publishers, total: data.total }
+  const res = await fetch(`${BASE}?page=${page}&size=${size}`, { credentials: "include" })
+  if (!res.ok) throw new Error("Failed to fetch publishers")
+  const data = await res.json()
+  return { publishers: data.publishers, total: data.total }
 
-  await new Promise((r) => setTimeout(r, 300))
-  const start = (page - 1) * size
-  const paged = mockPublishers.slice(start, start + size)
-  return { publishers: paged, total: mockPublishers.length }
 }
 
 async function createPublisher(data: PublisherFormData): Promise<PublisherDTO> {

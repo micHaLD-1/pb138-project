@@ -35,93 +35,38 @@ type BookFormData = {
   copyCount: string
 }
 
-// ── Mock data ─────────────────────────────────────────────────────────────────
-
-const mockBooks: BookDTO[] = [
-  {
-    id: 1, title: "The Hobbit", language: "English", publisherId: 1,
-    publisherName: "Penguin Books", yearPublished: 1937,
-    description: "A fantasy adventure.", authors: ["J.R.R. Tolkien"],
-    genres: ["Fantasy"], availableCopies: 3, totalCopies: 5,
-  },
-  {
-    id: 2, title: "1984", language: "English", publisherId: 2,
-    publisherName: "HarperCollins", yearPublished: 1949,
-    description: "A dystopian novel.", authors: ["George Orwell"],
-    genres: ["Dystopian"], availableCopies: 1, totalCopies: 3,
-  },
-]
-
-const mockAuthors: AuthorDTO[] = [
-  { id: 1,  name: "J.R.R. Tolkien" },
-  { id: 2,  name: "George Orwell" },
-  { id: 3,  name: "Frank Herbert" },
-  { id: 4,  name: "J.K. Rowling" },
-  { id: 5,  name: "Stephen King" },
-  { id: 6,  name: "Agatha Christie" },
-  { id: 7,  name: "Ernest Hemingway" },
-  { id: 8,  name: "Franz Kafka" },
-  { id: 9,  name: "Gabriel García Márquez" },
-  { id: 10, name: "Fyodor Dostoevsky" },
-  { id: 11, name: "Leo Tolstoy" },
-  { id: 12, name: "Virginia Woolf" },
-  { id: 13, name: "Albert Camus" },
-  { id: 14, name: "Haruki Murakami" },
-  { id: 15, name: "Isaac Asimov" },
-  { id: 16, name: "Philip K. Dick" },
-  { id: 17, name: "Ursula K. Le Guin" },
-  { id: 18, name: "Cormac McCarthy" },
-  { id: 19, name: "Toni Morrison" },
-  { id: 20, name: "Milan Kundera" },
-]
-
-const mockGenres: GenreDTO[] = [
-  { id: 1, name: "Fantasy" },
-  { id: 2, name: "Sci-Fi" },
-  { id: 3, name: "Dystopian" },
-  { id: 4, name: "Mystery" },
-]
-
-const mockPublishers: PublisherDTO[] = [
-  { id: 1, name: "Penguin Books" },
-  { id: 2, name: "HarperCollins" },
-  { id: 3, name: "Random House" },
-  { id: 4, name: "Bloomsbury" },
-]
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 
 const BASE = "/api"
 
 async function fetchBooks(page: number, size: number): Promise<{ books: BookDTO[]; total: number }> {
-  // const res = await fetch(`${BASE}/books?page=${page}&size=${size}`, { credentials: "include" })
-  // if (!res.ok) throw new Error("Failed to fetch books")
-  // const data = await res.json()
-  // return { books: data.books, total: data.total }
-  await new Promise((r) => setTimeout(r, 300))
-  const start = (page - 1) * size
-  return { books: mockBooks.slice(start, start + size), total: mockBooks.length }
+  const res = await fetch(`${BASE}/books?page=${page}&size=${size}`, { credentials: "include" })
+  if (!res.ok) throw new Error("Failed to fetch books")
+  const data = await res.json()
+  return { books: data.books, total: data.total }
+
 }
 
 async function fetchAuthors(): Promise<AuthorDTO[]> {
-  // const res = await fetch(`${BASE}/authors?page=1&size=100`, { credentials: "include" })
-  // const data = await res.json()
-  // return data.authors
-  return mockAuthors
+  const res = await fetch(`${BASE}/authors?page=1&size=100`, { credentials: "include" })
+  const data = await res.json()
+  return data.authors
+  // return mockAuthors
 }
 
 async function fetchGenres(): Promise<GenreDTO[]> {
-  // const res = await fetch(`${BASE}/genres?page=1&size=100`, { credentials: "include" })
-  // const data = await res.json()
-  // return data.genres
-  return mockGenres
+  const res = await fetch(`${BASE}/genres?page=1&size=100`, { credentials: "include" })
+  const data = await res.json()
+  return data.genres
+  // return mockGenres
 }
 
 async function fetchPublishers(): Promise<PublisherDTO[]> {
-  // const res = await fetch(`${BASE}/publishers?page=1&size=100`, { credentials: "include" })
-  // const data = await res.json()
-  // return data.publishers
-  return mockPublishers
+  const res = await fetch(`${BASE}/publishers?page=1&size=100`, { credentials: "include" })
+  const data = await res.json()
+  return data.publishers
+  // return mockPublishers
 }
 
 async function createBook(data: any): Promise<void> {

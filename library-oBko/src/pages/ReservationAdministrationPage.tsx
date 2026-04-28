@@ -34,56 +34,29 @@ type UpdateFormData = {
   price: string
 }
 
-// ── Mock data ─────────────────────────────────────────────────────────────────
-
-const mockReservations: ReservationDTO[] = [
-  { id: 1, userId: 1, bookId: 1, bookCopyId: 3, fromDate: "2026-05-01", toDate: "2026-05-15", price: 0, status: "ACTIVE" },
-  { id: 2, userId: 2, bookId: 2, bookCopyId: 5, fromDate: "2026-05-03", toDate: "2026-05-17", price: 0, status: "ACTIVE" },
-  { id: 3, userId: 3, bookId: 3, bookCopyId: 1, fromDate: "2026-04-10", toDate: "2026-04-24", price: 2.5, status: "CANCELED" },
-]
-
-const mockUsers: UserOption[] = [
-  { id: 1, name: "Jan Novák" },
-  { id: 2, name: "Marie Svobodová" },
-  { id: 3, name: "Petr Dvořák" },
-  { id: 4, name: "Lucie Marková" },
-  { id: 5, name: "Tomáš Blaho" },
-]
-
-const mockBooks: BookOption[] = [
-  { id: 1, name: "The Hobbit" },
-  { id: 2, name: "1984" },
-  { id: 3, name: "Dune" },
-  { id: 4, name: "Harry Potter" },
-  { id: 5, name: "Brave New World" },
-]
-
 // ── API helpers ───────────────────────────────────────────────────────────────
 
 const BASE = "/api/reservations"
 
 async function fetchReservations(page: number, pageSize: number): Promise<{ reservations: ReservationDTO[]; total: number }> {
-  // const res = await fetch(`${BASE}?page=${page}&pageSize=${pageSize}`, { credentials: "include" })
-  // if (!res.ok) throw new Error("Failed to fetch reservations")
-  // const data = await res.json()
-  // return { reservations: data.reservations, total: data.total }
-  await new Promise((r) => setTimeout(r, 300))
-  const start = (page - 1) * pageSize
-  return { reservations: mockReservations.slice(start, start + pageSize), total: mockReservations.length }
+  const res = await fetch(`${BASE}?page=${page}&pageSize=${pageSize}`, { credentials: "include" })
+  if (!res.ok) throw new Error("Failed to fetch reservations")
+  const data = await res.json()
+  return { reservations: data.reservations, total: data.total }
 }
 
 async function fetchUsers(): Promise<UserOption[]> {
-  // const res = await fetch("/api/users?page=1&size=100", { credentials: "include" })
-  // const data = await res.json()
-  // return data.users.map((u: any) => ({ id: u.id, name: `${u.firstName} ${u.lastName}` }))
-  return mockUsers
+  const res = await fetch("/api/users?page=1&size=100", { credentials: "include" })
+  const data = await res.json()
+  return data.users.map((u: any) => ({ id: u.id, name: `${u.firstName} ${u.lastName}` }))
+  // return mockUsers
 }
 
 async function fetchBooks(): Promise<BookOption[]> {
-  // const res = await fetch("/api/books?page=1&size=100", { credentials: "include" })
-  // const data = await res.json()
-  // return data.books.map((b: any) => ({ id: b.id, name: b.title }))
-  return mockBooks
+  const res = await fetch("/api/books?page=1&size=100", { credentials: "include" })
+  const data = await res.json()
+  return data.books.map((b: any) => ({ id: b.id, name: b.title }))
+  // return mockBooks
 }
 
 async function createReservation(data: any): Promise<void> {

@@ -15,31 +15,17 @@ type GenreFormData = {
   name: string
 }
 
-// ── Mock data (replace with real fetch when backend is ready) ─────────────────
-
-const mockGenres: GenreDTO[] = [
-  { id: 1, name: "Fantasy" },
-  { id: 2, name: "Sci-Fi" },
-  { id: 3, name: "Dystopian" },
-  { id: 4, name: "Mystery" },
-  { id: 5, name: "Romance" },
-]
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 
 const BASE = "/api/genres"
 
 async function fetchGenres(page: number, size: number): Promise<{ genres: GenreDTO[]; total: number }> {
-  // Mock — replace with real fetch:
-  // const res = await fetch(`${BASE}?page=${page}&size=${size}`, { credentials: "include" })
-  // if (!res.ok) throw new Error("Failed to fetch genres")
-  // const data = await res.json()
-  // return { genres: data.genres, total: data.total }
+  const res = await fetch(`${BASE}?page=${page}&size=${size}`, { credentials: "include" })
+  if (!res.ok) throw new Error("Failed to fetch genres")
+  const data = await res.json()
+  return { genres: data.genres, total: data.total }
 
-  await new Promise((r) => setTimeout(r, 300))
-  const start = (page - 1) * size
-  const paged = mockGenres.slice(start, start + size)
-  return { genres: paged, total: mockGenres.length }
 }
 
 async function createGenre(data: GenreFormData): Promise<GenreDTO> {

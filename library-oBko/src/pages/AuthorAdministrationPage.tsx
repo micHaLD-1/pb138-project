@@ -20,31 +20,17 @@ type AuthorFormData = {
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 
-const BASE = "api/authors"
-
-// async function fetchAuthors(page: number, size: number): Promise<{ authors: AuthorDTO[]; total: number }> {
-//   const res = await fetch(`${BASE}?page=${page}&size=${size}`, { credentials: "include" })
-//   if (!res.ok) throw new Error("Failed to fetch authors")
-//   const data = await res.json()
-//   // backend returns { authors, page, pageSize, total }
-//   return { authors: data.authors, total: data.total }
- 
-// }
-
-const mockAuthors: AuthorDTO[] = [
-  { id: 1, firstName: "Jan",    lastName: "Novák",    name: "Jan Novák" },
-  { id: 2, firstName: "Marie",  lastName: "Svobodová",name: "Marie Svobodová" },
-  { id: 3, firstName: "Petr",   lastName: "Dvořák",   name: "Petr Dvořák" },
-  { id: 4, firstName: "George", lastName: "Orwell",   name: "George Orwell" },
-  { id: 5, firstName: "Frank",  lastName: "Herbert",  name: "Frank Herbert" },
-]
+const BASE = "/api/authors"
 
 async function fetchAuthors(page: number, size: number): Promise<{ authors: AuthorDTO[]; total: number }> {
-  await new Promise((r) => setTimeout(r, 300)) // simulate network delay
-  const start = (page - 1) * size
-  const paged = mockAuthors.slice(start, start + size)
-  return { authors: paged, total: mockAuthors.length }
+  const res = await fetch(`${BASE}?page=${page}&size=${size}`, { credentials: "include" })
+  if (!res.ok) throw new Error("Failed to fetch authors")
+  const data = await res.json()
+  // backend returns { authors, page, pageSize, total }
+  return { authors: data.authors, total: data.total }
+ 
 }
+
 
 async function createAuthor(data: AuthorFormData): Promise<AuthorDTO> {
   const res = await fetch(BASE, {
