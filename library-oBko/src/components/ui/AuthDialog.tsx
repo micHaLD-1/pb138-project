@@ -47,12 +47,35 @@ function AuthDialog() {
       return
     }
     
-    // Mock backend call result for now.
-    login()
+    try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: data.email, password: data.password }),
+      credentials: "include",
+    })
+
+    if (!res.ok) {
+      setSignInErrors({ email: "Invalid email or password." })
+      return
+    }
+
+    console.log("Login response status:", res.status)
+    const json = await res.json()
+    console.log("Login response body:", json)
+    // json.data = { userId, role }
+    login({
+      firstName: "John",
+      lastName: "Doe",
+      email: data.email,
+      role: json.data.role,
+    })
 
     event.currentTarget.reset()
     setStage(null)
-    return
+  } catch (e) {
+    setSignInErrors({ email: "Something went wrong. Try again." })
+  }
   }
 
   async function handleRegisterSubmit(event: React.FormEvent<HTMLFormElement>) {

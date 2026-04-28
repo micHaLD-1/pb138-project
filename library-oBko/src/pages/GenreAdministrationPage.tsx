@@ -3,6 +3,7 @@ import { Plus, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "@/context/AuthContext"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -145,6 +146,9 @@ export default function GenreAdministrationPage() {
   const [deleteTarget, setDeleteTarget] = useState<GenreDTO | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+
+  const {user} = useAuth();
+  console.log(user);
 
   const load = async () => {
     setLoading(true)
