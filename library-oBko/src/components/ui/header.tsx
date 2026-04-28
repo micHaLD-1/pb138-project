@@ -6,7 +6,6 @@ import { useAuth } from '@/context/AuthContext'
 import { Input } from "@/components/ui/input"
 
 function Header() {
-	// TODO: Replace with backend API calls for authentication state
 	const { isLoggedIn, user } = useAuth()
 
 	return (
