@@ -45,6 +45,7 @@ function Header() {
 				<Link to="/genres" className="text-sm font-bold hover:text-primary">Administrace zanru</Link>
 				<Link to="/publishers" className="text-sm font-bold hover:text-primary">Administrace vydavatelu</Link>
 				<Link to="/books_adm" className="text-sm font-bold hover:text-primary">Administrace knih</Link>
+				<Link to="/reservations" className="text-sm font-bold hover:text-primary">Administrace rezervaci</Link>
 				<Link to="/o_nas" className="text-sm font-bold hover:text-primary">O nás</Link>
 			</div>
 		</header>

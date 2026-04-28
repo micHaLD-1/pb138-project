@@ -12,6 +12,7 @@ import AuthorAdministrationPage from './pages/AuthorAdministrationPage'
 import GenreAdministrationPage from './pages/GenreAdministrationPage'
 import PublisherAdministrationPage from './pages/PublisherAdministrationPage'
 import BookAdministrationPage from './pages/BookAdministrationPage'
+import ReservationAdministrationPage from './pages/ReservationAdministrationPage'
 
 function NotFound() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route path="/genres" element={<GenreAdministrationPage />} />
           <Route path="/publishers" element={<PublisherAdministrationPage />} />
           <Route path="/books_adm" element={<BookAdministrationPage />} />
+          <Route path="/reservations" element={<ReservationAdministrationPage />} />
 
           <Route path="/wishlist" element={
             <ProtectedRoute>
