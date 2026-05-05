@@ -19,8 +19,8 @@ export default function Wishlist() {
     return (
       <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="rounded-xl border bg-card p-8 text-center shadow-sm">
-          <h1 className="text-2xl font-extrabold">Your wishlist is empty</h1>
-          <p className="mt-3 text-muted-foreground">Add books from a book detail page.</p>
+          <h1 className="text-2xl font-extrabold">Tvoj zoznam prianí je prázdny</h1>
+          <p className="mt-3 text-muted-foreground">Pridaj knihu z ponuky.</p>
         </div>
       </section>
     )
@@ -28,7 +28,7 @@ export default function Wishlist() {
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="mb-6 text-2xl font-extrabold">Wishlist</h1>
+      <h1 className="mb-6 text-2xl font-extrabold">Knihy na rezervovanie</h1>
       <div className="flex flex-col gap-4">
         {list.map((book) => (
           <div key={book.id} className="relative rounded-lg border bg-card p-4 shadow-sm">

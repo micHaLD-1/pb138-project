@@ -18,6 +18,12 @@ const nameSchema = z
   .min(2, "Name must be at least 2 characters")
   .max(50, "Name must be at most 50 characters")
 
+// Phone validation: 9-20 chars
+const phoneSchema = z
+  .string()
+  .min(9, "Phone must be at least 9 characters")
+  .max(20, "Phone must be at most 20 characters")
+
 // Sign In Form Schema
 export const signInSchema = z.object({
   email: emailSchema,
@@ -32,6 +38,7 @@ export const registerSchema = z
     firstName: nameSchema,
     lastName: nameSchema,
     email: emailSchema,
+    phone: phoneSchema,
     password: passwordSchema,
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })

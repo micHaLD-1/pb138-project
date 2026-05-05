@@ -17,7 +17,6 @@ interface UserMenuProps {
 }
 
 function UserMenu({ user }: UserMenuProps) {
-    // TODO: Replace with backend API calls for logout
     const { logout } = useAuth()
     const navigate = useNavigate()
 
@@ -44,6 +43,7 @@ function UserMenu({ user }: UserMenuProps) {
                     className="cursor-pointer"
                     onClick={() => {
                         logout()
+                        navigate('/')
                     }}
                 >
                     Odhlásiť sa

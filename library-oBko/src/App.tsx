@@ -7,6 +7,7 @@ import BookDetail from '@/pages/BookDetail'
 import UserProfile from '@/pages/UserProfile'
 import AboutUs from '@/pages/AboutUs'
 import Wishlist from '@/pages/Wishlist'
+// import Reservation from '@/pages/Reservation'
 import ProtectedRoute from '@/components/ui/ProtectedRoutes'
 import AuthorAdministrationPage from './pages/AuthorAdministrationPage'
 import GenreAdministrationPage from './pages/GenreAdministrationPage'
@@ -58,6 +59,15 @@ function App() {
             </ProtectedRoute>
             }
           />
+
+          <Route path="/reservation" element={
+            <ProtectedRoute>
+              <NotFound />
+            </ProtectedRoute>
+            }
+          />
+
+
           <Route
             path="/profile"
             element={

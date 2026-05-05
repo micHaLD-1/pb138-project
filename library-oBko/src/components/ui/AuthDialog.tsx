@@ -23,7 +23,7 @@ function AuthDialog() {
   const [signInErrors, setSignInErrors] = useState<SignInErrors>({})
   const [registerErrors, setRegisterErrors] = useState<RegisterErrors>({})
   // TODO: Replace with backend API calls for authentication
-  const { login } = useAuth()
+  const { login, register } = useAuth()
 
   async function handleSignInSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -48,34 +48,12 @@ function AuthDialog() {
     }
     
     try {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: data.email, password: data.password }),
-      credentials: "include",
-    })
 
-    if (!res.ok) {
-      setSignInErrors({ email: "Invalid email or password." })
-      return
+      await login(data.email, data.password);
+      setStage(null);
+    } catch (err) {
+      setSignInErrors({ email: (err as Error).message });
     }
-
-    console.log("Login response status:", res.status)
-    const json = await res.json()
-    console.log("Login response body:", json)
-    // json.data = { userId, role }
-    login({
-      firstName: "John",
-      lastName: "Doe",
-      email: data.email,
-      role: json.data.role,
-    })
-
-    event.currentTarget.reset()
-    setStage(null)
-  } catch (e) {
-    setSignInErrors({ email: "Something went wrong. Try again." })
-  }
   }
 
   async function handleRegisterSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -87,6 +65,7 @@ function AuthDialog() {
       firstName: formData.get("firstName") as string,
       lastName: formData.get("lastName") as string,
       email: formData.get("email") as string,
+      phone: formData.get("phone") as string,
       password: formData.get("password") as string,
       confirmPassword: formData.get("confirmPassword") as string,
     }
@@ -103,13 +82,11 @@ function AuthDialog() {
       return
     }
     
-    // Mock backend call result for now.
-    const isRegisterSuccessful = true
-
-    if (isRegisterSuccessful) {
-      event.currentTarget.reset()
-      setStage(null)
-      return
+    try {
+      await register(data);
+      setStage('signin'); // redirect to sign in after register
+    } catch (err) {
+      setRegisterErrors({ email: (err as Error).message });
     }
   }
 
@@ -236,6 +213,21 @@ function AuthDialog() {
                   autoComplete="email" 
                   required
                   aria-invalid={!!registerErrors.email}
+                />
+                {registerErrors.email && (
+                  <p className="text-sm font-medium text-destructive">{registerErrors.email}</p>
+                )}
+              </Field>
+
+              <Field className="gap-2">
+                <FieldLabel htmlFor="register-phone">Tel</FieldLabel>
+                <Input 
+                  id="register-phone" 
+                  name="phone" 
+                  type="tel" 
+                  autoComplete="tel" 
+                  required
+                  aria-invalid={!!registerErrors.phone}
                 />
                 {registerErrors.email && (
                   <p className="text-sm font-medium text-destructive">{registerErrors.email}</p>
