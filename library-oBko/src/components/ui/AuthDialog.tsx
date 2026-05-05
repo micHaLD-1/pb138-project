@@ -48,6 +48,7 @@ function AuthDialog() {
     }
     
     try {
+
       await login(data.email, data.password);
       setStage(null);
     } catch (err) {

@@ -6,13 +6,19 @@ type Book = {
   title: string
   author: string
   genre: string
-  image: string
   description: string
 }
 
 type BookCardProps = {
   book: Book
 }
+
+const images = ["https://covers.openlibrary.org/b/id/7984916-L.jpg",
+  "https://covers.openlibrary.org/b/id/8101356-L.jpg",
+  "https://covers.openlibrary.org/b/id/7222246-L.jpg",
+  "https://covers.openlibrary.org/b/id/6979861-L.jpg",
+  "https://covers.openlibrary.org/b/id/7984916-L.jpg",
+]
 
 export default function BookCard({ book }: BookCardProps) {
   return (
@@ -21,7 +27,7 @@ export default function BookCard({ book }: BookCardProps) {
       <CardContent className="p-0">
         <div className="aspect-[3/4] overflow-hidden">
           <img
-            src={book.image}
+            src={images[Number(book.id) % images.length]}
             alt={book.title}
             className="block h-full w-full object-cover"
           />
