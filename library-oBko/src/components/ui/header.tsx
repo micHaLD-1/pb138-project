@@ -4,6 +4,7 @@ import UserMenu from "@/components/ui/UserMenu"
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { Input } from "@/components/ui/input"
+import { ToggleMode } from "@/components/ui/ToggleMode"
 
 function Header() {
 	// TODO: Replace with backend API calls for authentication state
@@ -11,6 +12,7 @@ function Header() {
 
 	return (
 		<header className="w-full border-b border-border bg-background text-foreground">
+			<ToggleMode />
 			<div className="mx-auto w-full max-w-7xl px-4 py-3 md:px-6 md:py-4">
 				<div className="grid grid-cols-[auto,minmax(0,1fr)] items-center gap-x-3 gap-y-3 md:grid-cols-[auto,minmax(0,1fr),auto] md:gap-x-5 md:gap-y-0">
 					<Link to="/" aria-label="Profil" className="justify-self-start">
@@ -34,7 +36,7 @@ function Header() {
 						{isLoggedIn && user
 						? <UserMenu user={user} />
 						: <AuthDialog />
-          }
+          				}
 					</div>
 				</div>
 			</div>
