@@ -31,6 +31,7 @@ export const BookResponse = z.object({
   publisherName: z.string(),
   yearPublished: z.number().int(),
   description: z.string(),
+  coverImageUrl: z.string().nullable(),
   authors: z.array(z.string()),
   genres: z.array(z.string()),
   // tags: z.array(z.string()), // TODO: Tagy

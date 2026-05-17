@@ -39,7 +39,8 @@ export const book = pgTable("book", {
   yearPublished: integer("year_published").notNull(),
   language: varchar("language", { length: 100 }).notNull(),
   description: varchar("description", { length: 500 }).notNull(),
-  publisherId: integer("id_publisher").notNull().references(() => publisher.id, { onDelete: "restrict"})
+  publisherId: integer("id_publisher").notNull().references(() => publisher.id, { onDelete: "restrict"}),
+  coverImageKey: varchar("cover_image_key", { length: 255 })
 });
 
 export const bookGenre = pgTable("book_genre", {

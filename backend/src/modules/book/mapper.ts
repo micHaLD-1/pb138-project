@@ -35,6 +35,7 @@ export const mapToBookDTO = (entity: BookWithRelations): BookDTO => {
         publisherName: entity.publisher.name,
         yearPublished: entity.yearPublished,
         description: entity.description,
+        coverImageUrl: entity.coverImageKey ? `/books/${entity.id}/cover` : null,
         genres: entity.bookGenres.map((bg) => (bg.genre.name)),
         authors: entity.bookAuthors.map((ba) => (`${ba.author.firstName} ${ba.author.lastName}`)),
         availableCopies,

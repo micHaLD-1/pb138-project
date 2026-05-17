@@ -1,12 +1,39 @@
 import { eq, sql } from "drizzle-orm";
 
-import { NotFoundError } from "../../errors";
+import { NotFoundError, UnprocessableError } from "../../errors";
 import { db, book, bookAuthor, bookGenre, bookCopy, publisher, author, genre } from "../../db";
 // import { bookTag } from "../../db"; // TODO: Tagy
 import { BookCopyStatus } from "../../enums";
+import { storageService } from "../storage";
 
 import {mapToBookDTO, mapToBooksDTOs} from "./mapper";
 import type { BookCreationDTO, BookUpdateDTO, BookDTO, BooksDTO } from "./model";
+
+const MAX_BOOK_COVER_SIZE = 5 * 1024 * 1024;
+const ALLOWED_BOOK_COVER_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const bookCoverObjectKey = (bookId: number) => `book-covers/${bookId}/cover`;
+
+const validateCoverFile = (file: File) => {
+    if (!(file instanceof File)) {
+        throw new UnprocessableError("Book cover must be uploaded as a file");
+    }
+
+    if (!file.type.startsWith("image/")) {
+        throw new UnprocessableError("Book cover must be an image file");
+    }
+
+    if (!ALLOWED_BOOK_COVER_TYPES.has(file.type)) {
+        throw new UnprocessableError("Book cover must be JPEG, PNG, WebP, or GIF");
+    }
+
+    if (file.size === 0) {
+        throw new UnprocessableError("Book cover file is empty");
+    }
+
+    if (file.size > MAX_BOOK_COVER_SIZE) {
+        throw new UnprocessableError("Book cover must be 5 MB or smaller");
+    }
+};
 
 export const booksService = {
 
@@ -120,6 +147,41 @@ export const booksService = {
         });
     },
 
+    uploadCoverImage: async (id: number, file: File): Promise<void> => {
+        const existing = await db.query.book.findFirst({
+            where: eq(book.id, id),
+            columns: { id: true, coverImageKey: true }
+        });
+
+        if (!existing) throw new NotFoundError(`Book ${id} not found`);
+
+        validateCoverFile(file);
+
+        const objectKey = bookCoverObjectKey(id);
+        await storageService.uploadObject(objectKey, file);
+
+        try {
+            await db.update(book)
+                .set({ coverImageKey: objectKey })
+                .where(eq(book.id, id));
+        } catch (error) {
+            await storageService.removeObject(objectKey).catch(() => undefined);
+            throw error;
+        }
+    },
+
+    getCoverImageRedirectUrl: async (id: number): Promise<string> => {
+        const existing = await db.query.book.findFirst({
+            where: eq(book.id, id),
+            columns: { id: true, coverImageKey: true }
+        });
+
+        if (!existing) throw new NotFoundError(`Book ${id} not found`);
+        if (!existing.coverImageKey) throw new NotFoundError(`Book ${id} does not have a cover image`);
+
+        return await storageService.getSignedDownloadUrl(existing.coverImageKey);
+    },
+
     update: async (id: number, data: BookUpdateDTO) => {
         return await db.transaction(async (tx) => {
             const [existing] = await tx.select().from(book).where(eq(book.id, id));
@@ -162,6 +224,17 @@ export const booksService = {
     },
 
     remove: async (id: number): Promise<void> => {
+        const existing = await db.query.book.findFirst({
+            where: eq(book.id, id),
+            columns: { id: true, coverImageKey: true }
+        });
+
+        if (!existing) throw new NotFoundError(`Book ${id} not found`);
+
+        if (existing.coverImageKey) {
+            await storageService.removeObject(existing.coverImageKey).catch(() => undefined);
+        }
+
         const [deleted] = await db.delete(book).where(eq(book.id, id)).returning();
         if (!deleted) throw new NotFoundError(`Book ${id} not found`);
     }

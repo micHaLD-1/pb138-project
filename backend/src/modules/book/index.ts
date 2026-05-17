@@ -6,6 +6,7 @@ import { reviewsService } from "../reviews/service";
 import { BookCreationRequest, BookUpdateRequest} from "./model";
 import { hasRole } from "../auth/middleware";
 import { sessionStoreManager } from "../auth/session";
+import { UnprocessableError } from "../../errors";
 import { UserRole } from "../../enums";
 
 export const bookModule = new Elysia({ prefix: "/books" })
@@ -41,6 +42,16 @@ bookModule.get("/:id", async ({ params: { id } }) => {
   return await booksService.findById(Number(id));
 });
 
+bookModule.get("/:id/cover", async ({ params: { id } }) => {
+  const redirectUrl = await booksService.getCoverImageRedirectUrl(Number(id));
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: redirectUrl,
+    },
+  });
+});
+
 bookModule.post("/", async (ctx: any) => {
   hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
   ctx.set.status = 201;
@@ -55,6 +66,19 @@ bookModule.put("/:id", async (ctx: any) => {
   ctx.set.status = 204;
 }, {
   body: BookUpdateRequest,
+});
+
+bookModule.post("/:id/cover", async (ctx: any) => {
+  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
+
+  const formData = await ctx.request.formData();
+  const file = formData.get("file");
+  if (!(file instanceof File)) {
+    throw new UnprocessableError("Missing cover image file");
+  }
+
+  await booksService.uploadCoverImage(Number(ctx.params.id), file);
+  ctx.set.status = 204;
 });
 
 bookModule.delete("/:id", async (ctx: any) => {

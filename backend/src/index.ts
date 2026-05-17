@@ -9,6 +9,8 @@ import { genreModule } from "./modules/genre";
 import { loanModule } from "./modules/loan";
 import { publisherModule } from "./modules/publisher";
 import { reservationModule } from "./modules/reservation";
+import { storageService } from "./modules/storage";
+import { bookCoverSeedService } from "./modules/storage/book-cover-seed";
 import { reviewsModule } from "./modules/reviews";
 import { rulesModule } from "./modules/rules";
 import { rulesService } from "./modules/rules/service";
@@ -63,3 +65,5 @@ console.log(
 // Initialize default library settings and admin user
 rulesService.initializeDefaults().catch(console.error);
 authService.initializeDefaults().catch(console.error);
+storageService.initializeDefaults().catch(console.error);
+bookCoverSeedService.seedFromFolder().catch(console.error);
