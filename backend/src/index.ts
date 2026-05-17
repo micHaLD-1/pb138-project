@@ -16,9 +16,6 @@ import { rulesModule } from "./modules/rules";
 import { rulesService } from "./modules/rules/service";
 import { authService } from "./modules/auth/service";
 
-// TODO - ten exception handling by som dal niekam inam nech je to clean
-// TODO - asi by bolo spraviť aj OpenApi kvôli FE, ale idk asi to nie je nutne, treba sa ich spytat
-
 const app = new Elysia()
   .onError(({ code, error, set }) => {
     if (code === "VALIDATION") {
