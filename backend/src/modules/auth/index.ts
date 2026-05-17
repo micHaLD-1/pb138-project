@@ -22,10 +22,10 @@ authModule.post("/login", async ({ body, cookie, set }: { body: LoginDTO; cookie
 
     cookie.sessionId.set({
         value: sessionId,
-        httpOnly: true, // cookie nemoze citat JavaScript
-        secure: false, // funguje aj na HTTP (nie len HTTPS)
-        sameSite: 'lax', // posle sa len na rovnaku stranku
-        maxAge: 24 * 60 * 60, // sekundy
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60,
     });
 
     return {
@@ -41,8 +41,8 @@ authModule.post("/login", async ({ body, cookie, set }: { body: LoginDTO; cookie
 authModule.post("/logout", async ({ cookie, set }: { cookie: any; set: any }) => {
     const sessionId = cookie.sessionId;
     if (sessionId) {
-        await authService.logout(sessionId); // zmaze session z pamate
-        cookie.sessionId.remove(); // vymaze cookie z browsera
+        await authService.logout(sessionId);
+        cookie.sessionId.remove();
     }
     return { message: "Logged out" };
 });

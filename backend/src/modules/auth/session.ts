@@ -8,11 +8,12 @@ interface Session {
 
 const sessionStore = new Map<string, Session>();
 
-const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hodin v milisekundach
+// 24 Hours in milliseconds (ms)
+const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 export const sessionStoreManager = {
     create: (userId: number, role: UserRole): string => {
-        const sessionId = crypto.randomUUID(); // nahodny retazec ako ID
+        const sessionId = crypto.randomUUID();
         sessionStore.set(sessionId, {
             userId,
             role,
@@ -25,7 +26,7 @@ export const sessionStoreManager = {
         const session = sessionStore.get(sessionId);
         if (!session) return null;
 
-        const expired = Date.now() - session.createdAt.getTime() > SESSION_MAX_AGE_MS; // ci uz expiroval
+        const expired = Date.now() - session.createdAt.getTime() > SESSION_MAX_AGE_MS;
         if (expired) {
             sessionStore.delete(sessionId);
             return null;
