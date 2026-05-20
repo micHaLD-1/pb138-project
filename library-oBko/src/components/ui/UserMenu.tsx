@@ -23,9 +23,14 @@ function UserMenu({ user }: UserMenuProps) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
-                <span className="whitespace-nowrap">
-                    {user.firstName} {user.lastName}
-                </span>
+                <div className="flex flex-col items-end leading-tight">
+                    <span className="whitespace-nowrap">
+                        {user.firstName} {user.lastName}
+                    </span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {user.email}
+                    </span>
+                </div>
                 <img src={userIcon} alt="" aria-hidden="true" className="h-8 w-8 shrink-0" />
             </DropdownMenuTrigger>
 

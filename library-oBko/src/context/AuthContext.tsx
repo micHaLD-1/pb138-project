@@ -3,6 +3,9 @@ import { createContext, useContext, useState, useEffect } from 'react';
 interface User {
   userId: number;
   role: "ADMIN" | "STAFF" | "GUEST" | "MEMBER";
+  firstName: string;
+  lastName: string;
+  email: string;
 }
 
 interface AuthContextType {
@@ -39,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         if (res.ok) {
           const data = await res.json();
-          setUser({ userId: data.data.userId, role: data.data.role });
+          setUser({ userId: data.id, role: data.role, firstName: data.firstName, lastName: data.lastName, email: data.email });
         }
       } catch {
         // no active session, stay null
@@ -63,8 +66,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(err.message ?? 'Prihlásenie zlyhalo');
     }
 
-    const data = await res.json();
-    setUser({ userId: data.data.userId, role: data.data.role });
+    // Login only returns userId + role — fetch full profile to get name/email
+    const meRes = await fetch(`${API}/auth/me`, { credentials: 'include' });
+    const me = await meRes.json();
+    setUser({ userId: me.id, role: me.role, firstName: me.firstName, lastName: me.lastName, email: me.email });
   };
 
   const logout = async () => {
