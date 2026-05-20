@@ -8,12 +8,6 @@ INSERT INTO library_setting (key, value, updated_at) VALUES
   ('reservationValidityHours', '48', NOW())
 ON CONFLICT (key) DO NOTHING;
 
--- ── Branches ──────────────────────────────────────────────────────────────────
-INSERT INTO branch (name, address, email, phone) VALUES
-  ('Hlavní pobočka', 'Náměstí Svobody 1, Brno', 'hlavni@knihovna.cz', '+420511111111'),
-  ('Pobočka Žabovřesky', 'Horova 12, Brno', 'zabovresky@knihovna.cz', '+420511222222'),
-  ('Pobočka Královo Pole', 'Palackého třída 55, Brno', 'kralovopole@knihovna.cz', '+420511333333');
-
 -- ── Publishers ────────────────────────────────────────────────────────────────
 INSERT INTO publisher (name) VALUES
   ('Penguin Books'),
@@ -141,27 +135,27 @@ INSERT INTO book_genre (id_book, id_genre) VALUES
   (20, 10); -- The Metamorphosis - Classic
 
 -- ── Book copies ───────────────────────────────────────────────────────────────
-INSERT INTO book_copy (status, id_book, id_branch) VALUES
-  ('AVAILABLE', 1, 1), ('AVAILABLE', 1, 1), ('AVAILABLE', 1, 2),  -- The Hobbit
-  ('AVAILABLE', 2, 1), ('AVAILABLE', 2, 2), ('RESERVED', 2, 1),   -- 1984
-  ('AVAILABLE', 3, 1), ('AVAILABLE', 3, 3),                        -- Dune
-  ('AVAILABLE', 4, 1), ('AVAILABLE', 4, 2), ('AVAILABLE', 4, 3),  -- Harry Potter
-  ('AVAILABLE', 5, 1), ('BORROWED', 5, 2),                         -- The Shining
-  ('AVAILABLE', 6, 1), ('AVAILABLE', 6, 2),                        -- Murder on the Orient Express
-  ('AVAILABLE', 7, 1),                                              -- The Old Man and the Sea
-  ('AVAILABLE', 8, 1), ('AVAILABLE', 8, 3),                        -- The Trial
-  ('AVAILABLE', 9, 1), ('BORROWED', 9, 2),                         -- One Hundred Years of Solitude
-  ('AVAILABLE', 10, 1), ('AVAILABLE', 10, 2),                      -- Crime and Punishment
-  ('AVAILABLE', 11, 1), ('AVAILABLE', 11, 2), ('AVAILABLE', 11, 3),-- The Lord of the Rings
-  ('AVAILABLE', 12, 1), ('AVAILABLE', 12, 2),                      -- Animal Farm
-  ('AVAILABLE', 13, 1),                                             -- Norwegian Wood
-  ('AVAILABLE', 14, 1), ('AVAILABLE', 14, 3),                      -- Foundation
-  ('AVAILABLE', 15, 1),                                             -- The Left Hand of Darkness
-  ('AVAILABLE', 16, 1), ('AVAILABLE', 16, 2),                      -- The Road
-  ('AVAILABLE', 17, 1),                                             -- Beloved
-  ('AVAILABLE', 18, 1), ('AVAILABLE', 18, 2),                      -- The Unbearable Lightness of Being
-  ('AVAILABLE', 19, 1),                                             -- Do Androids Dream of Electric Sheep?
-  ('AVAILABLE', 20, 1), ('AVAILABLE', 20, 3);                      -- The Metamorphosis
+INSERT INTO book_copy (status, id_book) VALUES
+  ('AVAILABLE', 1), ('AVAILABLE', 1), ('AVAILABLE', 1),  -- The Hobbit
+  ('AVAILABLE', 2), ('AVAILABLE', 2), ('RESERVED', 2),   -- 1984
+  ('AVAILABLE', 3), ('AVAILABLE', 3),                     -- Dune
+  ('AVAILABLE', 4), ('AVAILABLE', 4), ('AVAILABLE', 4),  -- Harry Potter
+  ('AVAILABLE', 5), ('BORROWED', 5),                      -- The Shining
+  ('AVAILABLE', 6), ('AVAILABLE', 6),                     -- Murder on the Orient Express
+  ('AVAILABLE', 7),                                        -- The Old Man and the Sea
+  ('AVAILABLE', 8), ('AVAILABLE', 8),                     -- The Trial
+  ('AVAILABLE', 9), ('BORROWED', 9),                      -- One Hundred Years of Solitude
+  ('AVAILABLE', 10), ('AVAILABLE', 10),                   -- Crime and Punishment
+  ('AVAILABLE', 11), ('AVAILABLE', 11), ('AVAILABLE', 11),-- The Lord of the Rings
+  ('AVAILABLE', 12), ('AVAILABLE', 12),                   -- Animal Farm
+  ('AVAILABLE', 13),                                       -- Norwegian Wood
+  ('AVAILABLE', 14), ('AVAILABLE', 14),                   -- Foundation
+  ('AVAILABLE', 15),                                       -- The Left Hand of Darkness
+  ('AVAILABLE', 16), ('AVAILABLE', 16),                   -- The Road
+  ('AVAILABLE', 17),                                       -- Beloved
+  ('AVAILABLE', 18), ('AVAILABLE', 18),                   -- The Unbearable Lightness of Being
+  ('AVAILABLE', 19),                                       -- Do Androids Dream of Electric Sheep?
+  ('AVAILABLE', 20), ('AVAILABLE', 20);                   -- The Metamorphosis
 
 -- ── Users ─────────────────────────────────────────────────────────────────────
 INSERT INTO "user" (role, first_name, last_name, email, password_hash) VALUES
