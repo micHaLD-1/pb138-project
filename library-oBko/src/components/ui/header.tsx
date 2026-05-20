@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { ToggleMode } from "@/components/ui/ToggleMode"
 
 function Header() {
-	// TODO: Replace with backend API calls for authentication state
 	const { isLoggedIn, user } = useAuth()
 
 	return (
@@ -42,9 +41,20 @@ function Header() {
 			</div>
 
 			<div className="flex justify-around gap-4">
+
 				<Link to="/" className="text-sm font-bold hover:text-primary">Domů</Link>
+				{user?.role === "STAFF" || user?.role === "ADMIN" &&
+				<>
+				<Link to="/authors" className="text-sm font-bold hover:text-primary">Administrace autoru</Link>
+				<Link to="/genres" className="text-sm font-bold hover:text-primary">Administrace zanru</Link>
+				<Link to="/publishers" className="text-sm font-bold hover:text-primary">Administrace vydavatelu</Link>
+				<Link to="/books_adm" className="text-sm font-bold hover:text-primary">Administrace knih</Link>
+				<Link to="/reservations" className="text-sm font-bold hover:text-primary">Administrace rezervaci</Link>
+				</>
+				}
 				<Link to="/o_nas" className="text-sm font-bold hover:text-primary">O nás</Link>
-			</div>
+			
+      </div>
 		</header>
 		
 	)

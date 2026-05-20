@@ -1,11 +1,10 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
-interface Props {
-  children: React.ReactNode;
-}
+export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn, isLoading } = useAuth();
 
-export default function ProtectedRoute({ children }: Props) {
-  const { isLoggedIn } = useAuth();
-  return isLoggedIn ? <>{children}</> : <Navigate to="/login" replace />;
+  if (isLoading) return null; // or a spinner
+
+  return isLoggedIn ? <>{children}</> : <Navigate to="/" replace />;
 }

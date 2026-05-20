@@ -1,0 +1,1343 @@
+openapi: 3.0.3
+info:
+  title: Library API
+  version: 1.0.0
+  description: Backend API for library system (extracted from Elysia modules)
+servers:
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: sessionId
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 1
+    RegistrationRequest:
+      type: object
+      required: [firstName, lastName, email, password, phone]
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        phone:
+          type: string
+          minLength: 9
+          maxLength: 20
+    AuthLoginResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            userId:
+              type: integer
+            role:
+              type: string
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        userId:
+          type: integer
+    AuthorCreationRequest:
+      type: object
+      required: [firstName, lastName]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+    AuthorUpdateRequest:
+      type: object
+      required: [firstName, lastName]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+    AuthorResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        name:
+          type: string
+    AuthorsResponse:
+      type: object
+      properties:
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorResponse'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    BookCreationRequest:
+      type: object
+      required:
+        - title
+        - language
+        - publisherId
+        - yearPublished
+        - description
+        - genreIds
+        - authorIds
+        - copyCount
+      properties:
+        title:
+          type: string
+        language:
+          type: string
+        publisherId:
+          type: integer
+        yearPublished:
+          type: integer
+        description:
+          type: string
+          maxLength: 1000
+        genreIds:
+          type: array
+          items:
+            type: integer
+        authorIds:
+          type: array
+          items:
+            type: integer
+        copyCount:
+          type: integer
+          minimum: 1
+    BookUpdateRequest:
+      type: object
+      required:
+        - title
+        - language
+        - publisherId
+        - yearPublished
+        - description
+        - genreIds
+        - authorIds
+      properties:
+        title:
+          type: string
+        language:
+          type: string
+        publisherId:
+          type: integer
+        yearPublished:
+          type: integer
+        description:
+          type: string
+          maxLength: 1000
+        genreIds:
+          type: array
+          items:
+            type: integer
+        authorIds:
+          type: array
+          items:
+            type: integer
+    BookResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        language:
+          type: string
+        publisherId:
+          type: integer
+        publisherName:
+          type: string
+        yearPublished:
+          type: integer
+        description:
+          type: string
+        authors:
+          type: array
+          items:
+            type: string
+        genres:
+          type: array
+          items:
+            type: string
+        availableCopies:
+          type: integer
+        totalCopies:
+          type: integer
+    BooksResponse:
+      type: object
+      properties:
+        books:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookResponse'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    BranchCreationRequest:
+      type: object
+      required: [name, address, email, phone]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        address:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          minLength: 6
+          maxLength: 20
+    BranchUpdateRequest:
+      type: object
+      required: [address, email, phone]
+      properties:
+        address:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          minLength: 6
+          maxLength: 20
+    BranchResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+    BranchesResponse:
+      type: object
+      properties:
+        branches:
+          type: array
+          items:
+            $ref: '#/components/schemas/BranchResponse'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    GenreCreationRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+    GenreResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    GenresResponse:
+      type: object
+      properties:
+        genres:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenreResponse'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    LoanCreationRequest:
+      type: object
+      required:
+        - userId
+        - bookCopyId
+        - loanDate
+        - expectedReturnDate
+        - actualReturnDate
+        - price
+      properties:
+        userId:
+          type: integer
+        bookCopyId:
+          type: integer
+        loanDate:
+          type: string
+          format: date
+        expectedReturnDate:
+          type: string
+          format: date
+        actualReturnDate:
+          type: string
+          format: date
+        price:
+          type: number
+          minimum: 0
+    LoanUpdateRequest:
+      type: object
+      required: [expectedReturnDate, price]
+      properties:
+        expectedReturnDate:
+          type: string
+          format: date
+        price:
+          type: number
+          minimum: 0
+    LoanResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        bookCopyId:
+          type: integer
+        loanDate:
+          type: string
+        expectedReturnDate:
+          type: string
+        actualReturnDate:
+          type: string
+          nullable: true
+        price:
+          type: number
+    LoansResponse:
+      type: object
+      properties:
+        loans:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoanResponse'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    PublisherCreationRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+    PublisherUpdateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+    PublisherResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    PublishersResponse:
+      type: object
+      properties:
+        publishers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublisherResponse'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    ReservationCreationRequest:
+      type: object
+      required: [userId, bookId, fromDate, toDate, price]
+      properties:
+        userId:
+          type: integer
+        bookId:
+          type: integer
+        fromDate:
+          type: string
+          format: date
+        toDate:
+          type: string
+          format: date
+        price:
+          type: number
+          minimum: 0
+    ReservationUpdateRequest:
+      type: object
+      required: [fromDate, toDate, price]
+      properties:
+        fromDate:
+          type: string
+          format: date
+        toDate:
+          type: string
+          format: date
+        price:
+          type: number
+          minimum: 0
+    ReservationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        bookId:
+          type: integer
+        bookCopyId:
+          type: integer
+        fromDate:
+          type: string
+        toDate:
+          type: string
+        price:
+          type: number
+    ReservationsResponse:
+      type: object
+      properties:
+        reservations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReservationResponse'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    ReviewCreationRequest:
+      type: object
+      required: [bookId, content]
+      properties:
+        bookId:
+          type: integer
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    ReviewUpdateRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    ReviewResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        createdAt:
+          type: string
+        userId:
+          type: integer
+        userFirstName:
+          type: string
+        userLastName:
+          type: string
+    ReviewsResponse:
+      type: object
+      properties:
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewResponse'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    RulesUpdateRequest:
+      type: object
+      properties:
+        fineAmountPerDay:
+          type: integer
+          minimum: 0
+        maxBooksPerUser:
+          type: integer
+          minimum: 1
+        gracePeriodDays:
+          type: integer
+          minimum: 0
+    RulesResponse:
+      type: object
+      properties:
+        fineAmountPerDay:
+          type: integer
+        maxBooksPerUser:
+          type: integer
+        gracePeriodDays:
+          type: integer
+        updatedAt:
+          type: string
+paths:
+  /auth/register:
+    post:
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        '201':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/login:
+    post:
+      summary: Login and create session cookie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthLoginResponse'
+        '422':
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/logout:
+    post:
+      summary: Logout and clear session cookie
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /authors:
+    get:
+      summary: List authors
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Authors list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorsResponse'
+    post:
+      summary: Create author
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorCreationRequest'
+      responses:
+        '201':
+          description: Author created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  author:
+                    $ref: '#/components/schemas/AuthorResponse'
+  /authors/{id}:
+    get:
+      summary: Get author by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Author
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  author:
+                    $ref: '#/components/schemas/AuthorResponse'
+    put:
+      summary: Update author
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorUpdateRequest'
+      responses:
+        '204':
+          description: Updated
+    delete:
+      summary: Delete author
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+  /books:
+    get:
+      summary: List books
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Books list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BooksResponse'
+    post:
+      summary: Create book
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookCreationRequest'
+      responses:
+        '201':
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+  /books/{id}:
+    get:
+      summary: Get book by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+    put:
+      summary: Update book
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookUpdateRequest'
+      responses:
+        '204':
+          description: Updated
+    delete:
+      summary: Delete book
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+  /books/{id}/reviews:
+    get:
+      summary: List book reviews
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Reviews list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewsResponse'
+  /branches:
+    get:
+      summary: List branches
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Branches list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchesResponse'
+    post:
+      summary: Create branch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchCreationRequest'
+      responses:
+        '201':
+          description: Branch created
+  /branches/{id}:
+    get:
+      summary: Get branch by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Branch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchResponse'
+    put:
+      summary: Update branch
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchUpdateRequest'
+      responses:
+        '204':
+          description: Updated
+    delete:
+      summary: Delete branch
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+  /genres:
+    get:
+      summary: List genres
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Genres list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenresResponse'
+    post:
+      summary: Create genre
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenreCreationRequest'
+      responses:
+        '201':
+          description: Genre created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  genre:
+                    $ref: '#/components/schemas/GenreResponse'
+  /genres/{id}:
+    get:
+      summary: Get genre by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Genre
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  genre:
+                    $ref: '#/components/schemas/GenreResponse'
+    delete:
+      summary: Delete genre
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+  /loans:
+    get:
+      summary: List loans
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Loans list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoansResponse'
+    post:
+      summary: Create loan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanCreationRequest'
+      responses:
+        '201':
+          description: Loan created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loan:
+                    $ref: '#/components/schemas/LoanResponse'
+  /loans/{id}:
+    get:
+      summary: Get loan by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Loan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loan:
+                    $ref: '#/components/schemas/LoanResponse'
+    put:
+      summary: Update loan
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanUpdateRequest'
+      responses:
+        '204':
+          description: Updated
+  /loans/{id}/return:
+    put:
+      summary: Return loan
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Returned
+  /loans/{id}/revert:
+    put:
+      summary: Revert loan
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Reverted
+  /loans/{id}/cancel:
+    put:
+      summary: Cancel loan
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Canceled
+  /publishers:
+    get:
+      summary: List publishers
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Publishers list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishersResponse'
+    post:
+      summary: Create publisher
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublisherCreationRequest'
+      responses:
+        '201':
+          description: Publisher created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publisher:
+                    $ref: '#/components/schemas/PublisherResponse'
+  /publishers/{id}:
+    get:
+      summary: Get publisher by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Publisher
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publisher:
+                    $ref: '#/components/schemas/PublisherResponse'
+    put:
+      summary: Update publisher
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublisherUpdateRequest'
+      responses:
+        '204':
+          description: Updated
+    delete:
+      summary: Delete publisher
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+  /reservations:
+    get:
+      summary: List reservations
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Reservations list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationsResponse'
+    post:
+      summary: Create reservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationCreationRequest'
+      responses:
+        '201':
+          description: Reservation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationResponse'
+  /reservations/{id}:
+    get:
+      summary: Get reservation by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Reservation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationResponse'
+    put:
+      summary: Update reservation
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationUpdateRequest'
+      responses:
+        '204':
+          description: Updated
+  /reservations/{id}/cancel:
+    put:
+      summary: Cancel reservation
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Canceled
+  /reviews/book/{bookId}:
+    get:
+      summary: List reviews for book
+      parameters:
+        - in: path
+          name: bookId
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Reviews list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewsResponse'
+  /reviews:
+    post:
+      summary: Create review
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewCreationRequest'
+      responses:
+        '201':
+          description: Review created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  review:
+                    $ref: '#/components/schemas/ReviewResponse'
+  /reviews/{id}:
+    put:
+      summary: Update review
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewUpdateRequest'
+      responses:
+        '204':
+          description: Updated
+    delete:
+      summary: Delete review
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+  /rules:
+    get:
+      summary: Get rules
+      responses:
+        '200':
+          description: Rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulesResponse'
+    put:
+      summary: Update rules
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RulesUpdateRequest'
+      responses:
+        '200':
+          description: Rules updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulesResponse'
