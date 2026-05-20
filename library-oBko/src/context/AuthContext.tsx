@@ -24,7 +24,7 @@ export interface RegisterData {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const API = 'http://localhost:3000';
+const API = '/api';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
