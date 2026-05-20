@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@clerk/nextjs": "^7.3.7",
+    "@clerk/react": "^6.6.6",
+    "@react-email/components": "^1.0.12",
+    "resend": "^6.12.3"
+  }
+}
