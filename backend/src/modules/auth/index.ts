@@ -4,6 +4,8 @@ import { LoginRequest, RegistrationRequest, type LoginDTO, type RegistrationDTO 
 import { authService } from "./service";
 import { sessionStoreManager } from "./session";
 import { UserRole } from "../../enums";
+import { db, user as userTable } from "../../db";
+import { eq } from "drizzle-orm";
 
 export const authModule = new Elysia({ prefix: "/auth" })
     .use(cookie());
@@ -45,4 +47,34 @@ authModule.post("/logout", async ({ cookie, set }: { cookie: any; set: any }) =>
         cookie.sessionId.remove();
     }
     return { message: "Logged out" };
+});
+
+authModule.get("/me", async ({ cookie, set }: { cookie: any; set: any }) => {
+    const sessionCookie = cookie.sessionId;
+    const sessionId = typeof sessionCookie === 'string' ? sessionCookie : sessionCookie?.value;
+
+    if (!sessionId) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+    }
+
+    const session = sessionStoreManager.get(sessionId);
+    if (!session) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+    }
+
+    const [found] = await db.select().from(userTable).where(eq(userTable.id, session.userId));
+    if (!found) {
+        set.status = 404;
+        return { message: "User not found" };
+    }
+
+    return {
+        id: found.id,
+        role: found.role,
+        firstName: found.firstName,
+        lastName: found.lastName,
+        email: found.email,
+    };
 });
