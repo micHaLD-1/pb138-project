@@ -35,10 +35,10 @@ function UserMenu({ user }: UserMenuProps) {
                     Profil
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/wishlist')}>
-                    Zoznam prianí
+                    Seznam přání
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/o_nas')}>
-                    Rezervácie
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/o_nas')}>     
+                    Rezervace
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     className="cursor-pointer"
@@ -46,7 +46,7 @@ function UserMenu({ user }: UserMenuProps) {
                         logout()
                     }}
                 >
-                    Odhlásiť sa
+                    Odhlásit se
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

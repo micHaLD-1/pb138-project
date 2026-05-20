@@ -99,9 +99,9 @@ function AuthDialog() {
             "flex w-full items-center justify-end gap-2 rounded-none border-0 bg-transparent px-0 py-0 text-right text-sm font-medium text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
             "md:justify-self-auto"
           )}
-          aria-label="Prihlásiť sa alebo registrovať"
+          aria-label="Přihlásit se nebo registrovat"
         >
-          <span className="whitespace-nowrap">Prihlásiť/registrovať</span>
+          <span className="whitespace-nowrap">Přihlásit/registrovat</span>
           <img src={userIcon} alt="" aria-hidden="true" className="h-8 w-8 shrink-0" />
         </DialogTrigger>
 
@@ -109,10 +109,10 @@ function AuthDialog() {
           
           <div className="mt-5 grid gap-3 sm:grid-rows-2">
             <Button type="button" variant="outline" className="w-full bg-chart-3 text-primary-foreground hover:bg-primary hover:text-background" onClick={() => setStage("signin")}>
-              Prihlásiť sa
+              Přihlásit se
             </Button>
             <Button type="button" variant="outline" className="w-full bg-chart-3 text-primary-foreground hover:bg-primary hover:text-background" onClick={() => setStage("register")}>
-              Registrovať
+              Registrovat
             </Button>
           </div>
         </DialogContent>
@@ -177,7 +177,7 @@ function AuthDialog() {
           <form className="grid gap-4" onSubmit={handleRegisterSubmit}>
             <FieldSet className="gap-4">
               <Field className="gap-2">
-                <FieldLabel htmlFor="register-first-name">Meno</FieldLabel>
+                <FieldLabel htmlFor="register-first-name">Jméno</FieldLabel>
                 <Input 
                   id="register-first-name" 
                   name="firstName" 
@@ -191,7 +191,7 @@ function AuthDialog() {
               </Field>
 
               <Field className="gap-2">
-                <FieldLabel htmlFor="register-last-name">Priezvisko</FieldLabel>
+                <FieldLabel htmlFor="register-last-name">Příjmení</FieldLabel>
                 <Input 
                   id="register-last-name" 
                   name="lastName" 
@@ -252,7 +252,7 @@ function AuthDialog() {
 
             <div className="flex items-center justify-between gap-3">
               <Button type="button" variant="ghost" onClick={() => setStage("chooser")}>
-                Späť
+                Zpět
               </Button>
               
               { /* Send data to BE */}
@@ -260,7 +260,7 @@ function AuthDialog() {
                 type="submit"
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                Registrovať
+                Registrovat
               </Button>
             </div>
           </form>

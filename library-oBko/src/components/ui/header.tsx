@@ -25,8 +25,8 @@ function Header() {
 							<Input
 								type="search"
 								name="search"
-								placeholder="Vyhľadaj🔍"
-								aria-label="Vyhľadávanie"
+								placeholder="Vyhledej🔍"
+								aria-label="Vyhledávání"
 								className="h-10 border-border bg-muted-foreground/15 px-4 text-center text-foreground placeholder:text-center placeholder:text-muted-foreground/80 focus-visible:ring-2 md:h-11"
 							/>
 						</form>
@@ -42,7 +42,7 @@ function Header() {
 			</div>
 
 			<div className="flex justify-around gap-4">
-				<Link to="/" className="text-sm font-bold hover:text-primary">Domov</Link>
+				<Link to="/" className="text-sm font-bold hover:text-primary">Domů</Link>
 				<Link to="/o_nas" className="text-sm font-bold hover:text-primary">O nás</Link>
 			</div>
 		</header>
