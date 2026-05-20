@@ -21,7 +21,7 @@ const openingHours = [
     "Št 8:00 - 17:00",
     "Pi 8:00 - 17:00",
     "So 9:00 - 15:00",
-    "Ne Zatvorené",
+    "Ne Zavřeno",
 ]
 
 function Footer() {
@@ -60,7 +60,7 @@ function Footer() {
         // Form is valid, proceed with submission
         setSubmitStatus("success")
         // TODO: Add actual message submission logic here
-        
+
         // Reset form after successful submission
         const form = event.currentTarget
         setTimeout(() => {
@@ -77,7 +77,7 @@ function Footer() {
                     <section className="w-full rounded-lg border border-border bg-background p-4 md:order-1 md:p-5 lg:order-1">
                         <FieldSet className="gap-3">
                             <FieldLegend className="text-left text-lg font-bold tracking-tight">
-                                Otváracie hodiny
+                                Otevírací hodiny
                             </FieldLegend>
                             <FieldGroup className="gap-1.5">
                                 {openingHours.map((line) => (
@@ -118,7 +118,7 @@ function Footer() {
                                             <Textarea
                                                 id="footer-message"
                                                 name="message"
-                                                placeholder="Napíšte nám správu"
+                                                placeholder="Napište nám zprávu"
                                                 className="min-h-40 flex-1 resize-none"
                                                 rows={4}
                                                 aria-invalid={!!footerErrors.message}
@@ -131,10 +131,11 @@ function Footer() {
                                     </Field>
 
                                     <Button type="submit" className="w-full sm:w-auto" disabled={isSubmitting}>
-                                        {submitStatus === "success" ? "✓ Odoslané" : "Odoslať správu"}
+                                        {submitStatus === "success" ? "✓ Odesláno" : "Odeslat zprávu"}
                                     </Button>
                                     {submitStatus === "error" && (
-                                        <p className="text-sm font-medium text-destructive">Prosím skontrolujte chyby vyššie</p>
+                                        <p className="text-sm font-medium text-destructive">
+                                            Prosím zkontrolujte chyby výše</p>
                                     )}
                                 </FieldGroup>
                             </FieldSet>
@@ -159,7 +160,7 @@ function Footer() {
 
                                 <div className="rounded-lg border border-border bg-background p-3">
                                     <p className="text-sm text-foreground">email: info@obko.com</p>
-                                    <p className="text-sm text-foreground">phone: +420 123 456 789</p>
+                                    <p className="text-sm text-foreground">tel: +420 123 456 789</p>
                                 </div>
                             </div>
                         </FieldSet>

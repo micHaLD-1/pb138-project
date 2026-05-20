@@ -20,9 +20,9 @@ function NotFound() {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
       <div className="rounded-xl border bg-card p-8 text-center shadow-sm">
-        <h1 className="text-3xl font-extrabold">Page Not Found</h1>
+        <h1 className="text-3xl font-extrabold">Stránka nenalezena</h1>
         <p className="mt-3 text-muted-foreground">
-          The page you requested does not exist.
+          Požadovaná stránka neexistuje.
         </p>
       </div>
     </section>
