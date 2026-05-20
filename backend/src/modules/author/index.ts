@@ -30,10 +30,14 @@ export const authorModule = new Elysia({ prefix: "/authors" })
     };
   });
 
-authorModule.get("/", async ({ query: {page, size} }) => {
-  return await authorService.findAll(page, size);
+authorModule.get("/", async ({ query: {page, size, name} }) => {
+  return await authorService.findAll(page, size, name);
 }, {
-  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1 })})
+  query: t.Object({
+      page: t.Numeric({ minimum: 1 }),
+      size: t.Numeric({ minimum: 1 }),
+      name: t.Optional(t.String({minLength: 3}))
+  })
 });
 
 authorModule.get("/:id", async ({ params: { id } }) => {

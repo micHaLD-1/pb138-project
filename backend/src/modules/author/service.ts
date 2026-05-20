@@ -8,10 +8,18 @@ import type {AuthorCreationDTO, AuthorUpdateDTO, AuthorDTO, AuthorsDTO} from "./
 
 export const authorService = {
 
-  findAll: async (page: number, pageSize: number): Promise<AuthorsDTO> => {
+  findAll: async (page: number, pageSize: number, name?: string): Promise<AuthorsDTO> => {
     const offset = (page - 1) * pageSize;
-    const [totalRecords] = await db.select({ count: sql<number>`count(*)` }).from(author);
-    const result = await db.query.author.findMany({limit: pageSize, offset});
+    const whereClause = name ? sql`concat(${author.firstName}, ' ', ${author.lastName}) ILIKE ${'%' + name + '%'}` : undefined;
+
+    const [totalRecords] = await db.select({ count: sql<number>`count(*)` }).from(author).where(whereClause);
+
+    const result = await db.query.author.findMany({
+      limit: pageSize, offset,
+      where: whereClause,
+      orderBy: [author.lastName, author.firstName]
+    });
+
     return mapToAuthorsDTOs(result, Number(totalRecords.count), page, pageSize);
   },
 

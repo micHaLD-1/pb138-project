@@ -53,6 +53,6 @@ export const authService = {
     },
 
     logout: async (sessionId: string) => {
-        sessionStoreManager.delete(sessionId); // toto by mohlo byt kludne aj rovno v index ale clarity
+        sessionStoreManager.delete(sessionId);
     }
 };

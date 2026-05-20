@@ -9,14 +9,6 @@ export const fineStatusEnum = pgEnum("fine_status", Object.values(FineStatus) as
 export const bookCopyStatusEnum = pgEnum("book_copy_status", Object.values(BookCopyStatus) as [string, ...string[]]);
 export const reservationStatusEnum = pgEnum("reservation_status", Object.values(ReservationStatus) as [string, ...string[]]);
 
-export const branch = pgTable("branch", {
-  id: serial("id_branch").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull().unique(),
-  address: varchar("address", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull(),
-  phone: varchar("phone", { length: 20 }).notNull()
-});
-
 export const genre = pgTable("genre", {
   id: serial("id_genre").primaryKey(),
   name: varchar("name", { length: 255 }).notNull().unique()
@@ -39,7 +31,8 @@ export const book = pgTable("book", {
   yearPublished: integer("year_published").notNull(),
   language: varchar("language", { length: 100 }).notNull(),
   description: varchar("description", { length: 500 }).notNull(),
-  publisherId: integer("id_publisher").notNull().references(() => publisher.id, { onDelete: "restrict"})
+  publisherId: integer("id_publisher").notNull().references(() => publisher.id, { onDelete: "restrict"}),
+  coverImageKey: varchar("cover_image_key", { length: 255 })
 });
 
 export const bookGenre = pgTable("book_genre", {
@@ -55,8 +48,7 @@ export const bookAuthor = pgTable("book_author", {
 export const bookCopy = pgTable("book_copy", {
   id: serial("id").primaryKey(),
   status: bookCopyStatusEnum("status").notNull(),
-  bookId: integer("id_book").notNull().references(() => book.id, { onDelete: "cascade" }),
-  branchId: integer("id_branch").references(() => branch.id)
+  bookId: integer("id_book").notNull().references(() => book.id, { onDelete: "cascade" })
 });
 
 export const user = pgTable("user", {
@@ -112,6 +104,12 @@ export const review = pgTable("review", {
   createdAt: timestamp("created_at").notNull(),
   userId: integer("id_user").notNull().references(() => user.id, { onDelete: "cascade" }),
   bookId: integer("id_book").notNull().references(() => book.id, { onDelete: "cascade" })
+});
+
+export const librarySetting = pgTable("library_setting", {
+  key: varchar("key", { length: 100 }).primaryKey(),
+  value: varchar("value", { length: 255 }).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
 export const genreRelations = relations(genre, ({ many }) => ({
@@ -180,9 +178,3 @@ export const reviewRelations = relations(review, ({ one }) => ({
   user: one(user, { fields: [review.userId], references: [user.id] }),
   book: one(book, { fields: [review.bookId], references: [book.id] }),
 }));
-
-export const librarySetting = pgTable("library_setting", {
-  key: varchar("key", { length: 100 }).primaryKey(),
-  value: varchar("value", { length: 255 }).notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()
-});

@@ -2,7 +2,7 @@
   "dependencies": {
     "@clerk/react": "^6.6.6",
     "@react-email/components": "^1.0.12",
-    "@elysiajs/cookie": "^0.8.0"
+    "@elysiajs/cookie": "^0.8.0",
     "resend": "^6.12.3"
   }
 }

@@ -4,6 +4,8 @@ import { LoginRequest, RegistrationRequest, type LoginDTO, type RegistrationDTO 
 import { authService } from "./service";
 import { sessionStoreManager } from "./session";
 import { UserRole } from "../../enums";
+import { db, user as userTable } from "../../db";
+import { eq } from "drizzle-orm";
 
 export const authModule = new Elysia({ prefix: "/auth" })
     .use(cookie());
@@ -22,10 +24,10 @@ authModule.post("/login", async ({ body, cookie, set }: { body: LoginDTO; cookie
 
     cookie.sessionId.set({
         value: sessionId,
-        httpOnly: true, // cookie nemoze citat JavaScript
-        secure: false, // funguje aj na HTTP (nie len HTTPS)
-        sameSite: 'lax', // posle sa len na rovnaku stranku
-        maxAge: 24 * 60 * 60, // sekundy
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60,
     });
 
     return {
@@ -41,8 +43,38 @@ authModule.post("/login", async ({ body, cookie, set }: { body: LoginDTO; cookie
 authModule.post("/logout", async ({ cookie, set }: { cookie: any; set: any }) => {
     const sessionId = cookie.sessionId;
     if (sessionId) {
-        await authService.logout(sessionId); // zmaze session z pamate
-        cookie.sessionId.remove(); // vymaze cookie z browsera
+        await authService.logout(sessionId);
+        cookie.sessionId.remove();
     }
     return { message: "Logged out" };
+});
+
+authModule.get("/me", async ({ cookie, set }: { cookie: any; set: any }) => {
+    const sessionCookie = cookie.sessionId;
+    const sessionId = typeof sessionCookie === 'string' ? sessionCookie : sessionCookie?.value;
+
+    if (!sessionId) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+    }
+
+    const session = sessionStoreManager.get(sessionId);
+    if (!session) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+    }
+
+    const [found] = await db.select().from(userTable).where(eq(userTable.id, session.userId));
+    if (!found) {
+        set.status = 404;
+        return { message: "User not found" };
+    }
+
+    return {
+        id: found.id,
+        role: found.role,
+        firstName: found.firstName,
+        lastName: found.lastName,
+        email: found.email,
+    };
 });
