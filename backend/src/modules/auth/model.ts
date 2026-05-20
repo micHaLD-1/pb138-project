@@ -13,5 +13,11 @@ export const RegistrationRequest = z.object({
   phone: z.string().min(9).max(20)
 });
 
+export const UpdateProfileRequest = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+});
+
 export type LoginDTO = z.infer<typeof LoginRequest>;
 export type RegistrationDTO = z.infer<typeof RegistrationRequest>;
+export type UpdateProfileDTO = z.infer<typeof UpdateProfileRequest>;

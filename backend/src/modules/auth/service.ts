@@ -52,6 +52,17 @@ export const authService = {
         return foundUser;
     },
 
+    updateProfile: async (userId: number, data: { firstName: string; lastName: string }) => {
+        const [updated] = await db
+            .update(user)
+            .set({ firstName: data.firstName, lastName: data.lastName })
+            .where(eq(user.id, userId))
+            .returning();
+
+        if (!updated) throw new Error("User not found");
+        return updated;
+    },
+
     logout: async (sessionId: string) => {
         sessionStoreManager.delete(sessionId);
     }

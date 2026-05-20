@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  updateUser: (data: { firstName: string; lastName: string }) => Promise<void>;
 }
 
 export interface RegisterData {
@@ -72,6 +73,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser({ userId: me.id, role: me.role, firstName: me.firstName, lastName: me.lastName, email: me.email });
   };
 
+  const updateUser = async (data: { firstName: string; lastName: string }) => {
+    const res = await fetch(`${API}/auth/me`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message ?? 'Aktualizácia zlyhala');
+    }
+
+    const updated = await res.json();
+    setUser(prev => prev ? { ...prev, firstName: updated.firstName, lastName: updated.lastName } : prev);
+  };
+
   const logout = async () => {
     await fetch(`${API}/auth/logout`, {
       method: 'POST',
@@ -95,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, isLoading, login, logout, register }}>
+    <AuthContext.Provider value={{ user, isLoggedIn: !!user, isLoading, login, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

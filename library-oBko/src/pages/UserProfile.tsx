@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input'
 import { useAuth } from '@/context/AuthContext'
 
 function UserProfile() {
-  // TODO: Replace with backend API calls for user profile management
   const { user, updateUser } = useAuth()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [savedMessage, setSavedMessage] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     setFirstName(user?.firstName ?? '')
@@ -20,10 +21,20 @@ function UserProfile() {
     return null
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    updateUser({ firstName, lastName })
-    setSavedMessage('Profil bol aktualizovaný.')
+    setSaving(true)
+    setSuccessMessage(null)
+    setErrorMessage(null)
+
+    try {
+      await updateUser({ firstName, lastName })
+      setSuccessMessage('Profil bol aktualizovaný.')
+    } catch (err) {
+      setErrorMessage((err as Error).message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -44,6 +55,7 @@ function UserProfile() {
                 value={firstName}
                 onChange={(event) => setFirstName(event.target.value)}
                 className="h-11"
+                required
               />
             </Field>
 
@@ -55,6 +67,7 @@ function UserProfile() {
                 value={lastName}
                 onChange={(event) => setLastName(event.target.value)}
                 className="h-11"
+                required
               />
             </Field>
 
@@ -71,13 +84,16 @@ function UserProfile() {
           </FieldSet>
 
           <div className="flex items-center justify-between gap-3">
-            {savedMessage ? (
-              <p className="text-sm font-medium text-primary">{savedMessage}</p>
-            ) : (
-              <span />
-            )}
-            <Button type="submit" className="px-6">
-              Potvrdiť
+            <div>
+              {successMessage && (
+                <p className="text-sm font-medium text-primary">{successMessage}</p>
+              )}
+              {errorMessage && (
+                <p className="text-sm font-medium text-destructive">{errorMessage}</p>
+              )}
+            </div>
+            <Button type="submit" className="px-6" disabled={saving}>
+              {saving ? 'Ukladám…' : 'Potvrdiť'}
             </Button>
           </div>
         </form>

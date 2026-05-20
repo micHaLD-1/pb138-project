@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { cookie } from "@elysiajs/cookie";
-import { LoginRequest, RegistrationRequest, type LoginDTO, type RegistrationDTO } from "./model";
+import { LoginRequest, RegistrationRequest, UpdateProfileRequest, type LoginDTO, type RegistrationDTO, type UpdateProfileDTO } from "./model";
 import { authService } from "./service";
 import { sessionStoreManager } from "./session";
 import { UserRole } from "../../enums";
@@ -47,6 +47,33 @@ authModule.post("/logout", async ({ cookie, set }: { cookie: any; set: any }) =>
         cookie.sessionId.remove();
     }
     return { message: "Logged out" };
+});
+
+authModule.put("/me", async ({ body, cookie, set }: { body: UpdateProfileDTO; cookie: any; set: any }) => {
+    const sessionCookie = cookie.sessionId;
+    const sessionId = typeof sessionCookie === 'string' ? sessionCookie : sessionCookie?.value;
+
+    if (!sessionId) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+    }
+
+    const session = sessionStoreManager.get(sessionId);
+    if (!session) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+    }
+
+    const updated = await authService.updateProfile(session.userId, body);
+    return {
+        id: updated.id,
+        role: updated.role,
+        firstName: updated.firstName,
+        lastName: updated.lastName,
+        email: updated.email,
+    };
+}, {
+    body: UpdateProfileRequest,
 });
 
 authModule.get("/me", async ({ cookie, set }: { cookie: any; set: any }) => {
