@@ -23,9 +23,9 @@ export function ToggleMode() {
 
 	return (
 		<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-sm">
-			<span className="select-none">Light</span>
+			<span className="select-none">Bledá</span>
 			<Switch checked={isDark} onCheckedChange={setIsDark} size="sm" />
-			<span className="select-none">Dark</span>
+			<span className="select-none">Tmavá</span>
 		</div>
 	)
 }
