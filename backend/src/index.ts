@@ -3,6 +3,7 @@ import { Elysia } from "elysia";
 import {ConflictError, ForbiddenError, NotFoundError, UnauthorizedError, UnprocessableError} from "./errors";
 
 import { authModule } from "./modules/auth";
+import { userModule } from "./modules/user";
 import { authorModule } from "./modules/author";
 import { bookModule } from "./modules/book";
 import { genreModule } from "./modules/genre";
@@ -45,6 +46,7 @@ const app = new Elysia()
   })
   .get("/", () => "Library API")
   .use(authModule)
+  .use(userModule)
   .use(authorModule)
   .use(bookModule)
   .use(genreModule)

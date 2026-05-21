@@ -53,7 +53,7 @@ function Header() {
 			<div className="flex justify-around gap-4">
 
 				<Link to="/" className="text-sm font-bold hover:text-primary">Domů</Link>
-				{user?.role === "STAFF" || user?.role === "ADMIN" &&
+				{(user?.role === "STAFF" || user?.role === "ADMIN") &&
 				<>
 				<Link to="/authors" className="text-sm font-bold hover:text-primary">Administrace autoru</Link>
 				<Link to="/genres" className="text-sm font-bold hover:text-primary">Administrace zanru</Link>
@@ -61,6 +61,9 @@ function Header() {
 				<Link to="/books_adm" className="text-sm font-bold hover:text-primary">Administrace knih</Link>
 				<Link to="/reservations" className="text-sm font-bold hover:text-primary">Administrace rezervaci</Link>
 				</>
+				}
+				{user?.role === "ADMIN" &&
+				<Link to="/users" className="text-sm font-bold hover:text-primary">Správa uživatelů</Link>
 				}
 				<Link to="/o_nas" className="text-sm font-bold hover:text-primary">O nás</Link>
 			
