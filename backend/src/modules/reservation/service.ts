@@ -43,6 +43,27 @@ export const reservationService = {
         return mapToReservationDTO(result);
     },
 
+    findByUserId: async (userId: number, page: number, pageSize: number): Promise<ReservationsDTO> => {
+        const offset = (page - 1) * pageSize;
+        const [totalRecords] = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(reservation)
+            .where(eq(reservation.userId, userId));
+
+        const result = await db.query.reservation.findMany({
+            where: eq(reservation.userId, userId),
+            limit: pageSize,
+            offset,
+            with: {
+                user: true,
+                bookCopy: { with: { book: true } }
+            },
+            orderBy: (reservation, { desc }) => [desc(reservation.dateOfReservation)]
+        });
+
+        return mapToReservationsDTO(result, Number(totalRecords.count), page, pageSize);
+    },
+
     create: async (data: ReservationCreationDTO) => {
         return await db.transaction(async (tx) => {
             const { bookId, userId, fromDate, toDate, price } = data;

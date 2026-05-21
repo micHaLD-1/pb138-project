@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and, or, ilike, exists, inArray } from "drizzle-orm";
 
 import { NotFoundError, UnprocessableError } from "../../errors";
 import { db, book, bookAuthor, bookGenre, bookCopy, publisher, author, genre } from "../../db";
@@ -37,20 +37,81 @@ const validateCoverFile = (file: File) => {
 
 export const booksService = {
 
-    findAll: async (page: number, pageSize: number): Promise<BooksDTO> => {
+    findAll: async (
+        page: number,
+        pageSize: number,
+        filters?: { search?: string; genreId?: number; authorId?: number }
+    ): Promise<BooksDTO> => {
         const offset = (page - 1) * pageSize;
-        const [totalRecords] = await db.select({ count: sql<number>`count(*)` }).from(book);
 
+        // Build WHERE conditions from optional filters
+        const conditions = [];
+
+        if (filters?.search) {
+            conditions.push(
+                or(
+                    ilike(book.title, `%${filters.search}%`),
+                    ilike(book.description, `%${filters.search}%`)
+                )
+            );
+        }
+
+        if (filters?.genreId) {
+            conditions.push(
+                exists(
+                    db.select({ one: sql`1` }).from(bookGenre).where(
+                        and(
+                            eq(bookGenre.bookId, book.id),
+                            eq(bookGenre.genreId, filters.genreId)
+                        )
+                    )
+                )
+            );
+        }
+
+        if (filters?.authorId) {
+            conditions.push(
+                exists(
+                    db.select({ one: sql`1` }).from(bookAuthor).where(
+                        and(
+                            eq(bookAuthor.bookId, book.id),
+                            eq(bookAuthor.authorId, filters.authorId)
+                        )
+                    )
+                )
+            );
+        }
+
+        const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+        // Count total matching records (for pagination metadata)
+        const [totalRecords] = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(book)
+            .where(whereClause);
+
+        // Get the paginated IDs that match the filters
+        const matchingIds = await db
+            .select({ id: book.id })
+            .from(book)
+            .where(whereClause)
+            .limit(pageSize)
+            .offset(offset);
+
+        if (matchingIds.length === 0) {
+            return mapToBooksDTOs([], Number(totalRecords.count), page, pageSize);
+        }
+
+        // Fetch full book data with all relations for the matched IDs
         const result = await db.query.book.findMany({
-            limit: pageSize,
-            offset,
+            where: inArray(book.id, matchingIds.map(b => b.id)),
             with: {
                 bookAuthors: {
                     with: { author: true } },
                 bookGenres: {
                     with: { genre: true } },
                 // bookTags: { // TODO: Tagy
-                //     with: { tag: true } 
+                //     with: { tag: true }
                 // },
                 bookCopies: true,
                 publisher: true

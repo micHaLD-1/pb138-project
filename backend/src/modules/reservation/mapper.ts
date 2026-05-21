@@ -20,7 +20,8 @@ export const mapToReservationDTO = (entity: ReservationWithRelations): Reservati
     bookCopyId: entity.bookCopyId,
     fromDate: entity.fromDate,
     toDate: entity.toDate,
-    price: entity.price
+    price: entity.price,
+    status: entity.status,
 });
 
 export const mapToReservationsDTO = (entities: ReservationWithRelations[], total: number, page: number, pageSize: number): ReservationsDTO => ({

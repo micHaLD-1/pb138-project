@@ -3,6 +3,9 @@ import { createContext, useContext, useState, useEffect } from 'react';
 interface User {
   userId: number;
   role: "ADMIN" | "STAFF" | "GUEST" | "MEMBER";
+  firstName: string;
+  lastName: string;
+  email: string;
 }
 
 interface AuthContextType {
@@ -12,6 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  updateUser: (data: { firstName: string; lastName: string }) => Promise<void>;
 }
 
 export interface RegisterData {
@@ -24,7 +28,7 @@ export interface RegisterData {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const API = 'http://localhost:3000';
+const API = '/api';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -39,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         if (res.ok) {
           const data = await res.json();
-          setUser({ userId: data.data.userId, role: data.data.role });
+          setUser({ userId: data.id, role: data.role, firstName: data.firstName, lastName: data.lastName, email: data.email });
         }
       } catch {
         // no active session, stay null
@@ -63,8 +67,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(err.message ?? 'Prihlásenie zlyhalo');
     }
 
-    const data = await res.json();
-    setUser({ userId: data.data.userId, role: data.data.role });
+    // Login only returns userId + role — fetch full profile to get name/email
+    const meRes = await fetch(`${API}/auth/me`, { credentials: 'include' });
+    const me = await meRes.json();
+    setUser({ userId: me.id, role: me.role, firstName: me.firstName, lastName: me.lastName, email: me.email });
+  };
+
+  const updateUser = async (data: { firstName: string; lastName: string }) => {
+    const res = await fetch(`${API}/auth/me`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message ?? 'Aktualizácia zlyhala');
+    }
+
+    const updated = await res.json();
+    setUser(prev => prev ? { ...prev, firstName: updated.firstName, lastName: updated.lastName } : prev);
   };
 
   const logout = async () => {
@@ -90,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, isLoading, login, logout, register }}>
+    <AuthContext.Provider value={{ user, isLoggedIn: !!user, isLoading, login, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

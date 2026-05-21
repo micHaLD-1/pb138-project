@@ -1,13 +1,21 @@
 import logo from "@/assets/Logo.png"
 import AuthDialog from "@/components/ui/AuthDialog"
 import UserMenu from "@/components/ui/UserMenu"
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { Input } from "@/components/ui/input"
 import { ToggleMode } from "@/components/ui/ToggleMode"
 
 function Header() {
 	const { isLoggedIn, user } = useAuth()
+	const navigate = useNavigate()
+	const [searchParams] = useSearchParams()
+
+	function handleSearch(e: React.FormEvent<HTMLFormElement>) {
+		e.preventDefault()
+		const value = (new FormData(e.currentTarget).get("search") as string).trim()
+		navigate(value ? `/?search=${encodeURIComponent(value)}` : "/")
+	}
 
 	return (
 		<header className="w-full border-b border-border bg-background text-foreground">
@@ -20,12 +28,14 @@ function Header() {
 
 
 					<div className="col-span-2 row-start-2 w-full md:col-span-1 md:col-start-2 md:row-start-1">
-						<form role="search" className="w-full">
+						<form role="search" className="w-full" onSubmit={handleSearch}>
 							<Input
 								type="search"
 								name="search"
 								placeholder="Vyhledej🔍"
 								aria-label="Vyhledávání"
+								defaultValue={searchParams.get("search") ?? ""}
+								key={searchParams.get("search") ?? ""}
 								className="h-10 border-border bg-muted-foreground/15 px-4 text-center text-foreground placeholder:text-center placeholder:text-muted-foreground/80 focus-visible:ring-2 md:h-11"
 							/>
 						</form>
@@ -43,7 +53,7 @@ function Header() {
 			<div className="flex justify-around gap-4">
 
 				<Link to="/" className="text-sm font-bold hover:text-primary">Domů</Link>
-				{user?.role === "STAFF" || user?.role === "ADMIN" &&
+				{(user?.role === "STAFF" || user?.role === "ADMIN") &&
 				<>
 				<Link to="/authors" className="text-sm font-bold hover:text-primary">Administrace autoru</Link>
 				<Link to="/genres" className="text-sm font-bold hover:text-primary">Administrace zanru</Link>
@@ -51,6 +61,9 @@ function Header() {
 				<Link to="/books_adm" className="text-sm font-bold hover:text-primary">Administrace knih</Link>
 				<Link to="/reservations" className="text-sm font-bold hover:text-primary">Administrace rezervaci</Link>
 				</>
+				}
+				{user?.role === "ADMIN" &&
+				<Link to="/users" className="text-sm font-bold hover:text-primary">Správa uživatelů</Link>
 				}
 				<Link to="/o_nas" className="text-sm font-bold hover:text-primary">O nás</Link>
 			

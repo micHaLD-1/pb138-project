@@ -22,6 +22,7 @@ export const ReservationResponse = z.object({
   fromDate: z.string(),
   toDate: z.string(),
   price: z.number(),
+  status: z.string(),
 });
 
 export const ReservationsResponse = z.object({
