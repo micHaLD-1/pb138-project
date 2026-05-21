@@ -15,6 +15,7 @@ import PublisherAdministrationPage from './pages/PublisherAdministrationPage'
 import BookAdministrationPage from './pages/BookAdministrationPage'
 import ReservationAdministrationPage from './pages/ReservationAdministrationPage'
 import UserAdministrationPage from './pages/UserAdministrationPage'
+import MyReservations from './pages/MyReservations'
 import { useAuth } from './context/AuthContext'
 
 function NotFound() {
@@ -67,9 +68,9 @@ function App() {
             }
           />
 
-          <Route path="/reservation" element={
+          <Route path="/my-reservations" element={
             <ProtectedRoute>
-              <NotFound />
+              <MyReservations />
             </ProtectedRoute>
             }
           />

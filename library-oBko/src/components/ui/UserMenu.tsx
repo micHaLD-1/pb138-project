@@ -41,7 +41,7 @@ function UserMenu({ user }: UserMenuProps) {
                 <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/wishlist')}>
                     Seznam přání
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/o_nas')}>     
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/my-reservations')}>
                     Rezervace
                 </DropdownMenuItem>
                 <DropdownMenuItem
