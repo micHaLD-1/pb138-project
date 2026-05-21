@@ -3,9 +3,13 @@ import { useParams } from 'react-router-dom'
 import { Star } from 'lucide-react'
 import fallbackImage from '@/assets/hero.png'
 import wishlistIcon from '@/assets/Subtract.png'
-import reservationIcon from '@/assets/Union.png'
 // TODO: Replace WishlistContext with backend API calls
 import { useWishlist } from '@/context/WishlistContext'
+import { useAuth } from '@/context/AuthContext'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Field, FieldLabel, FieldSet } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 
 const STAR_COUNT = 5
 
@@ -37,7 +41,57 @@ export default function BookDetail() {
     const [activePop, setActivePop] = useState<string | null>(null)
 
     // TODO: Replace WishlistContext with backend API calls
-    const { addToWishlist, addToReservations } = useWishlist()
+    const { addToWishlist } = useWishlist()
+    const { user } = useAuth()
+
+    // Reservation dialog state
+    const [reservationOpen, setReservationOpen] = useState(false)
+    const [fromDate, setFromDate] = useState('')
+    const [toDate, setToDate] = useState('')
+    const [reserving, setReserving] = useState(false)
+    const [reservationSuccess, setReservationSuccess] = useState(false)
+    const [reservationError, setReservationError] = useState<string | null>(null)
+
+    async function handleReserve(e: React.FormEvent) {
+        e.preventDefault()
+        if (!user || !book) return
+        setReserving(true)
+        setReservationError(null)
+        try {
+            const res = await fetch('/api/reservations', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.userId,
+                    bookId: book.id,
+                    fromDate,
+                    toDate,
+                    price: 0,
+                }),
+            })
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.message ?? 'Rezervácia zlyhala')
+            }
+            setReservationSuccess(true)
+        } catch (err) {
+            setReservationError((err as Error).message)
+        } finally {
+            setReserving(false)
+        }
+    }
+
+    function handleDialogOpenChange(open: boolean) {
+        setReservationOpen(open)
+        if (!open) {
+            // reset form when closing
+            setFromDate('')
+            setToDate('')
+            setReservationSuccess(false)
+            setReservationError(null)
+        }
+    }
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -166,18 +220,76 @@ export default function BookDetail() {
                                     <img src={wishlistIcon} alt="" className="h-5 w-5" aria-hidden="true" />
                                 </button>
 
-                                {/* TODO: Replace with backend API for reservation management */}
-                                <button
-                                    type="button"
-                                    aria-label="Reserve book"
-                                    className={`rounded-md border border-border p-2 transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activePop === 'reservation' ? 'animate-[bounce_220ms_ease-out_1]' : ''}`}
-                                    onClick={() => {
-                                        addToReservations(book as any)
-                                        triggerPop('reservation')
-                                    }}
-                                >
-                                    <img src={reservationIcon} alt="" className="h-5 w-5" aria-hidden="true" />
-                                </button>
+                                {/* Reservation dialog */}
+                                <Dialog open={reservationOpen} onOpenChange={handleDialogOpenChange}>
+                                    <DialogTrigger
+                                        render={<Button disabled={book.availableCopies === 0} />}
+                                        title={book.availableCopies === 0 ? 'Žiadne dostupné výtisky' : 'Rezervovať knihu'}
+                                    >
+                                        {book.availableCopies === 0 ? 'Nedostupné' : 'Rezervovať'}
+                                    </DialogTrigger>
+
+                                    <DialogContent className="sm:max-w-md">
+                                        {!user ? (
+                                            <div className="py-4 text-center">
+                                                <p className="font-medium">Pro rezervaci se musis prihlasit.</p>
+                                            </div>
+                                        ) : reservationSuccess ? (
+                                            <div className="py-4 text-center">
+                                                <p className="text-lg font-bold text-primary">Rezervace byla uspesna</p>
+                                                <p className="mt-2 text-sm text-muted-foreground">
+                                                    Kniha <span className="font-medium">{book.title}</span> je zarezervovaná od {fromDate} do {toDate}.
+                                                </p>
+                                                <Button className="mt-4" onClick={() => setReservationOpen(false)}>
+                                                    Zavřít
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <form className="grid gap-4" onSubmit={handleReserve}>
+                                                <h2 className="text-lg font-bold">Rezervovat: {book.title}</h2>
+
+                                                <FieldSet className="gap-4">
+                                                    <Field className="gap-2">
+                                                        <FieldLabel htmlFor="res-from">Datum od</FieldLabel>
+                                                        <Input
+                                                            id="res-from"
+                                                            type="date"
+                                                            value={fromDate}
+                                                            min={new Date().toISOString().split('T')[0]}
+                                                            onChange={(e) => setFromDate(e.target.value)}
+                                                            required
+                                                        />
+                                                    </Field>
+
+                                                    <Field className="gap-2">
+                                                        <FieldLabel htmlFor="res-to">Datum do</FieldLabel>
+                                                        <Input
+                                                            id="res-to"
+                                                            type="date"
+                                                            value={toDate}
+                                                            min={fromDate || new Date().toISOString().split('T')[0]}
+                                                            onChange={(e) => setToDate(e.target.value)}
+                                                            required
+                                                        />
+                                                    </Field>
+                                                </FieldSet>
+
+                                                {reservationError && (
+                                                    <p className="text-sm font-medium text-destructive">{reservationError}</p>
+                                                )}
+
+                                                <div className="flex justify-end gap-2">
+                                                    <Button type="button" variant="ghost" onClick={() => setReservationOpen(false)}>
+                                                        Zrušiť
+                                                    </Button>
+                                                    <Button type="submit" disabled={reserving}>
+                                                        {reserving ? 'Rezervujem…' : 'Potvrdiť'}
+                                                    </Button>
+                                                </div>
+                                            </form>
+                                        )}
+                                    </DialogContent>
+                                </Dialog>
                             </div>
                         </div>
                     </section>
