@@ -1,6 +1,6 @@
+import {genre} from "../../db";
 import type {GenreDTO, GenresDTO} from "./model";
 
-import {genre} from "../../db";
 type GenreEntity = typeof genre.$inferSelect;
 
 export const mapToGenreDTO = (entity: GenreEntity): GenreDTO => ({
