@@ -1,6 +1,7 @@
 import { db } from "./index";
 import * as schema from "./schema";
 import { UserRole, BookCopyStatus } from "../enums";
+import { bookCoverSeedService } from "../cover-storage/book-cover-seed";
 
 async function main() {
     console.log("⏳ Inicializace databáze v češtině...");
@@ -247,6 +248,8 @@ async function main() {
             ]);
         }
     }
+
+    await bookCoverSeedService.seedFromFolder();
 
     console.log("✅ Databáze byla úspěšně naplněna daty!");
     process.exit(0);
