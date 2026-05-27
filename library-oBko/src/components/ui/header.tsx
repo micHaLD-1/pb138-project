@@ -1,5 +1,5 @@
 import logo from "@/assets/Logo.png"
-import AuthDialog from "@/components/ui/AuthDialog"
+import AuthDialog from "@/components/auth/AuthDialog"
 import UserMenu from "@/components/ui/UserMenu"
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
@@ -60,6 +60,7 @@ function Header() {
 				<Link to="/publishers" className="text-sm font-bold hover:text-primary">Administrace vydavatelu</Link>
 				<Link to="/books_adm" className="text-sm font-bold hover:text-primary">Administrace knih</Link>
 				<Link to="/reservations" className="text-sm font-bold hover:text-primary">Administrace rezervaci</Link>
+				<Link to="/newsletter" className="text-sm font-bold hover:text-primary">Newsletter</Link>
 				</>
 				}
 				{user?.role === "ADMIN" &&
