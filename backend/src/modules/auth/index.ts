@@ -1,11 +1,12 @@
 import { Elysia } from "elysia";
+import { eq } from "drizzle-orm";
 import { cookie } from "@elysiajs/cookie";
-import { LoginRequest, RegistrationRequest, UpdateProfileRequest, type LoginDTO, type RegistrationDTO, type UpdateProfileDTO } from "./model";
+
+import { UserRole } from "../../enums";
 import { authService } from "./service";
 import { sessionStoreManager } from "./session";
-import { UserRole } from "../../enums";
 import { db, user as userTable } from "../../db";
-import { eq } from "drizzle-orm";
+import { LoginRequest, RegistrationRequest, UpdateProfileRequest, type LoginDTO, type RegistrationDTO, type UpdateProfileDTO } from "./model";
 
 export const authModule = new Elysia({ prefix: "/auth" })
     .use(cookie());
