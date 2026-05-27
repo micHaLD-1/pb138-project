@@ -9,22 +9,7 @@ import { sessionStoreManager } from "./session";
 export const authService = {
 
     initializeDefaults: async () => {
-        const [existingAdmin] = await db.select().from(user).where(eq(user.role, UserRole.ADMIN));
-        if (existingAdmin) {
-            console.log("Admin user already exists, skipping creation");
-            return;
-        }
-
-        const passwordHash = await Bun.password.hash("admin123");
-        const [adminUser] = await db.insert(user).values({
-            email: "admin@library.com",
-            passwordHash,
-            firstName: "Admin",
-            lastName: "User",
-            role: UserRole.ADMIN
-        }).returning();
-
-        console.log(`Default admin created: ${adminUser.email} / password: admin123`);
+        return;
     },
 
     register: async (data: RegistrationDTO) => {

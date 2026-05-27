@@ -63,5 +63,4 @@ console.log(
 
 // Initialize default library settings and admin user
 rulesService.initializeDefaults().catch(console.error);
-authService.initializeDefaults().catch(console.error);
 storageService.initializeDefaults().catch(console.error);
