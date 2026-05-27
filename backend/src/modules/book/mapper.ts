@@ -1,12 +1,13 @@
-import type {BookDTO, BooksDTO} from "./model";
-
-import {author, book, genre, bookCopy, publisher} from "../../db";
 import {BookCopyStatus} from "../../enums";
+import type {BookDTO, BooksDTO} from "./model";
+import {author, book, genre, bookCopy, publisher} from "../../db";
+
 type BookEntity = typeof book.$inferSelect;
 type GenreEntity = typeof genre.$inferSelect;
 type AuthorEntity = typeof author.$inferSelect;
 type BookCopyEntity = typeof bookCopy.$inferSelect;
 type PublisherEntity = typeof publisher.$inferSelect;
+
 // type TagEntity = typeof tag.$inferSelect; // TODO: Implement tags feature
 
 interface BookWithRelations extends BookEntity {
