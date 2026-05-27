@@ -22,5 +22,6 @@ export const PublishersResponse = z.object({
 
 export type PublisherCreationDTO = z.infer<typeof PublisherCreationRequest>;
 export type PublisherUpdateDTO = z.infer<typeof PublisherUpdateRequest>;
+
 export type PublisherDTO = z.infer<typeof PublisherResponse>;
 export type PublishersDTO = z.infer<typeof PublishersResponse>;
