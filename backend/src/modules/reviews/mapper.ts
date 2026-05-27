@@ -1,8 +1,8 @@
+import { review, user } from "../../db";
 import type { ReviewDTO, ReviewsDTO } from "./model";
 
-import { review, user } from "../../db";
-type ReviewEntity = typeof review.$inferSelect;
 type UserEntity = typeof user.$inferSelect;
+type ReviewEntity = typeof review.$inferSelect;
 
 interface ReviewWithUser extends ReviewEntity {
   user: UserEntity;
