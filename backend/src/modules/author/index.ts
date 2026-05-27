@@ -1,11 +1,11 @@
 import { Elysia, t } from "elysia";
 import { cookie } from "@elysiajs/cookie";
 
+import { UserRole } from "../../enums";
 import { authorService } from "./service";
-import {AuthorCreationRequest, AuthorUpdateRequest} from "./model";
 import { hasRole } from "../auth/middleware";
 import { sessionStoreManager } from "../auth/session";
-import { UserRole } from "../../enums";
+import {AuthorCreationRequest, AuthorUpdateRequest} from "./model";
 
 export const authorModule = new Elysia({ prefix: "/authors" })
   .use(cookie())

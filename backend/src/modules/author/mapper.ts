@@ -1,6 +1,6 @@
+import { author } from "../../db";
 import type {AuthorDTO, AuthorsDTO} from "./model";
 
-import { author } from "../../db";
 type AuthorEntity = typeof author.$inferSelect;
 
 export const mapToAuthorDTO = (entity: AuthorEntity): AuthorDTO => ({
