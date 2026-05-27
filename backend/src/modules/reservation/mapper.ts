@@ -1,10 +1,10 @@
+import {reservation, user, bookCopy, book} from "../../db";
 import type {ReservationDTO, ReservationsDTO} from "./model";
 
-import {reservation, user, bookCopy, book} from "../../db";
-type ReservationEntity = typeof reservation.$inferSelect;
+type BookEntity = typeof book.$inferSelect;
 type UserEntity = typeof user.$inferSelect;
 type BookCopyEntity = typeof bookCopy.$inferSelect;
-type BookEntity = typeof book.$inferSelect;
+type ReservationEntity = typeof reservation.$inferSelect;
 
 interface ReservationWithRelations extends ReservationEntity {
     user: UserEntity;

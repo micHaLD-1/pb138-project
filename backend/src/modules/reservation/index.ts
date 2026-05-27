@@ -30,7 +30,6 @@ reservationModule.put("/:id", async ({ params: { id }, body, set }) => {
   body: ReservationUpdateRequest,
 });
 
-// Moja teoria - pri reservation uvidi zamestnanec button CANCEL, ked klikne, tak sa oznaci reservation ako CANCELED a zneaktivny sa
 reservationModule.put("/:id/cancel", async ({ params: { id }, set }) => {
   await reservationService.cancel(Number(id));
   set.status = 204;
