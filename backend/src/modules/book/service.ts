@@ -4,7 +4,7 @@ import { NotFoundError, UnprocessableError } from "../../errors";
 import { db, book, bookAuthor, bookGenre, bookCopy, publisher, author, genre } from "../../db";
 // import { bookTag } from "../../db"; // TODO: Tagy
 import { BookCopyStatus } from "../../enums";
-import { storageService } from "../storage";
+import { storageService } from "../../cover-storage";
 
 import {mapToBookDTO, mapToBooksDTOs} from "./mapper";
 import type { BookCreationDTO, BookUpdateDTO, BookDTO, BooksDTO } from "./model";
