@@ -18,8 +18,8 @@ const openingHours = [
     "Po 8:00 - 17:00",
     "Ut 8:00 - 17:00",
     "St 8:00 - 19:00",
-    "Št 8:00 - 17:00",
-    "Pi 8:00 - 17:00",
+    "Čt 8:00 - 17:00",
+    "Pá 8:00 - 17:00",
     "So 9:00 - 15:00",
     "Ne Zavřeno",
 ]
@@ -68,7 +68,7 @@ function Footer() {
             setFooterErrors({})
             setSubmitStatus("idle")
             setIsSubmitting(false)
-        }, 2000)
+        }, 5000)
     }
     return (
         <footer className="w-full border-t border-border bg-background font-sans text-foreground">
