@@ -1,6 +1,6 @@
+import {loan} from "../../db";
 import type {LoanDTO, LoansDTO} from "./model";
 
-import {loan} from "../../db";
 type LoanEntity = typeof loan.$inferSelect;
 
 export const mapToLoanDTO = (entity: LoanEntity): LoanDTO => ({

@@ -29,19 +29,16 @@ loanModule.put("/:id", async ({ params: { id }, body, set }) => {
   body: LoanUpdateRequest,
 });
 
-// Moja teoria - pri loane uvidi zamestnanec button RETURN, ked klikne, tak sa oznaci loan ako RETURNED a dá sa tam aktualny datum
 loanModule.put("/:id/return", async ({ params: { id }, set }) => {
   await loanService.return(Number(id));
   set.status = 204;
 });
 
-// Moja teoria - pri loane uvidi zamestnanec button REVERT, ked klikne, tak sa oznaci loan ako PENDING a zmaže sa datum
 loanModule.put("/:id/revert", async ({ params: { id }, set }) => {
   await loanService.revert(Number(id));
   set.status = 204;
 });
 
-// Moja teoria - pri loane uvidi zamestnanec button CANCEL, ked klikne, tak sa oznaci loan ako CANCELED a zneaktivny sa
 loanModule.put("/:id/cancel", async ({ params: { id }, set }) => {
   await loanService.cancel(Number(id));
   set.status = 204;
