@@ -1,10 +1,10 @@
 import { eq } from "drizzle-orm";
-import { db, user } from "../../db";
 
-import type { RegistrationDTO, LoginDTO } from "./model";
-import { ConflictError, UnprocessableError } from "../../errors";
+import { db, user } from "../../db";
 import { UserRole } from "../../enums";
 import { sessionStoreManager } from "./session";
+import type { RegistrationDTO, LoginDTO } from "./model";
+import { ConflictError, UnprocessableError } from "../../errors";
 
 export const authService = {
 

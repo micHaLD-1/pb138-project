@@ -1,10 +1,9 @@
 import { eq, sql } from "drizzle-orm";
 
-import { NotFoundError, ConflictError } from "../../errors";
 import { db, loan, bookCopy } from "../../db";
-import { LoanStatus, BookCopyStatus } from "../../enums";
-
 import {mapToLoanDTO, mapToLaonDTOs} from "./mapper";
+import { LoanStatus, BookCopyStatus } from "../../enums";
+import { NotFoundError, ConflictError } from "../../errors";
 import type { LoanCreationDTO, LoanUpdateDTO, LoanDTO, LoansDTO } from "./model";
 
 export const loanService = {

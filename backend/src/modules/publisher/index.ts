@@ -1,11 +1,11 @@
 import { Elysia, t } from "elysia";
 import { cookie } from "@elysiajs/cookie";
 
-import { publisherService } from "./service";
-import { PublisherCreationRequest, PublisherUpdateRequest } from "./model";
-import { hasRole } from "../auth/middleware";
-import { sessionStoreManager } from "../auth/session";
 import { UserRole } from "../../enums";
+import { hasRole } from "../auth/middleware";
+import { publisherService } from "./service";
+import { sessionStoreManager } from "../auth/session";
+import { PublisherCreationRequest, PublisherUpdateRequest } from "./model";
 
 export const publisherModule = new Elysia({ prefix: "/publishers" })
   .use(cookie())

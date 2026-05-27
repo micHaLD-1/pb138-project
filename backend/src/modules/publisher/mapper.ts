@@ -1,6 +1,6 @@
+import { publisher } from "../../db";
 import type { PublisherDTO, PublishersDTO } from "./model";
 
-import { publisher } from "../../db";
 type PublisherEntity = typeof publisher.$inferSelect;
 
 export const mapToPublisherDTO = (entity: PublisherEntity): PublisherDTO => ({

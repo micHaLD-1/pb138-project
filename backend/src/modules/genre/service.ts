@@ -1,9 +1,8 @@
 import { eq, sql } from "drizzle-orm";
 
-import { NotFoundError, ConflictError } from "../../errors";
 import { db, genre, bookGenre } from "../../db";
-
 import { mapToGenreDTO, mapToGenresDTO } from "./mapper";
+import { NotFoundError, ConflictError } from "../../errors";
 import type { GenreCreationDTO, GenreDTO, GenresDTO } from "./model";
 
 export const genreService = {

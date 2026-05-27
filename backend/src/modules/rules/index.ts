@@ -1,11 +1,12 @@
 import { Elysia, t } from "elysia";
 import { cookie } from "@elysiajs/cookie";
 
+import { UserRole } from "../../enums";
+import { hasRole } from "../auth/middleware";
+
 import { rulesService } from "./service";
 import { RulesUpdateRequest } from "./model";
-import { hasRole } from "../auth/middleware";
 import { sessionStoreManager } from "../auth/session";
-import { UserRole } from "../../enums";
 
 export const rulesModule = new Elysia({ prefix: "/rules" })
   .use(cookie())

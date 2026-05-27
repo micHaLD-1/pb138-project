@@ -27,5 +27,6 @@ export const ReviewsResponse = z.object({
 
 export type ReviewCreationDTO = z.infer<typeof ReviewCreationRequest>;
 export type ReviewUpdateDTO = z.infer<typeof ReviewUpdateRequest>;
+
 export type ReviewDTO = z.infer<typeof ReviewResponse>;
 export type ReviewsDTO = z.infer<typeof ReviewsResponse>;

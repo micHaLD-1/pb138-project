@@ -1,9 +1,8 @@
 import { eq } from "drizzle-orm";
 
-import { db, librarySetting } from "../../db";
-import { ForbiddenError } from "../../errors";
 import { UserRole } from "../../enums";
-
+import { ForbiddenError } from "../../errors";
+import { db, librarySetting } from "../../db";
 import type { RulesUpdateDTO, RulesDTO } from "./model";
 
 const SETTING_KEYS = {

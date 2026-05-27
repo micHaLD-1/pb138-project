@@ -1,11 +1,11 @@
 import {Elysia, t} from "elysia";
 import { cookie } from "@elysiajs/cookie";
 
-import {genreService} from "./service";
-import { GenreCreationRequest } from "./model";
-import { hasRole } from "../auth/middleware";
-import { sessionStoreManager } from "../auth/session";
 import { UserRole } from "../../enums";
+import {genreService} from "./service";
+import { hasRole } from "../auth/middleware";
+import { GenreCreationRequest } from "./model";
+import { sessionStoreManager } from "../auth/session";
 
 export const genreModule = new Elysia({ prefix: "/genres" })
   .use(cookie())

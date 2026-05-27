@@ -5,7 +5,7 @@ export const LoanCreationRequest = z.object({
   bookCopyId: z.number().int().positive(),
   loanDate: z.string().date(),
   expectedReturnDate: z.string().date(),
-  actualReturnDate: z.string().date(),
+  actualReturnDate: z.string().date().nullable(),
   price: z.number().nonnegative(),
 });
 

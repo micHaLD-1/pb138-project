@@ -1,9 +1,8 @@
 import {eq, sql} from "drizzle-orm";
 
 import {db, author, bookAuthor} from "../../db";
-import { NotFoundError, ConflictError } from "../../errors";
-
 import {mapToAuthorDTO, mapToAuthorsDTOs} from "./mapper";
+import { NotFoundError, ConflictError } from "../../errors";
 import type {AuthorCreationDTO, AuthorUpdateDTO, AuthorDTO, AuthorsDTO} from "./model";
 
 export const authorService = {

@@ -2,10 +2,9 @@ import { Elysia, t } from "elysia";
 import { cookie } from "@elysiajs/cookie";
 
 import { reviewsService } from "./service";
-import { ReviewCreationRequest, ReviewUpdateRequest } from "./model";
 import { isAuthenticated } from "../auth/middleware";
 import { sessionStoreManager } from "../auth/session";
-import { UnauthorizedError } from "../../errors";
+import { ReviewCreationRequest, ReviewUpdateRequest } from "./model";
 
 export const reviewsModule = new Elysia({ prefix: "/reviews" })
   .use(cookie())

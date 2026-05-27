@@ -1,9 +1,8 @@
 import { eq, sql, and } from "drizzle-orm";
 
+import { db, reservation, bookCopy } from "../../db";
 import { NotFoundError, ConflictError } from "../../errors";
-import { db, reservation, bookCopy, book } from "../../db";
 import { ReservationStatus, BookCopyStatus } from "../../enums";
-
 import {mapToReservationDTO, mapToReservationsDTO} from "./mapper";
 import type { ReservationCreationDTO, ReservationUpdateDTO, ReservationDTO, ReservationsDTO } from "./model";
 
