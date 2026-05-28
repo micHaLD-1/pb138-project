@@ -30,15 +30,24 @@ function Header() {
 
 					<div className="col-span-2 row-start-2 w-full md:col-span-1 md:col-start-2 md:row-start-1">
 						<form role="search" className="w-full" onSubmit={handleSearch}>
-							<Input
-								type="search"
-								name="search"
-								placeholder="Vyhledej🔍"
-								aria-label="Vyhledávání"
-								defaultValue={searchParams.get("search") ?? ""}
-								key={searchParams.get("search") ?? ""}
-								className="h-10 border-border bg-muted-foreground/15 px-4 text-center text-foreground placeholder:text-center placeholder:text-muted-foreground/80 focus-visible:ring-2 md:h-11"
-							/>
+							<div className="relative w-full">
+								<Input
+									type="search"
+									name="search"
+									placeholder="Vyhledej"
+									aria-label="Vyhledávání"
+									defaultValue={searchParams.get("search") ?? ""}
+									key={searchParams.get("search") ?? ""}
+									className="h-10 border-border bg-muted-foreground/15 px-4 pr-10 text-center text-foreground placeholder:text-center placeholder:text-muted-foreground/80 focus-visible:ring-2 md:h-11"
+								/>
+								<button
+									type="submit"
+									aria-label="Vyhledat"
+									className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+								>
+									🔍
+								</button>
+							</div>
 						</form>
 					</div>
 
@@ -56,7 +65,7 @@ function Header() {
 				</div>
 			</div>
 
-			<div className="flex justify-around gap-4">
+			<div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4 pb-3 md:justify-around">
 
 				<Link to="/" className="text-sm font-bold hover:text-primary">Domů</Link>
 				{(user?.role === "STAFF" || user?.role === "ADMIN") &&
@@ -74,7 +83,7 @@ function Header() {
 				}
 				<Link to="/o_nas" className="text-sm font-bold hover:text-primary">O nás</Link>
 			
-      </div>
+      		</div>
 		</header>
 		
 	)
