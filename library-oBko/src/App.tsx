@@ -1,6 +1,6 @@
 import './App.css'
-import Header from '@/components/ui/header'
-import Footer from '@/components/ui/footer'
+import Header from '@/components/home/header'
+import Footer from '@/components/home/footer'
 import HomePage from './pages/Homepage'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import BookDetail from '@/pages/BookDetail'
@@ -17,6 +17,7 @@ import ReservationAdministrationPage from './pages/ReservationAdministrationPage
 import UserAdministrationPage from './pages/UserAdministrationPage'
 import MyReservations from './pages/MyReservations'
 import { useAuth } from './context/AuthContext'
+import NewsLetter from './pages/NewsLetter'
 
 function NotFound() {
   return (
@@ -49,6 +50,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/o_nas" element={<AboutUs />} />
+          <Route path="/newsletter" element={<StaffRoute><NewsLetter /></StaffRoute>} />
           <Route path="/authors" element={<StaffRoute><AuthorAdministrationPage /></StaffRoute>} />
           <Route path="/genres" element={<StaffRoute><GenreAdministrationPage /></StaffRoute>} />
           <Route path="/publishers" element={<StaffRoute><PublisherAdministrationPage /></StaffRoute>} />
