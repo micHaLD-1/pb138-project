@@ -23,6 +23,7 @@ const phoneSchema = z
   .string()
   .min(9, "Phone must be at least 9 characters")
   .max(20, "Phone must be at most 20 characters")
+  .regex(/^\d+$/, "Phone must contain only digits")
 
 // Sign In Form Schema
 export const signInSchema = z.object({

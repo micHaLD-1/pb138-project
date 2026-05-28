@@ -77,6 +77,8 @@ function RegisterDialog({
                 id="register-phone"
                 type="tel"
                 autoComplete="tel"
+                inputMode="numeric"
+                pattern="\d*"
                 aria-invalid={!!errors.phone}
                 {...register("phone")}
               />
