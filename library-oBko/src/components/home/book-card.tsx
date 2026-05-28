@@ -27,7 +27,7 @@ export default function BookCard({ book }: BookCardProps) {
       <CardContent className="p-0">
         <div className="aspect-[3/4] overflow-hidden">
         {/* TODO: when we have pictures, put book.id instead of 1*/}
-         <img src={`/api/books/1/cover`} alt={book.title}
+         <img src={`/api/books/${book.id}/cover`} alt={book.title}
             className="block h-full w-full object-cover" />
 
         </div>
