@@ -2,27 +2,26 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Field, FieldLabel, FieldSet } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import type { FormEventHandler } from "react"
+import type { FieldErrors, UseFormRegister } from "react-hook-form"
 
-type SignInErrors = {
-  email?: string
-  password?: string
-}
+import type { SignInFormData } from "@/lib/schemas"
 
 type LoginDialogProps = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  signInErrors: SignInErrors
-  signInError: string | null
+  register: UseFormRegister<SignInFormData>
+  errors: FieldErrors<SignInFormData>
   isSubmitting: boolean
   onBack: () => void
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void
+  onSubmit: FormEventHandler<HTMLFormElement>
 }
 
 function LoginDialog({
   isOpen,
   onOpenChange,
-  signInErrors,
-  signInError,
+  register,
+  errors,
   isSubmitting,
   onBack,
   onSubmit,
@@ -36,14 +35,13 @@ function LoginDialog({
               <FieldLabel htmlFor="signin-email">Email</FieldLabel>
               <Input
                 id="signin-email"
-                name="email"
                 type="email"
                 autoComplete="email"
-                required
-                aria-invalid={!!signInErrors.email}
+                aria-invalid={!!errors.email}
+                {...register("email")}
               />
-              {signInErrors.email && (
-                <p className="text-sm font-medium text-destructive">{signInErrors.email}</p>
+              {errors.email && (
+                <p className="text-sm font-medium text-destructive">{errors.email.message}</p>
               )}
             </Field>
 
@@ -51,21 +49,16 @@ function LoginDialog({
               <FieldLabel htmlFor="signin-password">Heslo</FieldLabel>
               <Input
                 id="signin-password"
-                name="password"
                 type="password"
                 autoComplete="current-password"
-                required
-                aria-invalid={!!signInErrors.password}
+                aria-invalid={!!errors.password}
+                {...register("password")}
               />
-              {signInErrors.password && (
-                <p className="text-sm font-medium text-destructive">{signInErrors.password}</p>
+              {errors.password && (
+                <p className="text-sm font-medium text-destructive">{errors.password.message}</p>
               )}
             </Field>
           </FieldSet>
-
-          {signInError && (
-            <p className="text-sm font-medium text-destructive">{signInError}</p>
-          )}
 
           <div className="flex items-center justify-between gap-3">
             <Button type="button" variant="ghost" onClick={onBack}>
