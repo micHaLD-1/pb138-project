@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -15,80 +17,35 @@ import { signInSchema, registerSchema, type SignInFormData, type RegisterFormDat
 
 type DialogStage = "chooser" | "signin" | "register" | null
 
-type SignInErrors = Partial<Record<keyof SignInFormData, string>>
-type RegisterErrors = Partial<Record<keyof RegisterFormData, string>>
-
 function AuthDialog() {
   const [stage, setStage] = useState<DialogStage>(null)
-  const [signInErrors, setSignInErrors] = useState<SignInErrors>({})
-  const [registerErrors, setRegisterErrors] = useState<RegisterErrors>({})
-  // TODO: Replace with backend API calls for authentication
   const { login, register } = useAuth()
 
-  async function handleSignInSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setSignInErrors({})
-    
-    const formData = new FormData(event.currentTarget)
-    const data = {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-    }
-    
-    const result = signInSchema.safeParse(data)
-    
-    if (!result.success) {
-      const errors: SignInErrors = {}
-      result.error.issues.forEach((error: any) => {
-        const field = error.path[0] as keyof SignInFormData
-        errors[field] = error.message
-      })
-      setSignInErrors(errors)
-      return
-    }
-    
-    try {
+  const signInForm = useForm<SignInFormData>({
+    resolver: zodResolver(signInSchema),
+  })
 
-      await login(data.email, data.password);
-      setStage(null);
-    } catch (err) {
-      setSignInErrors({ email: (err as Error).message });
-    }
-  }
+  const registerForm = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+  })
 
-  async function handleRegisterSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setRegisterErrors({})
-    
-    const formData = new FormData(event.currentTarget)
-    const data = {
-      firstName: formData.get("firstName") as string,
-      lastName: formData.get("lastName") as string,
-      email: formData.get("email") as string,
-      phone: formData.get("phone") as string,
-      password: formData.get("password") as string,
-      confirmPassword: formData.get("confirmPassword") as string,
-    }
-    
-    const result = registerSchema.safeParse(data)
-    
-    if (!result.success) {
-      const errors: RegisterErrors = {}
-      result.error.issues.forEach((error: any) => {
-        const field = error.path[0] as keyof RegisterFormData
-        errors[field] = error.message
-      })
-      setRegisterErrors(errors)
-      return
-    }
-    
+  const onSignIn = signInForm.handleSubmit(async (data) => {
     try {
-      await register(data);
-      setStage('signin'); // redirect to sign in after register
+      await login(data.email, data.password)
+      setStage(null)
     } catch (err) {
-      setRegisterErrors({ email: (err as Error).message });
+      signInForm.setError("email", { message: (err as Error).message })
     }
-  }
+  })
+
+  const onRegister = registerForm.handleSubmit(async (data) => {
+    try {
+      await register(data)
+      setStage("signin")
+    } catch (err) {
+      registerForm.setError("root", { message: (err as Error).message })
+    }
+  })
 
   return (
     <div className="w-full">
@@ -118,23 +75,22 @@ function AuthDialog() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={stage === "signin"} onOpenChange={(open) => !open && setStage(null)}>
+      <Dialog open={stage === "signin"} onOpenChange={(open) => { if (!open) { setStage(null); signInForm.reset() } }}>
         <DialogContent className="sm:max-w-md">
 
-          <form className="grid gap-4" onSubmit={handleSignInSubmit}>
+          <form className="grid gap-4" onSubmit={onSignIn}>
             <FieldSet className="gap-4">
               <Field className="gap-2">
                 <FieldLabel htmlFor="signin-email">Email</FieldLabel>
-                <Input 
-                  id="signin-email" 
-                  name="email" 
-                  type="email" 
-                  autoComplete="email" 
-                  required
-                  aria-invalid={!!signInErrors.email}
+                <Input
+                  id="signin-email"
+                  type="email"
+                  autoComplete="email"
+                  aria-invalid={!!signInForm.formState.errors.email}
+                  {...signInForm.register("email")}
                 />
-                {signInErrors.email && (
-                  <p className="text-sm font-medium text-destructive">{signInErrors.email}</p>
+                {signInForm.formState.errors.email && (
+                  <p className="text-sm font-medium text-destructive">{signInForm.formState.errors.email.message}</p>
                 )}
               </Field>
 
@@ -142,25 +98,23 @@ function AuthDialog() {
                 <FieldLabel htmlFor="signin-password">Heslo</FieldLabel>
                 <Input
                   id="signin-password"
-                  name="password"
                   type="password"
                   autoComplete="current-password"
-                  required
-                  aria-invalid={!!signInErrors.password}
+                  aria-invalid={!!signInForm.formState.errors.password}
+                  {...signInForm.register("password")}
                 />
-                {signInErrors.password && (
-                  <p className="text-sm font-medium text-destructive">{signInErrors.password}</p>
+                {signInForm.formState.errors.password && (
+                  <p className="text-sm font-medium text-destructive">{signInForm.formState.errors.password.message}</p>
                 )}
               </Field>
             </FieldSet>
 
             <div className="flex items-center justify-between gap-3">
-              <Button type="button" variant="ghost" onClick={() => setStage("chooser")}>
+              <Button type="button" variant="ghost" onClick={() => { setStage("chooser"); signInForm.reset() }}>
                 Späť
               </Button>
 
-              { /* Send data to BE */}
-              <Button 
+              <Button
                 type="submit"
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
@@ -171,81 +125,76 @@ function AuthDialog() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={stage === "register"} onOpenChange={(open) => !open && setStage(null)}>
+      <Dialog open={stage === "register"} onOpenChange={(open) => { if (!open) { setStage(null); registerForm.reset() } }}>
         <DialogContent className="sm:max-w-lg">
 
-          <form className="grid gap-4" onSubmit={handleRegisterSubmit}>
+          <form className="grid gap-4" onSubmit={onRegister}>
             <FieldSet className="gap-4">
               <Field className="gap-2">
                 <FieldLabel htmlFor="register-first-name">Jméno</FieldLabel>
-                <Input 
-                  id="register-first-name" 
-                  name="firstName" 
-                  autoComplete="given-name" 
-                  required
-                  aria-invalid={!!registerErrors.firstName}
+                <Input
+                  id="register-first-name"
+                  autoComplete="given-name"
+                  aria-invalid={!!registerForm.formState.errors.firstName}
+                  {...registerForm.register("firstName")}
                 />
-                {registerErrors.firstName && (
-                  <p className="text-sm font-medium text-destructive">{registerErrors.firstName}</p>
+                {registerForm.formState.errors.firstName && (
+                  <p className="text-sm font-medium text-destructive">{registerForm.formState.errors.firstName.message}</p>
                 )}
               </Field>
 
               <Field className="gap-2">
                 <FieldLabel htmlFor="register-last-name">Příjmení</FieldLabel>
-                <Input 
-                  id="register-last-name" 
-                  name="lastName" 
-                  autoComplete="family-name" 
-                  required
-                  aria-invalid={!!registerErrors.lastName}
+                <Input
+                  id="register-last-name"
+                  autoComplete="family-name"
+                  aria-invalid={!!registerForm.formState.errors.lastName}
+                  {...registerForm.register("lastName")}
                 />
-                {registerErrors.lastName && (
-                  <p className="text-sm font-medium text-destructive">{registerErrors.lastName}</p>
+                {registerForm.formState.errors.lastName && (
+                  <p className="text-sm font-medium text-destructive">{registerForm.formState.errors.lastName.message}</p>
                 )}
               </Field>
 
               <Field className="gap-2">
                 <FieldLabel htmlFor="register-email">Email</FieldLabel>
-                <Input 
-                  id="register-email" 
-                  name="email" 
-                  type="email" 
-                  autoComplete="email" 
-                  required
-                  aria-invalid={!!registerErrors.email}
+                <Input
+                  id="register-email"
+                  type="email"
+                  autoComplete="email"
+                  aria-invalid={!!registerForm.formState.errors.email}
+                  {...registerForm.register("email")}
                 />
-                {registerErrors.email && (
-                  <p className="text-sm font-medium text-destructive">{registerErrors.email}</p>
+                {registerForm.formState.errors.email && (
+                  <p className="text-sm font-medium text-destructive">{registerForm.formState.errors.email.message}</p>
                 )}
               </Field>
 
               <Field className="gap-2">
                 <FieldLabel htmlFor="register-phone">Tel</FieldLabel>
-                <Input 
-                  id="register-phone" 
-                  name="phone" 
-                  type="tel" 
-                  autoComplete="tel" 
-                  required
-                  aria-invalid={!!registerErrors.phone}
+                <Input
+                  id="register-phone"
+                  type="tel"
+                  autoComplete="tel"
+                  aria-invalid={!!registerForm.formState.errors.phone}
+                  {...registerForm.register("phone")}
                 />
-                {registerErrors.email && (
-                  <p className="text-sm font-medium text-destructive">{registerErrors.email}</p>
+                {registerForm.formState.errors.phone && (
+                  <p className="text-sm font-medium text-destructive">{registerForm.formState.errors.phone.message}</p>
                 )}
               </Field>
 
               <Field className="gap-2">
                 <FieldLabel htmlFor="register-password">Heslo</FieldLabel>
-                <Input 
-                  id="register-password" 
-                  name="password" 
-                  type="password" 
-                  autoComplete="new-password" 
-                  required
-                  aria-invalid={!!registerErrors.password}
+                <Input
+                  id="register-password"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={!!registerForm.formState.errors.password}
+                  {...registerForm.register("password")}
                 />
-                {registerErrors.password && (
-                  <p className="text-sm font-medium text-destructive">{registerErrors.password}</p>
+                {registerForm.formState.errors.password && (
+                  <p className="text-sm font-medium text-destructive">{registerForm.formState.errors.password.message}</p>
                 )}
               </Field>
 
@@ -253,25 +202,26 @@ function AuthDialog() {
                 <FieldLabel htmlFor="register-confirm-password">Potvrď heslo</FieldLabel>
                 <Input
                   id="register-confirm-password"
-                  name="confirmPassword"
                   type="password"
                   autoComplete="new-password"
-                  aria-invalid={!!registerErrors.confirmPassword}
-                  required
+                  aria-invalid={!!registerForm.formState.errors.confirmPassword}
+                  {...registerForm.register("confirmPassword")}
                 />
-                {registerErrors.confirmPassword && (
-                  <p className="text-sm font-medium text-destructive">{registerErrors.confirmPassword}</p>
+                {registerForm.formState.errors.confirmPassword && (
+                  <p className="text-sm font-medium text-destructive">{registerForm.formState.errors.confirmPassword.message}</p>
                 )}
               </Field>
             </FieldSet>
+            {registerForm.formState.errors.root && (
+              <p className="text-sm font-medium text-destructive">{registerForm.formState.errors.root.message}</p>
+            )}
 
             <div className="flex items-center justify-between gap-3">
-              <Button type="button" variant="ghost" onClick={() => setStage("chooser")}>
+              <Button type="button" variant="ghost" onClick={() => { setStage("chooser"); registerForm.reset() }}>
                 Zpět
               </Button>
-              
-              { /* Send data to BE */}
-              <Button 
+
+              <Button
                 type="submit"
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
