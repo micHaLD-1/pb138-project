@@ -1,7 +1,7 @@
 import logo from "@/assets/Logo.png"
 import AuthDialog from "@/components/auth/AuthDialog"
-import UserMenu from "@/components/ui/UserMenu"
-import StaffMenu from "@/components/ui/StaffMenu"
+import UserMenu from "@/components/menus/UserMenu"
+import StaffMenu from "@/components/menus/StaffMenu"
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { Input } from "@/components/ui/input"

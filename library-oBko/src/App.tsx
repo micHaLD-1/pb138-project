@@ -1,6 +1,6 @@
 import './App.css'
-import Header from '@/components/ui/header'
-import Footer from '@/components/ui/footer'
+import Header from '@/components/home/header'
+import Footer from '@/components/home/footer'
 import HomePage from './pages/Homepage'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import BookDetail from '@/pages/BookDetail'
