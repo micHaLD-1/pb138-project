@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import ReviewInput, { type ReviewInputData } from '@/components/reviews/ReviewInput'
 
 const STAR_COUNT = 5
 
@@ -39,6 +40,7 @@ export default function BookDetail() {
     const [imageFailed, setImageFailed] = useState(false)
     const [selectedRating, setSelectedRating] = useState<number | null>(null)
     const [activePop, setActivePop] = useState<string | null>(null)
+    const [submittedReviews, setSubmittedReviews] = useState<ReviewInputData[]>([])
 
     // TODO: Replace WishlistContext with backend API calls
     const { addToWishlist } = useWishlist()
@@ -207,19 +209,6 @@ export default function BookDetail() {
                             </div>
 
                             <div className="flex flex-wrap items-center gap-3">
-                                {/* TODO: Replace with backend API for wishlist management */}
-                                <button
-                                    type="button"
-                                    aria-label="Add to wishlist"
-                                    className={`rounded-md border border-border p-2 transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activePop === 'wishlist' ? 'animate-[bounce_220ms_ease-out_1]' : ''}`}
-                                    onClick={() => {
-                                        addToWishlist(book as any)
-                                        triggerPop('wishlist')
-                                    }}
-                                >
-                                    <img src={wishlistIcon} alt="" className="h-5 w-5" aria-hidden="true" />
-                                </button>
-
                                 {/* Reservation dialog */}
                                 <Dialog open={reservationOpen} onOpenChange={handleDialogOpenChange}>
                                     <DialogTrigger
@@ -290,12 +279,24 @@ export default function BookDetail() {
                                         )}
                                     </DialogContent>
                                 </Dialog>
+
+                                <button
+                                    type="button"
+                                    aria-label="Add to wishlist"
+                                    className={`rounded-md border border-border p-2 transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activePop === 'wishlist' ? 'animate-[bounce_220ms_ease-out_1]' : ''}`}
+                                    onClick={() => {
+                                        addToWishlist(book as any)
+                                        triggerPop('wishlist')
+                                    }}
+                                >
+                                    <img src={wishlistIcon} alt="" className="h-5 w-5" aria-hidden="true" />
+                                </button>
                             </div>
                         </div>
                     </section>
 
                     <section className="rounded-xl border bg-card p-5 shadow-sm">
-                        <h1 className="mb-5 text-3xl font-extrabold leading-tight">{book.title}</h1>
+                        <h2 className="mb-5 text-3xl font-extrabold leading-tight">{book.title}</h2>
 
                         <div className="flex items-baseline gap-2">
                             <p className="text-md uppercase tracking-wide text-muted-foreground">Žánr:</p>
@@ -338,6 +339,37 @@ export default function BookDetail() {
                     <p className="whitespace-pre-line leading-relaxed text-muted-foreground">
                         {book.description}
                     </p>
+                </div>
+            </section>
+
+            <section className="rounded-xl border bg-card p-5 shadow-sm">
+                <h2 className="text-xl font-extrabold">Recenze</h2>
+                <div className="mt-3 max-h-80 overflow-auto pr-1">
+                    <ReviewInput
+                        bookId={book.id}
+                        onSubmit={(review) => {
+                            setSubmittedReviews((current) => [review, ...current].slice(0, 3))
+                        }}
+                    />
+
+                    {submittedReviews.length > 0 && (
+                        <div className="mt-4 grid gap-3">
+                            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                                Nedávno odeslané recenze
+                            </h3>
+                            {submittedReviews.map((review, index) => (
+                                <article key={`${review.email}-${index}`} className="rounded-lg border bg-background p-3 shadow-sm">
+                                    <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                                        <p className="font-medium">{review.email}</p>
+                                        <p className="text-muted-foreground">{review.rating} / {STAR_COUNT}</p>
+                                    </div>
+                                    <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
+                                        {review.text}
+                                    </p>
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
         </section>

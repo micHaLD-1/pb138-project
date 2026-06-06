@@ -10,6 +10,7 @@ import {
 
 interface StaffMenuProps {
     user: {
+        role: "ADMIN" | "STAFF" | "GUEST" | "MEMBER"
         firstName: string
         lastName: string
         email: string
@@ -38,6 +39,31 @@ function StaffMenu({ user }: StaffMenuProps) {
                 <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
                     Profil
                 </DropdownMenuItem>
+
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/authors')}>
+                    Administrace autoru
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/genres')}>
+                    Administrace zanru
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/publishers')}>
+                    Administrace vydavatelu
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/books_adm')}>
+                    Administrace knih
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/reservations')}>
+                    Administrace rezervaci
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/newsletter')}>
+                    Newsletter
+                </DropdownMenuItem>
+
+                {user.role === 'ADMIN' && (
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/users')}>
+                        Správa uživatelů
+                    </DropdownMenuItem>
+                )}
                 
                 <DropdownMenuItem
                     className="cursor-pointer"
