@@ -2,8 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Star } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Field, FieldContent, FieldLabel, FieldSet } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { Field, FieldContent, FieldSet } from '@/components/ui/field'
 import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/context/AuthContext'
 
@@ -33,9 +32,11 @@ export default function ReviewInput({ bookId, onSubmit, className }: ReviewInput
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
-    if (isLoading || !user) {
+    if (isLoading || !user || (user.role !== "MEMBER" && user.role !== "GUEST")) {
         return null
     }
+
+    const currentUser = user
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -65,7 +66,7 @@ export default function ReviewInput({ bookId, onSubmit, className }: ReviewInput
 
         const payload: ReviewInputData = {
             bookId,
-            email: user.email,
+            email: currentUser.email,
             rating,
             text: trimmedText,
         }
