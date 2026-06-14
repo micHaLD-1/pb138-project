@@ -101,6 +101,7 @@ export const notification = pgTable("notification", {
 export const review = pgTable("review", {
   id: serial("id_review").primaryKey(),
   content: varchar("content", { length: 1000 }).notNull(),
+  rating: integer("rating").notNull(),
   createdAt: timestamp("created_at").notNull(),
   userId: integer("id_user").notNull().references(() => user.id, { onDelete: "cascade" }),
   bookId: integer("id_book").notNull().references(() => book.id, { onDelete: "cascade" })

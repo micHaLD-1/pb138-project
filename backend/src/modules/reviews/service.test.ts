@@ -29,6 +29,7 @@ const fakeReviewWithUser = {
     bookId: 10,
     userId: 5,
     content: "Great book!",
+    rating: 5,
     createdAt: new Date("2024-01-01"),
     user: { id: 5, firstName: "John", lastName: "Doe" }
 };
@@ -80,7 +81,7 @@ describe("Reviews Service", () => {
 
     describe("create()", () => {
 
-        const createData = { bookId: 10, content: "Test" };
+        const createData = { bookId: 10, content: "Test", rating: 4 };
 
         test("should throw ConflictError if user already reviewed the book", async () => {
             (db.query.review.findFirst as any).mockResolvedValue({ id: 1 });
@@ -111,7 +112,7 @@ describe("Reviews Service", () => {
 
     describe("update()", () => {
 
-        const updateData = { content: "Updated" };
+        const updateData = { content: "Updated", rating: 3 };
 
         test("should throw NotFoundError if review does not exist", async () => {
             setupSelectMock([]);

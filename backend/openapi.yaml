@@ -457,7 +457,7 @@ components:
           type: integer
     ReviewCreationRequest:
       type: object
-      required: [bookId, content]
+      required: [bookId, content, rating]
       properties:
         bookId:
           type: integer
@@ -465,14 +465,22 @@ components:
           type: string
           minLength: 1
           maxLength: 1000
+        rating:
+          type: integer
+          minimum: 0
+          maximum: 5
     ReviewUpdateRequest:
       type: object
-      required: [content]
+      required: [content, rating]
       properties:
         content:
           type: string
           minLength: 1
           maxLength: 1000
+        rating:
+          type: integer
+          minimum: 0
+          maximum: 5
     ReviewResponse:
       type: object
       properties:
@@ -480,6 +488,8 @@ components:
           type: integer
         content:
           type: string
+        rating:
+          type: integer
         createdAt:
           type: string
         userId:
@@ -1232,6 +1242,36 @@ paths:
       responses:
         '204':
           description: Canceled
+  /reviews/me:
+    get:
+      summary: Get current user's review for a book
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: query
+          name: bookId
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: User's review (or null if none)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  review:
+                    anyOf:
+                      - $ref: '#/components/schemas/ReviewResponse'
+                      - type: 'null'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /reviews/book/{bookId}:
     get:
       summary: List reviews for book

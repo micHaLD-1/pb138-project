@@ -29,6 +29,15 @@ export const reviewsModule = new Elysia({ prefix: "/reviews" })
     };
   });
 
+reviewsModule.get("/me", async (ctx: any) => {
+  isAuthenticated(ctx.user);
+  const bookId = Number(ctx.query.bookId);
+  const review = await reviewsService.findByUserAndBook(ctx.user.userId, bookId);
+  return { review };
+}, {
+  query: t.Object({ bookId: t.Numeric({ minimum: 1 }) })
+});
+
 // idk ci dava viac zmysel toto alebo /books/:id/reviews cize su obe
 reviewsModule.get("/book/:bookId", async ({ params: { bookId }, query: {page, size} }) => {
   return await reviewsService.findByBookId(Number(bookId), page, size);
