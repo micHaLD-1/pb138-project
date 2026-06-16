@@ -534,6 +534,99 @@ components:
           type: integer
         updatedAt:
           type: string
+    NewsletterCreationRequest:
+      type: object
+      required: [subject, text]
+      properties:
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 255
+        text:
+          type: string
+          minLength: 1
+        recipientUserIds:
+          type: array
+          items:
+            type: integer
+    NewsletterResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        employeeId:
+          type: integer
+        employeeName:
+          type: string
+        createdAt:
+          type: string
+        subject:
+          type: string
+        text:
+          type: string
+        recipientCount:
+          type: integer
+    NewslettersResponse:
+      type: object
+      properties:
+        newsletters:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewsletterResponse'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    FeedbackCreationRequest:
+      type: object
+      required: [userEmail, text]
+      properties:
+        userEmail:
+          type: string
+          format: email
+        text:
+          type: string
+          minLength: 1
+    FeedbackResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        userEmail:
+          type: string
+        createdAt:
+          type: string
+        text:
+          type: string
+    FeedbacksResponse:
+      type: object
+      properties:
+        feedbacks:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedbackResponse'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    SyncContactsResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        syncedCount:
+          type: integer
+    SendCampaignResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        campaignId:
+          type: integer
 paths:
   /auth/register:
     post:
@@ -1381,3 +1474,184 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RulesResponse'
+  /newsletter:
+    post:
+      summary: Create newsletter
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewsletterCreationRequest'
+      responses:
+        '201':
+          description: Newsletter created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  newsletter:
+                    $ref: '#/components/schemas/NewsletterResponse'
+        '403':
+          description: Forbidden (admin only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List newsletters
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Newsletters list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewslettersResponse'
+        '403':
+          description: Forbidden (admin only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /newsletter/sync-contacts:
+    post:
+      summary: Sync all users to Brevo contact list
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Contacts synced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncContactsResponse'
+        '403':
+          description: Forbidden (admin only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /newsletter/{id}:
+    get:
+      summary: Get newsletter details
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Newsletter details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  newsletter:
+                    $ref: '#/components/schemas/NewsletterResponse'
+        '403':
+          description: Forbidden (admin only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /newsletter/{id}/send:
+    post:
+      summary: Send newsletter campaign via Brevo
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campaign sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendCampaignResponse'
+        '403':
+          description: Forbidden (admin only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /feedback:
+    post:
+      summary: Submit feedback (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackCreationRequest'
+      responses:
+        '201':
+          description: Feedback submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  feedback:
+                    $ref: '#/components/schemas/FeedbackResponse'
+        '404':
+          description: Daily limit reached
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List feedbacks
+      security:
+        - sessionCookie: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+      responses:
+        '200':
+          description: Feedbacks list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbacksResponse'
+        '403':
+          description: Forbidden (admin only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

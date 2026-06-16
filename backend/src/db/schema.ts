@@ -179,3 +179,33 @@ export const reviewRelations = relations(review, ({ one }) => ({
   user: one(user, { fields: [review.userId], references: [user.id] }),
   book: one(book, { fields: [review.bookId], references: [book.id] }),
 }));
+
+export const newsletter = pgTable("newsletter", {
+  id: serial("id_newsletter").primaryKey(),
+  employeeId: integer("id_employee").notNull().references(() => user.id, { onDelete: "restrict" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  subject: varchar("subject", { length: 255 }).notNull(),
+  text: text("text").notNull()
+});
+
+export const newsletterRecipient = pgTable("newsletter_recipient", {
+  newsletterId: integer("id_newsletter").notNull().references(() => newsletter.id, { onDelete: "cascade" }),
+  userId: integer("id_user").notNull().references(() => user.id, { onDelete: "cascade" })
+});
+
+export const feedback = pgTable("feedback", {
+  id: serial("id_feedback").primaryKey(),
+  userEmail: varchar("user_email", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  text: text("text").notNull()
+});
+
+export const newsletterRelations = relations(newsletter, ({ one, many }) => ({
+  employee: one(user, { fields: [newsletter.employeeId], references: [user.id] }),
+  recipients: many(newsletterRecipient),
+}));
+
+export const newsletterRecipientRelations = relations(newsletterRecipient, ({ one }) => ({
+  newsletter: one(newsletter, { fields: [newsletterRecipient.newsletterId], references: [newsletter.id] }),
+  user: one(user, { fields: [newsletterRecipient.userId], references: [user.id] }),
+}));
