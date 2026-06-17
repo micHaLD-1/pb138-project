@@ -1,6 +1,6 @@
 import userIcon from '@/assets/user.svg'
 import { useAuth } from '@/context/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -35,20 +35,20 @@ function UserMenu({ user }: UserMenuProps) {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="min-w-44">
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/profile' })}>
                     Profil
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/wishlist')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/wishlist' })}>
                     Seznam přání
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/my-reservations')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/my-reservations' })}>
                     Rezervace
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => {
-                        logout()
-                        navigate('/')
+                        void logout()
+                        void navigate({ to: '/' })
                     }}
                 >
                     Odhlásit se

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '@tanstack/react-router'
 import { Plus, X } from 'lucide-react'
 // TODO: Replace WishlistContext with backend API calls
 import { useWishlist } from '@/context/WishlistContext'
@@ -35,7 +35,7 @@ export default function Wishlist() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-bold">
-                  <Link to={`/books/${book.id}`} className="hover:underline">{book.name}</Link>
+                  <Link to="/books/$id" params={{ id: String(book.id) }} className="hover:underline">{book.name}</Link>
                   <span className="ml-2 text-sm font-medium text-muted-foreground">- {book.author}</span>
                 </h2>
                 <p className="mt-2 text-sm text-muted-foreground">{truncate(book.description, 100)}</p>

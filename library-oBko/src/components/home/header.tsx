@@ -2,7 +2,7 @@ import logo from "@/assets/Logo.png"
 import AuthDialog from "@/components/auth/AuthDialog"
 import UserMenu from "@/components/menus/UserMenu"
 import StaffMenu from "@/components/menus/StaffMenu"
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useAuth } from '@/context/AuthContext'
 import { Input } from "@/components/ui/input"
 import { ToggleMode } from "@/components/ui/ToggleMode"
@@ -10,12 +10,12 @@ import { ToggleMode } from "@/components/ui/ToggleMode"
 function Header() {
 	const { isLoggedIn, user } = useAuth()
 	const navigate = useNavigate()
-	const [searchParams] = useSearchParams()
+	const currentSearch = useRouterState({ select: s => new URLSearchParams(s.location.searchStr).get('search') ?? '' })
 
 	function handleSearch(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault()
 		const value = (new FormData(e.currentTarget).get("search") as string).trim()
-		navigate(value ? `/?search=${encodeURIComponent(value)}` : "/")
+		void navigate({ to: '/', search: value ? { search: value } : {} })
 	}
 
 	return (
@@ -36,8 +36,8 @@ function Header() {
 									name="search"
 									placeholder="Vyhledej"
 									aria-label="Vyhledávání"
-									defaultValue={searchParams.get("search") ?? ""}
-									key={searchParams.get("search") ?? ""}
+									defaultValue={currentSearch}
+									key={currentSearch}
 									className="h-10 border-border bg-muted-foreground/15 px-4 pr-10 text-center text-foreground placeholder:text-center placeholder:text-muted-foreground/80 focus-visible:ring-2 md:h-11"
 								/>
 								<button

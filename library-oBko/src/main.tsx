@@ -1,19 +1,36 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { AuthProvider } from './context/AuthContext';
+import { createRouter, RouterProvider } from '@tanstack/react-router'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import WishlistProvider from '@/context/WishlistContext'
-import { BrowserRouter } from 'react-router-dom'
+import { routeTree } from './routeTree.gen'
 import './index.css'
-import App from './App.tsx'
+
+const router = createRouter({
+  routeTree,
+  context: {
+    auth: undefined!,
+  },
+})
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
+
+function InnerApp() {
+  const auth = useAuth()
+  if (auth.isLoading) return null
+  return <RouterProvider router={router} context={{ auth }} />
+}
 
 createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
-     <BrowserRouter>
-      <AuthProvider>
-        <WishlistProvider>
-          <App />
-        </WishlistProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <WishlistProvider>
+        <InnerApp />
+      </WishlistProvider>
+    </AuthProvider>
   </StrictMode>,
 )
