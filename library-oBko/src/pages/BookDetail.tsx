@@ -3,11 +3,12 @@ import { useParams } from 'react-router-dom'
 import { Star } from 'lucide-react'
 import fallbackImage from '@/assets/hero.png'
 import wishlistIcon from '@/assets/Subtract.png'
-// TODO: Replace WishlistContext with backend API calls
 import { useWishlist } from '@/context/WishlistContext'
 import { Button } from '@/components/ui/button'
-import ReviewInput, { type ReviewInputData } from '@/components/reviews/ReviewInput'
+import ReviewInput from '@/components/reviews/ReviewInput'
+import ReviewDisplay from '@/components/reviews/ReviewDisplay'
 import ReservationDialog from '@/components/book/ReservationDialog'
+import { mockReviews } from '@/lib/mock-reviews'
 
 const STAR_COUNT = 5
 const PAGE_SIZE = 10
@@ -36,12 +37,8 @@ export default function BookDetail() {
     const [loadState, setLoadState] = useState<LoadState>('loading')
     const [book, setBook] = useState<BookDetail | null>(null)
     const [imageFailed, setImageFailed] = useState(false)
-    const [selectedRating, setSelectedRating] = useState<number | null>(null)
     const [page, setPage] = useState(1)
     const [total] = useState(0)
-
-    const [activePop, setActivePop] = useState<string | null>(null)
-    const [submittedReviews, setSubmittedReviews] = useState<ReviewInputData[]>([])
 
     const { addToWishlist } = useWishlist()
 
@@ -75,13 +72,6 @@ export default function BookDetail() {
             .catch(() => setLoadState('not-found'))
     }, [id])
 
-    const triggerPop = (controlId: string) => {
-        setActivePop(controlId)
-        window.setTimeout(() => {
-            setActivePop((current) => (current === controlId ? null : current))
-        }, 220)
-    }
-
     if (loadState === 'loading') {
         return (
             <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -105,8 +95,8 @@ export default function BookDetail() {
         )
     }
 
-    const uiRating = selectedRating ?? 0
     const coverUrl = `/api/books/${book.id}/cover`
+    const projectedRating = mockReviews.reduce((sum, review) => sum + review.rating, 0) / mockReviews.length
 
     const totalPages = Math.ceil(total / PAGE_SIZE)
 
@@ -129,32 +119,21 @@ export default function BookDetail() {
                         <div className="mt-4 flex flex-col gap-4">
                             <div className="flex flex-wrap items-center gap-4">
                                 <div
-                                    role="group"
-                                    aria-label="Book rating"
+                                    role="img"
+                                    aria-label={`Book rating ${projectedRating.toFixed(1)} out of ${STAR_COUNT}`}
                                     className="flex items-center gap-1"
                                 >
                                     {Array.from({ length: STAR_COUNT }, (_, index) => {
                                         const starValue = index + 1
-                                        const isFilled = starValue <= Math.round(uiRating)
-                                        const popClass = activePop === `star-${starValue}`
-                                            ? 'animate-[bounce_220ms_ease-out_1]'
-                                            : ''
+                                        const isFilled = starValue <= Math.round(projectedRating)
 
                                         return (
-                                            <button
-                                                key={starValue}
-                                                type="button"
-                                                aria-label={`Set rating to ${starValue} star${starValue > 1 ? 's' : ''}`}
-                                                className={`rounded-md p-1 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${popClass}`}
-                                                onClick={() => {
-                                                    setSelectedRating(starValue)
-                                                    triggerPop(`star-${starValue}`)
-                                                }}
-                                            >
+                                            <span key={starValue} className="rounded-md p-1">
                                                 <Star
                                                     className={`h-6 w-6 ${isFilled ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
+                                                    aria-hidden="true"
                                                 />
-                                            </button>
+                                            </span>
                                         )
                                     })}
                                 </div>
@@ -170,10 +149,9 @@ export default function BookDetail() {
                                 <button
                                     type="button"
                                     aria-label="Add to wishlist"
-                                    className={`rounded-md border border-border p-2 transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activePop === 'wishlist' ? 'animate-[bounce_220ms_ease-out_1]' : ''}`}
+                                    className={`rounded-md border border-border p-2 transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring `}
                                     onClick={() => {
                                         addToWishlist(book as any)
-                                        triggerPop('wishlist')
                                     }}
                                 >
                                     <img src={wishlistIcon} alt="" className="h-5 w-5" aria-hidden="true" />
@@ -231,32 +209,9 @@ export default function BookDetail() {
 
             <section className="rounded-xl border bg-card p-5 shadow-sm">
                 <h2 className="text-xl font-extrabold">Recenze</h2>
+                <ReviewInput bookId={book.id} />
                 <div className="mt-3 max-h-80 overflow-auto pr-1">
-                    <ReviewInput
-                        bookId={book.id}
-                        onSubmit={(review) => {
-                            setSubmittedReviews((current) => [review, ...current].slice(0, 3))
-                        }}
-                    />
-
-                    {submittedReviews.length > 0 && (
-                        <div className="mt-4 grid gap-3">
-                            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                                Nedávno odeslané recenze
-                            </h3>
-                            {submittedReviews.map((review, index) => (
-                                <article key={`${review.email}-${index}`} className="rounded-lg border bg-background p-3 shadow-sm">
-                                    <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-                                        <p className="font-medium">{review.email}</p>
-                                        <p className="text-muted-foreground">{review.rating} / {STAR_COUNT}</p>
-                                    </div>
-                                    <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
-                                        {review.text}
-                                    </p>
-                                </article>
-                            ))}
-                        </div>
-                    )}
+                    <ReviewDisplay reviews={mockReviews} />
 
                     {/* Pagination */}
                     {totalPages > 1 && (
