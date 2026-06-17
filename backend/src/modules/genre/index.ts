@@ -40,16 +40,16 @@ genreModule.get("/:id", async ({ params: { id } }) => {
   return { genre: await genreService.findById(Number(id)) };
 });
 
-genreModule.post("/", async (ctx: any) => {
-  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
-  ctx.set.status = 201;
-  return { genre: await genreService.create(ctx.body) };
+genreModule.post("/", async ({ body, set, user }) => {
+  hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
+  set.status = 201;
+  return { genre: await genreService.create(body) };
 }, {
   body: GenreCreationRequest,
 });
 
-genreModule.delete("/:id", async (ctx: any) => {
-  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
-  await genreService.remove(Number(ctx.params.id));
-  ctx.set.status = 204;
+genreModule.delete("/:id", async ({ params: { id }, set, user }) => {
+  hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
+  await genreService.remove(Number(id));
+  set.status = 204;
 });

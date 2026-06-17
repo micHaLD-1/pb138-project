@@ -40,24 +40,24 @@ publisherModule.get("/:id", async ({ params: { id } }) => {
     return { publisher: await publisherService.findById(Number(id)) };
 });
 
-publisherModule.post("/", async (ctx: any) => {
-    hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
-    ctx.set.status = 201;
-    return { publisher: await publisherService.create(ctx.body) };
+publisherModule.post("/", async ({ body, set, user }) => {
+    hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
+    set.status = 201;
+    return { publisher: await publisherService.create(body) };
 }, {
     body: PublisherCreationRequest
 });
 
-publisherModule.put("/:id", async (ctx: any) => {
-    hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
-    await publisherService.update(Number(ctx.params.id), ctx.body);
-    ctx.set.status = 204;
+publisherModule.put("/:id", async ({ params: { id }, body, set, user }) => {
+    hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
+    await publisherService.update(Number(id), body);
+    set.status = 204;
 }, {
     body: PublisherUpdateRequest
 });
 
-publisherModule.delete("/:id", async (ctx: any) => {
-    hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
-    await publisherService.remove(Number(ctx.params.id));
-    ctx.set.status = 204;
+publisherModule.delete("/:id", async ({ params: { id }, set, user }) => {
+    hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
+    await publisherService.remove(Number(id));
+    set.status = 204;
 });

@@ -2,7 +2,7 @@ import { Elysia, t } from "elysia";
 import { cookie } from "@elysiajs/cookie";
 import { eq, sql } from "drizzle-orm";
 
-import { db, user } from "../../db";
+import { db, user as userTable } from "../../db";
 import { UserRole } from "../../enums";
 import { hasRole } from "../auth/middleware";
 import { sessionStoreManager } from "../auth/session";
@@ -21,22 +21,21 @@ export const userModule = new Elysia({ prefix: "/users" })
     });
 
 // GET /users?page=1&size=20 — list all users (admin only)
-userModule.get("/", async (ctx: any) => {
-    hasRole(ctx.user, [UserRole.ADMIN]);
+userModule.get("/", async ({ query: { page, size }, user }) => {
+    hasRole(user, [UserRole.ADMIN]);
 
-    const { page, size } = ctx.query;
     const offset = (page - 1) * size;
 
-    const [totalRecords] = await db.select({ count: sql<number>`count(*)` }).from(user);
+    const [totalRecords] = await db.select({ count: sql<number>`count(*)` }).from(userTable);
     const users = await db
         .select({
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            role: user.role,
+            id: userTable.id,
+            firstName: userTable.firstName,
+            lastName: userTable.lastName,
+            email: userTable.email,
+            role: userTable.role,
         })
-        .from(user)
+        .from(userTable)
         .limit(size)
         .offset(offset);
 
@@ -54,20 +53,20 @@ userModule.get("/", async (ctx: any) => {
 });
 
 // PUT /users/:id/role — change a user's role (admin only)
-userModule.put("/:id/role", async (ctx: any) => {
-    hasRole(ctx.user, [UserRole.ADMIN]);
+userModule.put("/:id/role", async ({ params: { id }, body, set, user }) => {
+    hasRole(user, [UserRole.ADMIN]);
 
-    const targetId = Number(ctx.params.id);
+    const targetId = Number(id);
 
-    if (ctx.user.userId === targetId) {
-        ctx.set.status = 400;
+    if (user!.userId === targetId) {
+        set.status = 400;
         return { message: "Cannot change your own role" };
     }
 
     const [updated] = await db
-        .update(user)
-        .set({ role: ctx.body.role })
-        .where(eq(user.id, targetId))
+        .update(userTable)
+        .set({ role: body.role })
+        .where(eq(userTable.id, targetId))
         .returning();
 
     if (!updated) throw new NotFoundError(`User ${targetId} not found`);

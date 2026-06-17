@@ -27,11 +27,16 @@ export const authMiddleware = new Elysia()
         };
     });
 
-export const isAuthenticated = (user: any) => {
+export interface UserContext {
+    userId: number;
+    role: string;
+}
+
+export const isAuthenticated = (user: UserContext | null) => {
     if (!user) throw new UnauthorizedError("Unauthorized");
 };
 
-export const hasRole = (user: any, roles: string[]) => {
+export const hasRole = (user: UserContext | null, roles: string[]) => {
     isAuthenticated(user);
-    if (!roles.includes(user.role)) throw new ForbiddenError("Forbidden: Insufficient permissions");
+    if (!user || !roles.includes(user.role)) throw new ForbiddenError("Forbidden: Insufficient permissions");
 };

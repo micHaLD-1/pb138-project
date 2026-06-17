@@ -62,39 +62,39 @@ bookModule.get("/:id/cover", async ({ params: { id } }) => {
   });
 });
 
-bookModule.post("/", async (ctx: any) => {
-  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
-  ctx.set.status = 201;
-  return await booksService.create(ctx.body);
+bookModule.post("/", async ({ body, set, user }) => {
+  hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
+  set.status = 201;
+  return await booksService.create(body);
 }, {
   body: BookCreationRequest,
 });
 
-bookModule.put("/:id", async (ctx: any) => {
-  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
-  await booksService.update(Number(ctx.params.id), ctx.body);
-  ctx.set.status = 204;
+bookModule.put("/:id", async ({ params: { id }, body, set, user }) => {
+  hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
+  await booksService.update(Number(id), body);
+  set.status = 204;
 }, {
   body: BookUpdateRequest,
 });
 
-bookModule.post("/:id/cover", async (ctx: any) => {
-  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
+bookModule.post("/:id/cover", async ({ params: { id }, request, set, user }) => {
+  hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
 
-  const formData = await ctx.request.formData();
+  const formData = await request.formData();
   const file = formData.get("file");
   if (!(file instanceof File)) {
     throw new UnprocessableError("Missing cover image file");
   }
 
-  await booksService.uploadCoverImage(Number(ctx.params.id), file);
-  ctx.set.status = 204;
+  await booksService.uploadCoverImage(Number(id), file);
+  set.status = 204;
 });
 
-bookModule.delete("/:id", async (ctx: any) => {
-  hasRole(ctx.user, [UserRole.ADMIN, UserRole.STAFF]);
-  await booksService.remove(Number(ctx.params.id));
-  ctx.set.status = 204;
+bookModule.delete("/:id", async ({ params: { id }, set, user }) => {
+  hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
+  await booksService.remove(Number(id));
+  set.status = 204;
 });
 
 bookModule.get("/:id/reviews", async ({ params: { id }, query: {page, size} }) => {
