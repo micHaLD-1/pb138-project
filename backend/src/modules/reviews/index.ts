@@ -29,40 +29,38 @@ export const reviewsModule = new Elysia({ prefix: "/reviews" })
     };
   });
 
-reviewsModule.get("/me", async (ctx: any) => {
-  isAuthenticated(ctx.user);
-  const bookId = Number(ctx.query.bookId);
-  const review = await reviewsService.findByUserAndBook(ctx.user.userId, bookId);
+reviewsModule.get("/me", async ({ query: { bookId }, user }) => {
+  isAuthenticated(user);
+  const review = await reviewsService.findByUserAndBook(user!.userId, Number(bookId));
   return { review };
 }, {
   query: t.Object({ bookId: t.Numeric({ minimum: 1 }) })
 });
 
-// idk ci dava viac zmysel toto alebo /books/:id/reviews cize su obe
 reviewsModule.get("/book/:bookId", async ({ params: { bookId }, query: {page, size} }) => {
   return await reviewsService.findByBookId(Number(bookId), page, size);
 }, {
-  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1 })})
+  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1, maximum: 100 })})
 });
 
-reviewsModule.post("/", async (ctx: any) => {
-  isAuthenticated(ctx.user);
-  ctx.set.status = 201;
-  return { review: await reviewsService.create(ctx.user.userId, ctx.body) };
+reviewsModule.post("/", async ({ body, set, user }) => {
+  isAuthenticated(user);
+  set.status = 201;
+  return { review: await reviewsService.create(user!.userId, body) };
 }, {
   body: ReviewCreationRequest
 });
 
-reviewsModule.put("/:id", async (ctx: any) => {
-  isAuthenticated(ctx.user);
-  ctx.set.status = 204;
-  await reviewsService.update(Number(ctx.params.id), ctx.user.userId, ctx.body);
+reviewsModule.put("/:id", async ({ params: { id }, body, set, user }) => {
+  isAuthenticated(user);
+  set.status = 204;
+  await reviewsService.update(Number(id), user!.userId, body);
 }, {
   body: ReviewUpdateRequest
 });
 
-reviewsModule.delete("/:id", async (ctx: any) => {
-  isAuthenticated(ctx.user);
-  await reviewsService.remove(Number(ctx.params.id), ctx.user.userId);
-  ctx.set.status = 204;
+reviewsModule.delete("/:id", async ({ params: { id }, set, user }) => {
+  isAuthenticated(user);
+  await reviewsService.remove(Number(id), user!.userId);
+  set.status = 204;
 });

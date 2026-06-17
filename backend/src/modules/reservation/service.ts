@@ -63,9 +63,9 @@ export const reservationService = {
         return mapToReservationsDTO(result, Number(totalRecords.count), page, pageSize);
     },
 
-    create: async (data: ReservationCreationDTO) => {
+    create: async (data: ReservationCreationDTO, userId: number) => {
         return await db.transaction(async (tx) => {
-            const { bookId, userId, fromDate, toDate, price } = data;
+            const { bookId, fromDate, toDate, price } = data;
 
             // Find an available copy of the book (queue-based assignment)
             const [availableCopy] = await tx
@@ -81,13 +81,16 @@ export const reservationService = {
                 throw new ConflictError("No copies available for this book");
             }
 
-            // Check if user already has an active reservation for this book
+            // Check if user already has an active reservation for this specific book
             const existingReservation = await tx.query.reservation.findFirst({
-                where: eq(reservation.userId, userId)
+                where: and(
+                    eq(reservation.userId, userId),
+                    eq(reservation.bookCopyId, availableCopy.id)
+                )
             });
 
             if (existingReservation && existingReservation.status === ReservationStatus.ACTIVE) {
-                throw new ConflictError(`User already has an active reservation`);
+                throw new ConflictError(`User already has an active reservation for this book`);
             }
 
             // Calculate validity date (48 hours from now)

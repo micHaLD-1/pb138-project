@@ -35,10 +35,10 @@ rulesModule.get("/", async () => {
   return await rulesService.getAll();
 });
 
-rulesModule.put("/", async (ctx: any) => {
-  hasRole(ctx.user, [UserRole.ADMIN]);
-  ctx.set.status = 200;
-  return await rulesService.update(ctx.body, ctx.user.role);
+rulesModule.put("/", async ({ body, set, user }) => {
+  hasRole(user, [UserRole.ADMIN]);
+  set.status = 200;
+  return await rulesService.update(body, user!.role);
 }, {
   body: RulesUpdateRequest
 });

@@ -11,7 +11,7 @@ import { LoginRequest, RegistrationRequest, UpdateProfileRequest, type LoginDTO,
 export const authModule = new Elysia({ prefix: "/auth" })
     .use(cookie());
 
-authModule.post("/register", async ({ body, set }: { body: RegistrationDTO; set: any }) => {
+authModule.post("/register", async ({ body, set }) => {
     const user = await authService.register(body);
     set.status = 201;
     return { message: "User registered", userId: user.id };
@@ -19,7 +19,7 @@ authModule.post("/register", async ({ body, set }: { body: RegistrationDTO; set:
     body: RegistrationRequest,
 });
 
-authModule.post("/login", async ({ body, cookie, set }: { body: LoginDTO; cookie: any; set: any }) => {
+authModule.post("/login", async ({ body, cookie, set }) => {
     const user = await authService.login(body);
     const sessionId = sessionStoreManager.create(user.id, user.role as UserRole);
 
@@ -41,8 +41,8 @@ authModule.post("/login", async ({ body, cookie, set }: { body: LoginDTO; cookie
     body: LoginRequest,
 });
 
-authModule.post("/logout", async ({ cookie, set }: { cookie: any; set: any }) => {
-    const sessionId = cookie.sessionId;
+authModule.post("/logout", async ({ cookie, set }) => {
+    const sessionId = cookie.sessionId?.value as string | undefined;
     if (sessionId) {
         await authService.logout(sessionId);
         cookie.sessionId.remove();
@@ -50,9 +50,9 @@ authModule.post("/logout", async ({ cookie, set }: { cookie: any; set: any }) =>
     return { message: "Logged out" };
 });
 
-authModule.put("/me", async ({ body, cookie, set }: { body: UpdateProfileDTO; cookie: any; set: any }) => {
+authModule.put("/me", async ({ body, cookie, set }) => {
     const sessionCookie = cookie.sessionId;
-    const sessionId = typeof sessionCookie === 'string' ? sessionCookie : sessionCookie?.value;
+    const sessionId = typeof sessionCookie === 'object' && sessionCookie !== null ? sessionCookie.value as string : sessionCookie;
 
     if (!sessionId) {
         set.status = 401;
@@ -77,9 +77,9 @@ authModule.put("/me", async ({ body, cookie, set }: { body: UpdateProfileDTO; co
     body: UpdateProfileRequest,
 });
 
-authModule.get("/me", async ({ cookie, set }: { cookie: any; set: any }) => {
+authModule.get("/me", async ({ cookie, set }) => {
     const sessionCookie = cookie.sessionId;
-    const sessionId = typeof sessionCookie === 'string' ? sessionCookie : sessionCookie?.value;
+    const sessionId = typeof sessionCookie === 'object' && sessionCookie !== null ? sessionCookie.value as string : sessionCookie;
 
     if (!sessionId) {
         set.status = 401;
