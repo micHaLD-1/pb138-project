@@ -26,6 +26,16 @@ mock.module("../../db", () => ({
     genre: { id: "id" }
 }));
 
+mock.module("drizzle-orm", () => ({
+    eq: mock(),
+    sql: mock(() => ({})),
+    and: mock(() => ({})),
+    or: mock(() => ({})),
+    ilike: mock(() => ({})),
+    exists: mock(() => ({})),
+    inArray: mock(() => ({})),
+}));
+
 mock.module("../../cover-storage", () => ({
     storageService: {
         uploadObject: mock().mockResolvedValue(undefined),

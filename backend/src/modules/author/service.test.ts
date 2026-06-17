@@ -18,6 +18,11 @@ mock.module("../../db", () => {
     };
 });
 
+mock.module("drizzle-orm", () => ({
+    eq: mock(),
+    sql: mock(() => ({})),
+}));
+
 describe("Author Service", () => {
 
     beforeEach(() => {
