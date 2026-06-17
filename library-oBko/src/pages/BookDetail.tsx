@@ -3,15 +3,15 @@ import { useParams } from 'react-router-dom'
 import { Star } from 'lucide-react'
 import fallbackImage from '@/assets/hero.png'
 import wishlistIcon from '@/assets/Subtract.png'
-// TODO: Replace WishlistContext with backend API calls
 import { useWishlist } from '@/context/WishlistContext'
-import { useAuth } from '@/context/AuthContext'
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Field, FieldLabel, FieldSet } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import ReviewInput from '@/components/reviews/ReviewInput'
+import ReviewDisplay from '@/components/reviews/ReviewDisplay'
+import ReservationDialog from '@/components/book/ReservationDialog'
+import { mockReviews } from '@/lib/mock-reviews'
 
 const STAR_COUNT = 5
+const PAGE_SIZE = 10
 
 type BookDetail = {
     id: number
@@ -37,61 +37,10 @@ export default function BookDetail() {
     const [loadState, setLoadState] = useState<LoadState>('loading')
     const [book, setBook] = useState<BookDetail | null>(null)
     const [imageFailed, setImageFailed] = useState(false)
-    const [selectedRating, setSelectedRating] = useState<number | null>(null)
-    const [activePop, setActivePop] = useState<string | null>(null)
+    const [page, setPage] = useState(1)
+    const [total] = useState(0)
 
-    // TODO: Replace WishlistContext with backend API calls
     const { addToWishlist } = useWishlist()
-    const { user } = useAuth()
-
-    // Reservation dialog state
-    const [reservationOpen, setReservationOpen] = useState(false)
-    const [fromDate, setFromDate] = useState('')
-    const [toDate, setToDate] = useState('')
-    const [reserving, setReserving] = useState(false)
-    const [reservationSuccess, setReservationSuccess] = useState(false)
-    const [reservationError, setReservationError] = useState<string | null>(null)
-
-    async function handleReserve(e: React.FormEvent) {
-        e.preventDefault()
-        if (!user || !book) return
-        setReserving(true)
-        setReservationError(null)
-        try {
-            const res = await fetch('/api/reservations', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: user.userId,
-                    bookId: book.id,
-                    fromDate,
-                    toDate,
-                    price: 0,
-                }),
-            })
-            if (!res.ok) {
-                const err = await res.json()
-                throw new Error(err.message ?? 'Rezervácia zlyhala')
-            }
-            setReservationSuccess(true)
-        } catch (err) {
-            setReservationError((err as Error).message)
-        } finally {
-            setReserving(false)
-        }
-    }
-
-    function handleDialogOpenChange(open: boolean) {
-        setReservationOpen(open)
-        if (!open) {
-            // reset form when closing
-            setFromDate('')
-            setToDate('')
-            setReservationSuccess(false)
-            setReservationError(null)
-        }
-    }
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -123,13 +72,6 @@ export default function BookDetail() {
             .catch(() => setLoadState('not-found'))
     }, [id])
 
-    const triggerPop = (controlId: string) => {
-        setActivePop(controlId)
-        window.setTimeout(() => {
-            setActivePop((current) => (current === controlId ? null : current))
-        }, 220)
-    }
-
     if (loadState === 'loading') {
         return (
             <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -153,8 +95,10 @@ export default function BookDetail() {
         )
     }
 
-    const uiRating = selectedRating ?? 0
     const coverUrl = `/api/books/${book.id}/cover`
+    const projectedRating = mockReviews.reduce((sum, review) => sum + review.rating, 0) / mockReviews.length
+
+    const totalPages = Math.ceil(total / PAGE_SIZE)
 
     return (
         <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -175,127 +119,49 @@ export default function BookDetail() {
                         <div className="mt-4 flex flex-col gap-4">
                             <div className="flex flex-wrap items-center gap-4">
                                 <div
-                                    role="group"
-                                    aria-label="Book rating"
+                                    role="img"
+                                    aria-label={`Book rating ${projectedRating.toFixed(1)} out of ${STAR_COUNT}`}
                                     className="flex items-center gap-1"
                                 >
                                     {Array.from({ length: STAR_COUNT }, (_, index) => {
                                         const starValue = index + 1
-                                        const isFilled = starValue <= Math.round(uiRating)
-                                        const popClass = activePop === `star-${starValue}`
-                                            ? 'animate-[bounce_220ms_ease-out_1]'
-                                            : ''
+                                        const isFilled = starValue <= Math.round(projectedRating)
 
                                         return (
-                                            <button
-                                                key={starValue}
-                                                type="button"
-                                                aria-label={`Set rating to ${starValue} star${starValue > 1 ? 's' : ''}`}
-                                                className={`rounded-md p-1 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${popClass}`}
-                                                onClick={() => {
-                                                    setSelectedRating(starValue)
-                                                    triggerPop(`star-${starValue}`)
-                                                }}
-                                            >
+                                            <span key={starValue} className="rounded-md p-1">
                                                 <Star
                                                     className={`h-6 w-6 ${isFilled ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
+                                                    aria-hidden="true"
                                                 />
-                                            </button>
+                                            </span>
                                         )
                                     })}
                                 </div>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-3">
-                                {/* TODO: Replace with backend API for wishlist management */}
+                                <ReservationDialog
+                                    bookId={book.id}
+                                    bookTitle={book.title}
+                                    availableCopies={book.availableCopies}
+                                />
+
                                 <button
                                     type="button"
                                     aria-label="Add to wishlist"
-                                    className={`rounded-md border border-border p-2 transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activePop === 'wishlist' ? 'animate-[bounce_220ms_ease-out_1]' : ''}`}
+                                    className={`rounded-md border border-border p-2 transition hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring `}
                                     onClick={() => {
                                         addToWishlist(book as any)
-                                        triggerPop('wishlist')
                                     }}
                                 >
                                     <img src={wishlistIcon} alt="" className="h-5 w-5" aria-hidden="true" />
                                 </button>
-
-                                {/* Reservation dialog */}
-                                <Dialog open={reservationOpen} onOpenChange={handleDialogOpenChange}>
-                                    <DialogTrigger
-                                        render={<Button disabled={book.availableCopies === 0} />}
-                                        title={book.availableCopies === 0 ? 'Žiadne dostupné výtisky' : 'Rezervovať knihu'}
-                                    >
-                                        {book.availableCopies === 0 ? 'Nedostupné' : 'Rezervovať'}
-                                    </DialogTrigger>
-
-                                    <DialogContent className="sm:max-w-md">
-                                        {!user ? (
-                                            <div className="py-4 text-center">
-                                                <p className="font-medium">Pro rezervaci se musis prihlasit.</p>
-                                            </div>
-                                        ) : reservationSuccess ? (
-                                            <div className="py-4 text-center">
-                                                <p className="text-lg font-bold text-primary">Rezervace byla uspesna</p>
-                                                <p className="mt-2 text-sm text-muted-foreground">
-                                                    Kniha <span className="font-medium">{book.title}</span> je zarezervovaná od {fromDate} do {toDate}.
-                                                </p>
-                                                <Button className="mt-4" onClick={() => setReservationOpen(false)}>
-                                                    Zavřít
-                                                </Button>
-                                            </div>
-                                        ) : (
-                                            <form className="grid gap-4" onSubmit={handleReserve}>
-                                                <h2 className="text-lg font-bold">Rezervovat: {book.title}</h2>
-
-                                                <FieldSet className="gap-4">
-                                                    <Field className="gap-2">
-                                                        <FieldLabel htmlFor="res-from">Datum od</FieldLabel>
-                                                        <Input
-                                                            id="res-from"
-                                                            type="date"
-                                                            value={fromDate}
-                                                            min={new Date().toISOString().split('T')[0]}
-                                                            onChange={(e) => setFromDate(e.target.value)}
-                                                            required
-                                                        />
-                                                    </Field>
-
-                                                    <Field className="gap-2">
-                                                        <FieldLabel htmlFor="res-to">Datum do</FieldLabel>
-                                                        <Input
-                                                            id="res-to"
-                                                            type="date"
-                                                            value={toDate}
-                                                            min={fromDate || new Date().toISOString().split('T')[0]}
-                                                            onChange={(e) => setToDate(e.target.value)}
-                                                            required
-                                                        />
-                                                    </Field>
-                                                </FieldSet>
-
-                                                {reservationError && (
-                                                    <p className="text-sm font-medium text-destructive">{reservationError}</p>
-                                                )}
-
-                                                <div className="flex justify-end gap-2">
-                                                    <Button type="button" variant="ghost" onClick={() => setReservationOpen(false)}>
-                                                        Zrušiť
-                                                    </Button>
-                                                    <Button type="submit" disabled={reserving}>
-                                                        {reserving ? 'Rezervujem…' : 'Potvrdiť'}
-                                                    </Button>
-                                                </div>
-                                            </form>
-                                        )}
-                                    </DialogContent>
-                                </Dialog>
                             </div>
                         </div>
                     </section>
 
                     <section className="rounded-xl border bg-card p-5 shadow-sm">
-                        <h1 className="mb-5 text-3xl font-extrabold leading-tight">{book.title}</h1>
+                        <h2 className="mb-5 text-3xl font-extrabold leading-tight">{book.title}</h2>
 
                         <div className="flex items-baseline gap-2">
                             <p className="text-md uppercase tracking-wide text-muted-foreground">Žánr:</p>
@@ -338,6 +204,27 @@ export default function BookDetail() {
                     <p className="whitespace-pre-line leading-relaxed text-muted-foreground">
                         {book.description}
                     </p>
+                </div>
+            </section>
+
+            <section className="rounded-xl border bg-card p-5 shadow-sm">
+                <h2 className="text-xl font-extrabold">Recenze</h2>
+                <ReviewInput bookId={book.id} />
+                <div className="mt-3 max-h-80 overflow-auto pr-1">
+                    <ReviewDisplay reviews={mockReviews} />
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="mt-8 flex items-center justify-center gap-2">
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                            Previous
+                        </Button>
+                        <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
+                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                            Next
+                        </Button>
+                        </div>
+                    )}
                 </div>
             </section>
         </section>
