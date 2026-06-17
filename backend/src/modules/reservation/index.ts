@@ -31,7 +31,6 @@ export const reservationModule = new Elysia({ prefix: "/reservations" })
     };
   });
 
-// List all reservations — admin/staff only
 reservationModule.get("/", async ({ query: { page, pageSize }, user } ) => {
   hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
   return await reservationService.findAll(page, pageSize);
@@ -39,7 +38,6 @@ reservationModule.get("/", async ({ query: { page, pageSize }, user } ) => {
   query: t.Object({page: t.Numeric({ minimum: 1 }), pageSize: t.Numeric({ minimum: 1, maximum: 100 })})
 });
 
-// Get current user's reservations
 reservationModule.get("/me", async ({ query: { page, pageSize }, user }) => {
   isAuthenticated(user);
   return await reservationService.findByUserId(user!.userId, page, pageSize);
@@ -47,13 +45,11 @@ reservationModule.get("/me", async ({ query: { page, pageSize }, user }) => {
   query: t.Object({page: t.Numeric({ minimum: 1 }), pageSize: t.Numeric({ minimum: 1, maximum: 100 })})
 });
 
-// Get reservation by id — admin/staff only
 reservationModule.get("/:id", async ({ params: { id }, user }) => {
   hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
   return await reservationService.findById(Number(id));
 });
 
-// Create reservation — any authenticated user (userId is taken from session, not request body)
 reservationModule.post("/", async ({ body, set, user }) => {
   isAuthenticated(user);
   const result = await reservationService.create(body, user!.userId);
@@ -63,7 +59,6 @@ reservationModule.post("/", async ({ body, set, user }) => {
   body: ReservationCreationRequest,
 });
 
-// Update reservation — admin/staff only
 reservationModule.put("/:id", async ({ params: { id }, body, set, user }) => {
   hasRole(user, [UserRole.ADMIN, UserRole.STAFF]);
   await reservationService.update(Number(id), body);
@@ -72,11 +67,9 @@ reservationModule.put("/:id", async ({ params: { id }, body, set, user }) => {
   body: ReservationUpdateRequest,
 });
 
-// Cancel reservation — admin/staff can cancel any, regular users can cancel their own
 reservationModule.put("/:id/cancel", async ({ params: { id }, set, user }) => {
   isAuthenticated(user);
 
-  // If regular user, verify ownership
   if (user!.role !== UserRole.ADMIN && user!.role !== UserRole.STAFF) {
     const reservation = await reservationService.findById(Number(id));
     if (reservation.userId !== user!.userId) {

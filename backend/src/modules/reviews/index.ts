@@ -37,7 +37,6 @@ reviewsModule.get("/me", async ({ query: { bookId }, user }) => {
   query: t.Object({ bookId: t.Numeric({ minimum: 1 }) })
 });
 
-// idk ci dava viac zmysel toto alebo /books/:id/reviews cize su obe
 reviewsModule.get("/book/:bookId", async ({ params: { bookId }, query: {page, size} }) => {
   return await reviewsService.findByBookId(Number(bookId), page, size);
 }, {
