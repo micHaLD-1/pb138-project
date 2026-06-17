@@ -4,14 +4,12 @@ import { Star } from 'lucide-react'
 import fallbackImage from '@/assets/hero.png'
 import wishlistIcon from '@/assets/Subtract.png'
 import { useWishlist } from '@/context/WishlistContext'
-import { Button } from '@/components/ui/button'
-import ReviewInput from '@/components/reviews/ReviewInput'
-import ReviewDisplay from '@/components/reviews/ReviewDisplay'
+import ReviewSection from '@/components/reviews/ReviewSection'
+import ReviewDisplay from '../components/reviews/ReviewDisplay'
 import ReservationDialog from '@/components/book/ReservationDialog'
 import { mockReviews } from '@/lib/mock-reviews'
 
 const STAR_COUNT = 5
-const PAGE_SIZE = 10
 
 type BookDetail = {
     id: number
@@ -37,8 +35,6 @@ export default function BookDetail() {
     const [loadState, setLoadState] = useState<LoadState>('loading')
     const [book, setBook] = useState<BookDetail | null>(null)
     const [imageFailed, setImageFailed] = useState(false)
-    const [page, setPage] = useState(1)
-    const [total] = useState(0)
 
     const { addToWishlist } = useWishlist()
 
@@ -97,8 +93,6 @@ export default function BookDetail() {
 
     const coverUrl = `/api/books/${book.id}/cover`
     const projectedRating = mockReviews.reduce((sum, review) => sum + review.rating, 0) / mockReviews.length
-
-    const totalPages = Math.ceil(total / PAGE_SIZE)
 
     return (
         <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
@@ -209,22 +203,11 @@ export default function BookDetail() {
 
             <section className="rounded-xl border bg-card p-5 shadow-sm">
                 <h2 className="text-xl font-extrabold">Recenze</h2>
-                <ReviewInput bookId={book.id} />
-                <div className="mt-3 max-h-80 overflow-auto pr-1">
-                    <ReviewDisplay reviews={mockReviews} />
 
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="mt-8 flex items-center justify-center gap-2">
-                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-                            Previous
-                        </Button>
-                        <span className="text-sm text-muted-foreground">{page} / {totalPages}</span>
-                        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
-                            Next
-                        </Button>
-                        </div>
-                    )}
+                <ReviewSection bookId={book.id} />
+
+                <div className="mt-3 max-h-80 overflow-auto pr-1">
+                    <ReviewDisplay bookId={book.id} />
                 </div>
             </section>
         </section>
