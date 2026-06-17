@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from '@tanstack/react-router'
 import { Star } from 'lucide-react'
 import fallbackImage from '@/assets/hero.png'
 import wishlistIcon from '@/assets/Subtract.png'
@@ -33,7 +33,7 @@ function formatAvailability(available: number, total: number): string {
 }
 
 export default function BookDetail() {
-    const { id } = useParams<{ id: string }>()
+    const { id } = useParams({ from: '/books/$id' })
     const [loadState, setLoadState] = useState<LoadState>('loading')
     const [book, setBook] = useState<BookDetail | null>(null)
     const [imageFailed, setImageFailed] = useState(false)

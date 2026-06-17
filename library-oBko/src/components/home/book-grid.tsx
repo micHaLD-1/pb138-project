@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useSearch } from "@tanstack/react-router"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel"
 import BookCard from "./book-card"
 import FilterPanel, { type ActiveFilters } from "./filter-panel"
@@ -43,8 +43,7 @@ export default function BookGrid() {
   }, [])
 
   // Read search term from the URL (?search=...) set by the header search bar
-  const [searchParams] = useSearchParams()
-  const search = searchParams.get("search") ?? ""
+  const { search = '' } = useSearch({ from: '/' })
 
 
 
