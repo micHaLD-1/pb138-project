@@ -41,7 +41,7 @@ bookModule.get("/", async ({ query: { page, size, search, genreId, authorId } })
 }, {
   query: t.Object({
     page: t.Numeric({ minimum: 1 }),
-    size: t.Numeric({ minimum: 1 }),
+    size: t.Numeric({ minimum: 1, maximum: 100 }),
     search: t.Optional(t.String()),
     genreId: t.Optional(t.Numeric()),
     authorId: t.Optional(t.Numeric()),
@@ -100,5 +100,5 @@ bookModule.delete("/:id", async ({ params: { id }, set, user }) => {
 bookModule.get("/:id/reviews", async ({ params: { id }, query: {page, size} }) => {
   return await reviewsService.findByBookId(Number(id), page, size);
 }, {
-  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1 })})
+  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1, maximum: 100 })})
 });

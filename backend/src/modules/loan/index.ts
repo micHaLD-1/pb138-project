@@ -8,7 +8,7 @@ export const loanModule = new Elysia({ prefix: "/loans" });
 loanModule.get("/", async ({ query: {page, size} }) => {
   return await loanService.findAll(page, size);
 }, {
-  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1 })})
+  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1, maximum: 100 })})
 });
 
 loanModule.get("/:id", async ({ params: { id } }) => {

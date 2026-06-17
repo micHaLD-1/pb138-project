@@ -8,7 +8,7 @@ export const reservationModule = new Elysia({ prefix: "/reservations" });
 reservationModule.get("/", async ({ query: { page, pageSize } } ) => {
   return await reservationService.findAll(page, pageSize);
 }, {
-  query: t.Object({page: t.Numeric({ minimum: 1 }), pageSize: t.Numeric({ minimum: 1 })})
+  query: t.Object({page: t.Numeric({ minimum: 1 }), pageSize: t.Numeric({ minimum: 1, maximum: 100 })})
 });
 
 reservationModule.get("/:id", async ({ params: { id } }) => {

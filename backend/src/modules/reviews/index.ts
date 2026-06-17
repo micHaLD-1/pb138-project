@@ -41,7 +41,7 @@ reviewsModule.get("/me", async ({ query: { bookId }, user }) => {
 reviewsModule.get("/book/:bookId", async ({ params: { bookId }, query: {page, size} }) => {
   return await reviewsService.findByBookId(Number(bookId), page, size);
 }, {
-  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1 })})
+  query: t.Object({page: t.Numeric({ minimum: 1 }), size: t.Numeric({ minimum: 1, maximum: 100 })})
 });
 
 reviewsModule.post("/", async ({ body, set, user }) => {
