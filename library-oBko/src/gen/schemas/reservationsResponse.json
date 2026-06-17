@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "reservations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "userId": { "type": "integer" },
+          "bookId": { "type": "integer" },
+          "bookCopyId": { "type": "integer" },
+          "fromDate": { "type": "string" },
+          "toDate": { "type": "string" },
+          "price": { "type": "number" }
+        },
+        "x-readme-ref-name": "ReservationResponse"
+      }
+    },
+    "page": { "type": "integer" },
+    "pageSize": { "type": "integer" },
+    "total": { "type": "integer" }
+  },
+  "x-readme-ref-name": "ReservationsResponse"
+}

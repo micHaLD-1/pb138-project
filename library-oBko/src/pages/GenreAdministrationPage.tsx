@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Plus, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/context/AuthContext"
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+import { useQueryClient } from "@tanstack/react-query"
+import { useGetGenres, getGenresQueryKey } from "@/gen/hooks/useGetGenres"
+import { usePostGenres } from "@/gen/hooks/usePostGenres"
+import { useDeleteGenresId } from "@/gen/hooks/useDeleteGenresId"
 
 type GenreDTO = {
   id: number
@@ -15,47 +16,6 @@ type GenreDTO = {
 type GenreFormData = {
   name: string
 }
-
-
-// ── API helpers ───────────────────────────────────────────────────────────────
-
-const BASE = "/api/genres"
-
-async function fetchGenres(page: number, size: number): Promise<{ genres: GenreDTO[]; total: number }> {
-  const res = await fetch(`${BASE}?page=${page}&size=${size}`, { credentials: "include" })
-  if (!res.ok) throw new Error("Failed to fetch genres")
-  const data = await res.json()
-  return { genres: data.genres, total: data.total }
-
-}
-
-async function createGenre(data: GenreFormData): Promise<GenreDTO> {
-  const res = await fetch(BASE, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to create genre")
-  }
-  const json = await res.json()
-  return json.genre
-}
-
-async function deleteGenre(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to delete genre")
-  }
-}
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
 
 type ModalProps = {
   onClose: () => void
@@ -130,43 +90,45 @@ function AddGenreModal({ onClose, onSubmit }: ModalProps) {
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
-
 const PAGE_SIZE = 20
 
 export default function GenreAdministrationPage() {
-  const [genres, setGenres] = useState<GenreDTO[]>([])
-  const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const [addOpen, setAddOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<GenreDTO | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [deleteLoading, setDeleteLoading] = useState(false)
 
-  const {user} = useAuth();
-  console.log(user);
+  const queryClient = useQueryClient()
 
-  const load = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await fetchGenres(page, PAGE_SIZE)
-      setGenres(data.genres)
-      setTotal(data.total)
-    } catch (e: any) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { data, isPending: loading, isError } = useGetGenres({ page, size: PAGE_SIZE })
+  const genres: GenreDTO[] = (data?.genres ?? []).map((g) => ({
+    id: g.id ?? 0,
+    name: g.name ?? "",
+  }))
+  const total = data?.total ?? 0
+  const error = isError ? "Failed to fetch genres" : null
 
-  useEffect(() => {
-    load()
-  }, [page])
+  const { mutateAsync: createGenre } = usePostGenres({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGenresQueryKey({ page, size: PAGE_SIZE }) })
+      },
+    },
+  })
+
+  const { mutate: deleteGenre, isPending: deleteLoading } = useDeleteGenresId({
+    mutation: {
+      onSuccess: () => {
+        setDeleteTarget(null)
+        queryClient.invalidateQueries({ queryKey: getGenresQueryKey({ page, size: PAGE_SIZE }) })
+      },
+      onError: (e: any) => {
+        setDeleteError(e.message ?? "Failed to delete genre")
+      },
+    },
+  })
 
   const filtered = genres.filter((g) =>
     g.name.toLowerCase().includes(search.toLowerCase())
@@ -174,26 +136,16 @@ export default function GenreAdministrationPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deleteTarget) return
-    setDeleteLoading(true)
     setDeleteError(null)
-    try {
-      await deleteGenre(deleteTarget.id)
-      setDeleteTarget(null)
-      load()
-    } catch (e: any) {
-      setDeleteError(e.message)
-    } finally {
-      setDeleteLoading(false)
-    }
+    deleteGenre({ id: deleteTarget.id })
   }
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="mb-6 text-3xl font-extrabold">Genres</h1>
 
-      {/* toolbar */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -210,7 +162,6 @@ export default function GenreAdministrationPage() {
         </Button>
       </div>
 
-      {/* table */}
       <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
         {loading && <p className="p-6 text-muted-foreground">Loading…</p>}
         {error && <p className="p-6 text-destructive">{error}</p>}
@@ -255,7 +206,6 @@ export default function GenreAdministrationPage() {
         )}
       </div>
 
-      {/* pagination */}
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-end gap-2 text-sm">
           <Button
@@ -280,18 +230,15 @@ export default function GenreAdministrationPage() {
         </div>
       )}
 
-      {/* add modal */}
       {addOpen && (
         <AddGenreModal
           onClose={() => setAddOpen(false)}
-          onSubmit={async (data) => {
-            await createGenre(data)
-            load()
+          onSubmit={async (form) => {
+            await createGenre({ data: form })
           }}
         />
       )}
 
-      {/* delete confirmation */}
       {deleteTarget && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"

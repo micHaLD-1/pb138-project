@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "newsletters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "employeeId": { "type": "integer" },
+          "employeeName": { "type": "string" },
+          "createdAt": { "type": "string" },
+          "subject": { "type": "string" },
+          "text": { "type": "string" },
+          "recipientCount": { "type": "integer" }
+        },
+        "x-readme-ref-name": "NewsletterResponse"
+      }
+    },
+    "page": { "type": "integer" },
+    "pageSize": { "type": "integer" },
+    "total": { "type": "integer" }
+  },
+  "x-readme-ref-name": "NewslettersResponse"
+}

@@ -1,10 +1,16 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Pencil, Plus, Search, X, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+import { useQueryClient } from "@tanstack/react-query"
+import { useGetBooks, getBooksQueryKey } from "@/gen/hooks/useGetBooks"
+import { useGetAuthors } from "@/gen/hooks/useGetAuthors"
+import { useGetGenres } from "@/gen/hooks/useGetGenres"
+import { useGetPublishers } from "@/gen/hooks/useGetPublishers"
+import { usePostBooks } from "@/gen/hooks/usePostBooks"
+import { usePutBooksId } from "@/gen/hooks/usePutBooksId"
+import { useDeleteBooksId } from "@/gen/hooks/useDeleteBooksId"
 
 type BookDTO = {
   id: number
@@ -34,79 +40,6 @@ type BookFormData = {
   genreIds: number[]
   copyCount: string
 }
-
-
-// ── API helpers ───────────────────────────────────────────────────────────────
-
-const BASE = "/api"
-
-async function fetchBooks(page: number, size: number): Promise<{ books: BookDTO[]; total: number }> {
-  const res = await fetch(`${BASE}/books?page=${page}&size=${size}`, { credentials: "include" })
-  if (!res.ok) throw new Error("Failed to fetch books")
-  const data = await res.json()
-  return { books: data.books, total: data.total }
-
-}
-
-async function fetchAuthors(): Promise<AuthorDTO[]> {
-  const res = await fetch(`${BASE}/authors?page=1&size=100`, { credentials: "include" })
-  const data = await res.json()
-  return data.authors
-  // return mockAuthors
-}
-
-async function fetchGenres(): Promise<GenreDTO[]> {
-  const res = await fetch(`${BASE}/genres?page=1&size=100`, { credentials: "include" })
-  const data = await res.json()
-  return data.genres
-  // return mockGenres
-}
-
-async function fetchPublishers(): Promise<PublisherDTO[]> {
-  const res = await fetch(`${BASE}/publishers?page=1&size=100`, { credentials: "include" })
-  const data = await res.json()
-  return data.publishers
-  // return mockPublishers
-}
-
-async function createBook(data: any): Promise<void> {
-  const res = await fetch(`${BASE}/books`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to create book")
-  }
-}
-
-async function updateBook(id: number, data: any): Promise<void> {
-  const res = await fetch(`${BASE}/books/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to update book")
-  }
-}
-
-async function deleteBook(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/books/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to delete book")
-  }
-}
-
-// ── Searchable multi-select picker popup ──────────────────────────────────────
 
 type PickerItem = { id: number; name: string }
 
@@ -178,8 +111,6 @@ function MultiPicker({ title, items, selected, onClose, onConfirm }: MultiPicker
   )
 }
 
-// ── Single-select picker popup ────────────────────────────────────────────────
-
 type SinglePickerProps = {
   title: string
   items: PickerItem[]
@@ -238,8 +169,6 @@ function SinglePicker({ title, items, selected, onClose, onConfirm }: SinglePick
     </div>
   )
 }
-
-// ── Book form modal ───────────────────────────────────────────────────────────
 
 type BookModalProps = {
   title: string
@@ -309,25 +238,21 @@ function BookModal({ title, initial, authors, genres, publishers, isCreate, onCl
           <h2 className="mb-5 text-xl font-bold">{title}</h2>
 
           <div className="flex flex-col gap-4">
-            {/* Title */}
             <div className="flex flex-col gap-1">
               <Label htmlFor="title">Title</Label>
               <Input id="title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="The Hobbit" />
             </div>
 
-            {/* Language */}
             <div className="flex flex-col gap-1">
               <Label htmlFor="language">Language</Label>
               <Input id="language" value={form.language} onChange={(e) => setForm((f) => ({ ...f, language: e.target.value }))} placeholder="English" />
             </div>
 
-            {/* Year */}
             <div className="flex flex-col gap-1">
               <Label htmlFor="year">Year published</Label>
               <Input id="year" type="number" value={form.yearPublished} onChange={(e) => setForm((f) => ({ ...f, yearPublished: e.target.value }))} placeholder="1937" />
             </div>
 
-            {/* Description */}
             <div className="flex flex-col gap-1">
               <Label htmlFor="description">Description</Label>
               <textarea
@@ -341,7 +266,6 @@ function BookModal({ title, initial, authors, genres, publishers, isCreate, onCl
               />
             </div>
 
-            {/* Publisher picker */}
             <div className="flex flex-col gap-1">
               <Label>Publisher</Label>
               <button
@@ -356,7 +280,6 @@ function BookModal({ title, initial, authors, genres, publishers, isCreate, onCl
               </button>
             </div>
 
-            {/* Authors picker */}
             <div className="flex flex-col gap-1">
               <Label>Authors</Label>
               <button
@@ -371,7 +294,6 @@ function BookModal({ title, initial, authors, genres, publishers, isCreate, onCl
               </button>
             </div>
 
-            {/* Genres picker */}
             <div className="flex flex-col gap-1">
               <Label>Genres</Label>
               <button
@@ -386,7 +308,6 @@ function BookModal({ title, initial, authors, genres, publishers, isCreate, onCl
               </button>
             </div>
 
-            {/* Copy count (create only) */}
             {isCreate && (
               <div className="flex flex-col gap-1">
                 <Label htmlFor="copyCount">Number of copies</Label>
@@ -413,7 +334,6 @@ function BookModal({ title, initial, authors, genres, publishers, isCreate, onCl
         </div>
       </div>
 
-      {/* Pickers rendered outside the modal so they stack on top */}
       {publisherPickerOpen && (
         <SinglePicker
           title="Select publisher"
@@ -445,8 +365,6 @@ function BookModal({ title, initial, authors, genres, publishers, isCreate, onCl
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
-
 const PAGE_SIZE = 20
 const EMPTY_FORM: BookFormData = {
   title: "", language: "", publisherId: null,
@@ -455,44 +373,69 @@ const EMPTY_FORM: BookFormData = {
 }
 
 export default function BookAdministrationPage() {
-  const [books, setBooks] = useState<BookDTO[]>([])
-  const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const [authors, setAuthors] = useState<AuthorDTO[]>([])
-  const [genres, setGenres] = useState<GenreDTO[]>([])
-  const [publishers, setPublishers] = useState<PublisherDTO[]>([])
 
   const [addOpen, setAddOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<BookDTO | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<BookDTO | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [deleteLoading, setDeleteLoading] = useState(false)
 
-  const load = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await fetchBooks(page, PAGE_SIZE)
-      setBooks(data.books)
-      setTotal(data.total)
-    } catch (e: any) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const queryClient = useQueryClient()
 
-  // Load books + reference data on mount
-  useEffect(() => {
-    load()
-    fetchAuthors().then(setAuthors)
-    fetchGenres().then(setGenres)
-    fetchPublishers().then(setPublishers)
-  }, [page])
+  const { data: booksData, isPending: loading, isError } = useGetBooks({ page, size: PAGE_SIZE })
+  const books: BookDTO[] = (booksData?.books ?? []).map((b) => ({
+    id: b.id ?? 0,
+    title: b.title ?? "",
+    language: b.language ?? "",
+    publisherId: b.publisherId ?? 0,
+    publisherName: b.publisherName ?? "",
+    yearPublished: b.yearPublished ?? 0,
+    description: b.description ?? "",
+    authors: b.authors ?? [],
+    genres: b.genres ?? [],
+    availableCopies: b.availableCopies ?? 0,
+    totalCopies: b.totalCopies ?? 0,
+  }))
+  const total = booksData?.total ?? 0
+  const error = isError ? "Failed to fetch books" : null
+
+  const { data: authorsData } = useGetAuthors({ page: 1, size: 100 })
+  const authors: AuthorDTO[] = (authorsData?.authors ?? []).map((a) => ({ id: a.id ?? 0, name: a.name ?? "" }))
+
+  const { data: genresData } = useGetGenres({ page: 1, size: 100 })
+  const genres: GenreDTO[] = (genresData?.genres ?? []).map((g) => ({ id: g.id ?? 0, name: g.name ?? "" }))
+
+  const { data: publishersData } = useGetPublishers({ page: 1, size: 100 })
+  const publishers: PublisherDTO[] = (publishersData?.publishers ?? []).map((p) => ({ id: p.id ?? 0, name: p.name ?? "" }))
+
+  const { mutateAsync: createBook } = usePostBooks({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getBooksQueryKey({ page, size: PAGE_SIZE }) })
+      },
+    },
+  })
+
+  const { mutateAsync: updateBook } = usePutBooksId({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getBooksQueryKey({ page, size: PAGE_SIZE }) })
+      },
+    },
+  })
+
+  const { mutate: deleteBook, isPending: deleteLoading } = useDeleteBooksId({
+    mutation: {
+      onSuccess: () => {
+        setDeleteTarget(null)
+        queryClient.invalidateQueries({ queryKey: getBooksQueryKey({ page, size: PAGE_SIZE }) })
+      },
+      onError: (e: any) => {
+        setDeleteError(e.message ?? "Failed to delete book")
+      },
+    },
+  })
 
   const filtered = books.filter((b) =>
     b.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -501,19 +444,10 @@ export default function BookAdministrationPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deleteTarget) return
-    setDeleteLoading(true)
     setDeleteError(null)
-    try {
-      await deleteBook(deleteTarget.id)
-      setDeleteTarget(null)
-      load()
-    } catch (e: any) {
-      setDeleteError(e.message)
-    } finally {
-      setDeleteLoading(false)
-    }
+    deleteBook({ id: deleteTarget.id })
   }
 
   const editInitial = editTarget ? {
@@ -531,7 +465,6 @@ export default function BookAdministrationPage() {
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="mb-6 text-3xl font-extrabold">Books</h1>
 
-      {/* toolbar */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -548,7 +481,6 @@ export default function BookAdministrationPage() {
         </Button>
       </div>
 
-      {/* table */}
       <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
         {loading && <p className="p-6 text-muted-foreground">Loading…</p>}
         {error && <p className="p-6 text-destructive">{error}</p>}
@@ -599,7 +531,6 @@ export default function BookAdministrationPage() {
         )}
       </div>
 
-      {/* pagination */}
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-end gap-2 text-sm">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
@@ -608,7 +539,6 @@ export default function BookAdministrationPage() {
         </div>
       )}
 
-      {/* add modal */}
       {addOpen && (
         <BookModal
           title="Add book"
@@ -618,11 +548,10 @@ export default function BookAdministrationPage() {
           publishers={publishers}
           isCreate={true}
           onClose={() => setAddOpen(false)}
-          onSubmit={async (data) => { await createBook(data); load() }}
+          onSubmit={async (data) => { await createBook({ data }) }}
         />
       )}
 
-      {/* edit modal */}
       {editTarget && (
         <BookModal
           title="Edit book"
@@ -632,11 +561,10 @@ export default function BookAdministrationPage() {
           publishers={publishers}
           isCreate={false}
           onClose={() => setEditTarget(null)}
-          onSubmit={async (data) => { await updateBook(editTarget.id, data); load() }}
+          onSubmit={async (data) => { await updateBook({ id: editTarget.id, data }); setEditTarget(null) }}
         />
       )}
 
-      {/* delete confirmation */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setDeleteTarget(null)}>
           <div className="relative w-full max-w-sm rounded-xl border bg-card p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>

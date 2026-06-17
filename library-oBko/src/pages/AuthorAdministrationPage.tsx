@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Pencil, Plus, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+import { useQueryClient } from "@tanstack/react-query"
+import { useGetAuthors, getAuthorsQueryKey } from "@/gen/hooks/useGetAuthors"
+import { usePostAuthors } from "@/gen/hooks/usePostAuthors"
+import { usePutAuthorsId } from "@/gen/hooks/usePutAuthorsId"
+import { useDeleteAuthorsId } from "@/gen/hooks/useDeleteAuthorsId"
 
 type AuthorDTO = {
   id: number
@@ -17,61 +20,6 @@ type AuthorFormData = {
   firstName: string
   lastName: string
 }
-
-// ── API helpers ───────────────────────────────────────────────────────────────
-
-const BASE = "/api/authors"
-
-async function fetchAuthors(page: number, size: number): Promise<{ authors: AuthorDTO[]; total: number }> {
-  const res = await fetch(`${BASE}?page=${page}&size=${size}`, { credentials: "include" })
-  if (!res.ok) throw new Error("Failed to fetch authors")
-  const data = await res.json()
-  // backend returns { authors, page, pageSize, total }
-  return { authors: data.authors, total: data.total }
- 
-}
-
-
-async function createAuthor(data: AuthorFormData): Promise<AuthorDTO> {
-  const res = await fetch(BASE, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to create author")
-  }
-  const json = await res.json()
-  return json.author
-}
-
-async function updateAuthor(id: number, data: AuthorFormData): Promise<void> {
-  const res = await fetch(`${BASE}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to update author")
-  }
-}
-
-async function deleteAuthor(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to delete author")
-  }
-}
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
 
 type ModalProps = {
   title: string
@@ -158,41 +106,56 @@ function AuthorModal({ title, initial, onClose, onSubmit }: ModalProps) {
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
-
 const PAGE_SIZE = 20
 
 export default function AuthorAdministrationPage() {
-  const [authors, setAuthors] = useState<AuthorDTO[]>([])
-  const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const [addOpen, setAddOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<AuthorDTO | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AuthorDTO | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [deleteLoading, setDeleteLoading] = useState(false)
 
-  const load = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await fetchAuthors(page, PAGE_SIZE)
-      setAuthors(data.authors)
-      setTotal(data.total)
-    } catch (e: any) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    load()
-  }, [page])
+  const { data, isPending: loading, isError } = useGetAuthors({ page, size: PAGE_SIZE })
+  const authors: AuthorDTO[] = (data?.authors ?? []).map((a) => ({
+    id: a.id ?? 0,
+    firstName: a.firstName ?? "",
+    lastName: a.lastName ?? "",
+    name: a.name ?? "",
+  }))
+  const total = data?.total ?? 0
+  const error = isError ? "Failed to fetch authors" : null
+
+  const { mutateAsync: createAuthor } = usePostAuthors({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getAuthorsQueryKey({ page, size: PAGE_SIZE }) })
+      },
+    },
+  })
+
+  const { mutateAsync: updateAuthor } = usePutAuthorsId({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getAuthorsQueryKey({ page, size: PAGE_SIZE }) })
+      },
+    },
+  })
+
+  const { mutate: deleteAuthor, isPending: deleteLoading } = useDeleteAuthorsId({
+    mutation: {
+      onSuccess: () => {
+        setDeleteTarget(null)
+        queryClient.invalidateQueries({ queryKey: getAuthorsQueryKey({ page, size: PAGE_SIZE }) })
+      },
+      onError: (e: any) => {
+        setDeleteError(e.message ?? "Failed to delete author")
+      },
+    },
+  })
 
   const filtered = authors.filter((a) =>
     a.name.toLowerCase().includes(search.toLowerCase())
@@ -200,26 +163,16 @@ export default function AuthorAdministrationPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deleteTarget) return
-    setDeleteLoading(true)
     setDeleteError(null)
-    try {
-      await deleteAuthor(deleteTarget.id)
-      setDeleteTarget(null)
-      load()
-    } catch (e: any) {
-      setDeleteError(e.message)
-    } finally {
-      setDeleteLoading(false)
-    }
+    deleteAuthor({ id: deleteTarget.id })
   }
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="mb-6 text-3xl font-extrabold">Authors</h1>
 
-      {/* toolbar */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -236,7 +189,6 @@ export default function AuthorAdministrationPage() {
         </Button>
       </div>
 
-      {/* table */}
       <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
         {loading && <p className="p-6 text-muted-foreground">Loading…</p>}
         {error && <p className="p-6 text-destructive">{error}</p>}
@@ -294,7 +246,6 @@ export default function AuthorAdministrationPage() {
         )}
       </div>
 
-      {/* pagination */}
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-end gap-2 text-sm">
           <Button
@@ -319,33 +270,29 @@ export default function AuthorAdministrationPage() {
         </div>
       )}
 
-      {/* add modal */}
       {addOpen && (
         <AuthorModal
           title="Add author"
           initial={{ firstName: "", lastName: "" }}
           onClose={() => setAddOpen(false)}
-          onSubmit={async (data) => {
-            await createAuthor(data)
-            load()
+          onSubmit={async (form) => {
+            await createAuthor({ data: form })
           }}
         />
       )}
 
-      {/* edit modal */}
       {editTarget && (
         <AuthorModal
           title="Edit author"
           initial={{ firstName: editTarget.firstName, lastName: editTarget.lastName }}
           onClose={() => setEditTarget(null)}
-          onSubmit={async (data) => {
-            await updateAuthor(editTarget.id, data)
-            load()
+          onSubmit={async (form) => {
+            await updateAuthor({ id: editTarget.id, data: form })
+            setEditTarget(null)
           }}
         />
       )}
 
-      {/* delete confirmation */}
       {deleteTarget && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"

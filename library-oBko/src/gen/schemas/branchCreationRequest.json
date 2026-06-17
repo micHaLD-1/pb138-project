@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["name", "address", "email", "phone"],
+  "properties": {
+    "name": { "type": "string", "maxLength": 100 },
+    "address": { "type": "string", "maxLength": 255 },
+    "email": { "type": "string", "format": "email" },
+    "phone": { "type": "string", "minLength": 6, "maxLength": 20 }
+  },
+  "x-readme-ref-name": "BranchCreationRequest"
+}

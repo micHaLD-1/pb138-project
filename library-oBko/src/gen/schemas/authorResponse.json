@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "firstName": { "type": "string" },
+    "lastName": { "type": "string" },
+    "name": { "type": "string" }
+  },
+  "x-readme-ref-name": "AuthorResponse"
+}

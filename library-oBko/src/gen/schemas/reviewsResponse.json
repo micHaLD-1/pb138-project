@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "content": { "type": "string" },
+          "rating": { "type": "integer" },
+          "createdAt": { "type": "string" },
+          "userId": { "type": "integer" },
+          "userFirstName": { "type": "string" },
+          "userLastName": { "type": "string" }
+        },
+        "x-readme-ref-name": "ReviewResponse"
+      }
+    },
+    "page": { "type": "integer" },
+    "pageSize": { "type": "integer" },
+    "total": { "type": "integer" }
+  },
+  "x-readme-ref-name": "ReviewsResponse"
+}

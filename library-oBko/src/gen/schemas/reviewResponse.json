@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "content": { "type": "string" },
+    "rating": { "type": "integer" },
+    "createdAt": { "type": "string" },
+    "userId": { "type": "integer" },
+    "userFirstName": { "type": "string" },
+    "userLastName": { "type": "string" }
+  },
+  "x-readme-ref-name": "ReviewResponse"
+}

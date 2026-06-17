@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { Field, FieldLabel, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/context/AuthContext'
+import { usePostReservations } from '@/gen/hooks/usePostReservations'
 
 type ReservationDialogProps = {
     bookId: number
@@ -17,42 +18,34 @@ export default function ReservationDialog({ bookId, bookTitle, availableCopies }
     const [open, setOpen] = useState(false)
     const [fromDate, setFromDate] = useState('')
     const [toDate, setToDate] = useState('')
-    const [reserving, setReserving] = useState(false)
     const [reservationSuccess, setReservationSuccess] = useState(false)
     const [reservationError, setReservationError] = useState<string | null>(null)
+
+    const { mutate: postReservation, isPending: reserving } = usePostReservations({
+        mutation: {
+            onSuccess: () => {
+                setReservationSuccess(true)
+            },
+            onError: (error) => {
+                setReservationError((error as Error).message ?? 'Rezervace selhala')
+            },
+        },
+    })
 
     async function handleReserve(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         if (!user) return
 
-        setReserving(true)
         setReservationError(null)
-
-        try {
-            const response = await fetch('/api/reservations', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: user.userId,
-                    bookId,
-                    fromDate,
-                    toDate,
-                    price: 0,
-                }),
-            })
-
-            if (!response.ok) {
-                const errorBody = await response.json().catch(() => null)
-                throw new Error(errorBody?.message ?? 'Rezervace selhala')
-            }
-
-            setReservationSuccess(true)
-        } catch (error) {
-            setReservationError((error as Error).message)
-        } finally {
-            setReserving(false)
-        }
+        postReservation({
+            data: {
+                userId: user.userId,
+                bookId,
+                fromDate,
+                toDate,
+                price: 0,
+            },
+        })
     }
 
     function handleOpenChange(nextOpen: boolean) {
