@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const ReservationCreationRequest = z.object({
-  userId: z.number().int().positive(),
   bookId: z.number().int().positive(),
   fromDate: z.string().date(),
   toDate: z.string().date(),

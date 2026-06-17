@@ -122,23 +122,23 @@ describe("Reservation Service", () => {
 
     describe("create()", () => {
         const createData = {
-            userId: 10,
             bookId: 5,
             fromDate: "2024-05-01",
             toDate: "2024-05-10",
             price: 15.0
         };
+        const testUserId = 10;
 
         test("should throw ConflictError if no book copies are available", async () => {
             setupSelectMock([]);
-            expect(reservationService.create(createData)).rejects.toThrow(ConflictError);
+            expect(reservationService.create(createData, testUserId)).rejects.toThrow(ConflictError);
         });
 
-        test("should throw ConflictError if user already has an active reservation", async () => {
+        test("should throw ConflictError if user already has an active reservation for this book", async () => {
             setupSelectMock([{ id: 100 }]);
             (db.query.reservation.findFirst as any).mockResolvedValue({ id: 1, status: ReservationStatus.ACTIVE });
 
-            expect(reservationService.create(createData)).rejects.toThrow(ConflictError);
+            expect(reservationService.create(createData, testUserId)).rejects.toThrow(ConflictError);
         });
 
         test("should throw NotFoundError if created reservation fails to be fetched", async () => {
@@ -151,7 +151,7 @@ describe("Reservation Service", () => {
             setupInsertMock([{ id: 1 }]);
             setupUpdateMock();
 
-            expect(reservationService.create(createData)).rejects.toThrow(NotFoundError);
+            expect(reservationService.create(createData, testUserId)).rejects.toThrow(NotFoundError);
         });
 
         test("should successfully create reservation and update book copy status", async () => {
@@ -164,7 +164,7 @@ describe("Reservation Service", () => {
             setupInsertMock([{ id: 1 }]);
             const { setMock } = setupUpdateMock();
 
-            const result = await reservationService.create(createData);
+            const result = await reservationService.create(createData, testUserId);
 
             expect(result).toBeDefined();
             expect(result.id).toBe(1);
