@@ -13,6 +13,7 @@ import { reservationModule } from "./modules/reservation";
 import { storageService } from "./cover-storage";
 import { bookCoverSeedService } from "./cover-storage/book-cover-seed";
 import { reviewsModule } from "./modules/reviews";
+import { newsletterModule, feedbackModule } from "./modules/newsletter";
 import { rulesModule } from "./modules/rules";
 import { rulesService } from "./modules/rules/service";
 import { authService } from "./modules/auth/service";
@@ -54,6 +55,8 @@ const app = new Elysia()
   .use(loanModule)
   .use(reservationModule)
   .use(reviewsModule)
+  .use(newsletterModule)
+  .use(feedbackModule)
   .use(rulesModule)
   .listen(3000);
 

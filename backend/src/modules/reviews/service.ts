@@ -20,7 +20,7 @@ export const reviewsService = {
       with: {
         user: true
       },
-      orderBy: (review, { desc }) => [desc(review.createdAt)]
+      orderBy: [sql`${review.createdAt} DESC`]
     });
 
     return mapToReviewsDTOs(result, Number(totalRecords.count), page, pageSize);
@@ -41,6 +41,7 @@ export const reviewsService = {
         userId,
         bookId: data.bookId,
         content: data.content,
+        rating: data.rating,
         createdAt: new Date()
       })
       .returning();
@@ -77,6 +78,16 @@ export const reviewsService = {
     });
 
     if (!result) throw new NotFoundError("Review not found after update");
+    return mapToReviewDTO(result);
+  },
+
+  findByUserAndBook: async (userId: number, bookId: number): Promise<ReviewDTO | null> => {
+    const result = await db.query.review.findFirst({
+      where: and(eq(review.userId, userId), eq(review.bookId, bookId)),
+      with: { user: true }
+    });
+
+    if (!result) return null;
     return mapToReviewDTO(result);
   },
 

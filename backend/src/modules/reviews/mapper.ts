@@ -1,16 +1,21 @@
-import { review, user } from "../../db";
 import type { ReviewDTO, ReviewsDTO } from "./model";
 
-type UserEntity = typeof user.$inferSelect;
-type ReviewEntity = typeof review.$inferSelect;
-
-interface ReviewWithUser extends ReviewEntity {
-  user: UserEntity;
-}
+type ReviewWithUser = {
+  id: number;
+  content: string;
+  rating: number;
+  createdAt: Date;
+  userId: number;
+  user: {
+    firstName: string;
+    lastName: string;
+  };
+};
 
 export const mapToReviewDTO = (entity: ReviewWithUser): ReviewDTO => ({
   id: entity.id,
   content: entity.content,
+  rating: entity.rating,
   createdAt: entity.createdAt.toISOString(),
   userId: entity.userId,
   userFirstName: entity.user.firstName,

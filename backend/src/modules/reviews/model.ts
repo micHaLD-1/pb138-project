@@ -2,16 +2,19 @@ import { z } from "zod";
 
 export const ReviewCreationRequest = z.object({
   bookId: z.number().int().positive(),
-  content: z.string().min(1).max(1000)
+  content: z.string().min(1).max(1000),
+  rating: z.number().int().min(0).max(5)
 });
 
 export const ReviewUpdateRequest = z.object({
-  content: z.string().min(1).max(1000)
+  content: z.string().min(1).max(1000),
+  rating: z.number().int().min(0).max(5)
 });
 
 export const ReviewResponse = z.object({
   id: z.number().int(),
   content: z.string(),
+  rating: z.number().int().min(0).max(5),
   createdAt: z.string(),
   userId: z.number().int(),
   userFirstName: z.string(),
