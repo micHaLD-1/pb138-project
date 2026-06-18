@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "fineAmountPerDay": { "type": "integer", "minimum": 0 },
+    "maxBooksPerUser": { "type": "integer", "minimum": 1 },
+    "gracePeriodDays": { "type": "integer", "minimum": 0 }
+  },
+  "x-readme-ref-name": "RulesUpdateRequest"
+}

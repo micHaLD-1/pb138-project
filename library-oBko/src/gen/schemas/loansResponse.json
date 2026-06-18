@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "loans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "userId": { "type": "integer" },
+          "bookCopyId": { "type": "integer" },
+          "loanDate": { "type": "string" },
+          "expectedReturnDate": { "type": "string" },
+          "actualReturnDate": { "type": "string", "nullable": true },
+          "price": { "type": "number" }
+        },
+        "x-readme-ref-name": "LoanResponse"
+      }
+    },
+    "page": { "type": "integer" },
+    "pageSize": { "type": "integer" },
+    "total": { "type": "integer" }
+  },
+  "x-readme-ref-name": "LoansResponse"
+}

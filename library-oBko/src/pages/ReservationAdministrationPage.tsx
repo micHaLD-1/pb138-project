@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Plus, Search, X, Check, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useGetReservations, getReservationsQueryKey } from "@/gen/hooks/useGetReservations"
+import { usePostReservations } from "@/gen/hooks/usePostReservations"
+import { usePutReservationsId } from "@/gen/hooks/usePutReservationsId"
+import { usePutReservationsIdCancel } from "@/gen/hooks/usePutReservationsIdCancel"
 
 type ReservationDTO = {
   id: number
@@ -33,70 +36,6 @@ type UpdateFormData = {
   toDate: string
   price: string
 }
-
-// ── API helpers ───────────────────────────────────────────────────────────────
-
-const BASE = "/api/reservations"
-
-async function fetchReservations(page: number, pageSize: number): Promise<{ reservations: ReservationDTO[]; total: number }> {
-  const res = await fetch(`${BASE}?page=${page}&pageSize=${pageSize}`, { credentials: "include" })
-  if (!res.ok) throw new Error("Failed to fetch reservations")
-  const data = await res.json()
-  return { reservations: data.reservations, total: data.total }
-}
-
-async function fetchUsers(): Promise<UserOption[]> {
-  const res = await fetch("/api/users?page=1&size=100", { credentials: "include" })
-  const data = await res.json()
-  return data.users.map((u: any) => ({ id: u.id, name: `${u.firstName} ${u.lastName}` }))
-  // return mockUsers
-}
-
-async function fetchBooks(): Promise<BookOption[]> {
-  const res = await fetch("/api/books?page=1&size=100", { credentials: "include" })
-  const data = await res.json()
-  return data.books.map((b: any) => ({ id: b.id, name: b.title }))
-  // return mockBooks
-}
-
-async function createReservation(data: any): Promise<void> {
-  const res = await fetch(BASE, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to create reservation")
-  }
-}
-
-async function updateReservation(id: number, data: any): Promise<void> {
-  const res = await fetch(`${BASE}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to update reservation")
-  }
-}
-
-async function cancelReservation(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/${id}/cancel`, {
-    method: "PUT",
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to cancel reservation")
-  }
-}
-
-// ── Single-select picker ──────────────────────────────────────────────────────
 
 type PickerItem = { id: number; name: string }
 
@@ -141,8 +80,6 @@ function SinglePicker({ title, items, selected, onClose, onConfirm }: SinglePick
     </div>
   )
 }
-
-// ── Create modal ──────────────────────────────────────────────────────────────
 
 type CreateModalProps = {
   users: UserOption[]
@@ -196,7 +133,6 @@ function CreateReservationModal({ users, books, onClose, onSubmit }: CreateModal
           <h2 className="mb-5 text-xl font-bold">New reservation</h2>
 
           <div className="flex flex-col gap-4">
-            {/* User picker */}
             <div className="flex flex-col gap-1">
               <Label>User</Label>
               <button
@@ -211,7 +147,6 @@ function CreateReservationModal({ users, books, onClose, onSubmit }: CreateModal
               </button>
             </div>
 
-            {/* Book picker */}
             <div className="flex flex-col gap-1">
               <Label>Book</Label>
               <button
@@ -226,7 +161,6 @@ function CreateReservationModal({ users, books, onClose, onSubmit }: CreateModal
               </button>
             </div>
 
-            {/* Dates */}
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
                 <Label htmlFor="fromDate">From date</Label>
@@ -238,7 +172,6 @@ function CreateReservationModal({ users, books, onClose, onSubmit }: CreateModal
               </div>
             </div>
 
-            {/* Price */}
             <div className="flex flex-col gap-1">
               <Label htmlFor="price">Price</Label>
               <Input id="price" type="number" min={0} step={0.01} value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} placeholder="0" />
@@ -263,8 +196,6 @@ function CreateReservationModal({ users, books, onClose, onSubmit }: CreateModal
     </>
   )
 }
-
-// ── Edit modal ────────────────────────────────────────────────────────────────
 
 type EditModalProps = {
   reservation: ReservationDTO
@@ -335,8 +266,6 @@ function EditReservationModal({ reservation, onClose, onSubmit }: EditModalProps
   )
 }
 
-// ── Status badge ──────────────────────────────────────────────────────────────
-
 function StatusBadge({ status }: { status?: string }) {
   const color =
     status === "ACTIVE" ? "bg-green-100 text-green-700" :
@@ -350,46 +279,80 @@ function StatusBadge({ status }: { status?: string }) {
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
-
 const PAGE_SIZE = 20
 
 export default function ReservationAdministrationPage() {
-  const [reservations, setReservations] = useState<ReservationDTO[]>([])
-  const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const [users, setUsers] = useState<UserOption[]>([])
-  const [books, setBooks] = useState<BookOption[]>([])
 
   const [addOpen, setAddOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<ReservationDTO | null>(null)
   const [cancelTarget, setCancelTarget] = useState<ReservationDTO | null>(null)
   const [cancelError, setCancelError] = useState<string | null>(null)
-  const [cancelLoading, setCancelLoading] = useState(false)
 
-  const load = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await fetchReservations(page, PAGE_SIZE)
-      setReservations(data.reservations)
-      setTotal(data.total)
-    } catch (e: any) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    load()
-    fetchUsers().then(setUsers)
-    fetchBooks().then(setBooks)
-  }, [page])
+  const { data: reservationsData, isPending: loading, isError } = useGetReservations({ page, pageSize: PAGE_SIZE })
+  const reservations: ReservationDTO[] = (reservationsData?.reservations ?? []).map((r) => ({
+    id: r.id ?? 0,
+    userId: r.userId ?? 0,
+    bookId: r.bookId ?? 0,
+    bookCopyId: r.bookCopyId ?? 0,
+    fromDate: r.fromDate ?? "",
+    toDate: r.toDate ?? "",
+    price: r.price ?? 0,
+    status: (r as any).status,
+  }))
+  const total = reservationsData?.total ?? 0
+  const error = isError ? "Failed to fetch reservations" : null
+
+  const usersQuery = useQuery({
+    queryKey: ["users-list"],
+    queryFn: async () => {
+      const res = await fetch("/api/users?page=1&size=100", { credentials: "include" })
+      const data = await res.json()
+      return (data.users as any[]).map((u) => ({ id: u.id as number, name: `${u.firstName} ${u.lastName}` })) as UserOption[]
+    },
+  })
+  const users: UserOption[] = usersQuery.data ?? []
+
+  const booksQuery = useQuery({
+    queryKey: ["books-list-all"],
+    queryFn: async () => {
+      const res = await fetch("/api/books?page=1&size=100", { credentials: "include" })
+      const data = await res.json()
+      return (data.books as any[]).map((b) => ({ id: b.id as number, name: b.title as string })) as BookOption[]
+    },
+  })
+  const books: BookOption[] = booksQuery.data ?? []
+
+  const { mutateAsync: createReservation } = usePostReservations({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getReservationsQueryKey({ page, pageSize: PAGE_SIZE }) })
+      },
+    },
+  })
+
+  const { mutateAsync: updateReservation } = usePutReservationsId({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getReservationsQueryKey({ page, pageSize: PAGE_SIZE }) })
+      },
+    },
+  })
+
+  const { mutate: cancelReservation, isPending: cancelLoading } = usePutReservationsIdCancel({
+    mutation: {
+      onSuccess: () => {
+        setCancelTarget(null)
+        queryClient.invalidateQueries({ queryKey: getReservationsQueryKey({ page, pageSize: PAGE_SIZE }) })
+      },
+      onError: (e: any) => {
+        setCancelError(e.message ?? "Failed to cancel reservation")
+      },
+    },
+  })
 
   const filtered = reservations.filter((r) =>
     String(r.id).includes(search) ||
@@ -399,26 +362,16 @@ export default function ReservationAdministrationPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
-  const handleCancel = async () => {
+  const handleCancel = () => {
     if (!cancelTarget) return
-    setCancelLoading(true)
     setCancelError(null)
-    try {
-      await cancelReservation(cancelTarget.id)
-      setCancelTarget(null)
-      load()
-    } catch (e: any) {
-      setCancelError(e.message)
-    } finally {
-      setCancelLoading(false)
-    }
+    cancelReservation({ id: cancelTarget.id })
   }
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="mb-6 text-3xl font-extrabold">Reservations</h1>
 
-      {/* toolbar */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -430,7 +383,6 @@ export default function ReservationAdministrationPage() {
         </Button>
       </div>
 
-      {/* table */}
       <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
         {loading && <p className="p-6 text-muted-foreground">Loading…</p>}
         {error && <p className="p-6 text-destructive">{error}</p>}
@@ -487,7 +439,6 @@ export default function ReservationAdministrationPage() {
         )}
       </div>
 
-      {/* pagination */}
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-end gap-2 text-sm">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
@@ -496,26 +447,23 @@ export default function ReservationAdministrationPage() {
         </div>
       )}
 
-      {/* create modal */}
       {addOpen && (
         <CreateReservationModal
           users={users}
           books={books}
           onClose={() => setAddOpen(false)}
-          onSubmit={async (data) => { await createReservation(data); load() }}
+          onSubmit={async (data) => { await createReservation({ data }) }}
         />
       )}
 
-      {/* edit modal */}
       {editTarget && (
         <EditReservationModal
           reservation={editTarget}
           onClose={() => setEditTarget(null)}
-          onSubmit={async (data) => { await updateReservation(editTarget.id, data); load() }}
+          onSubmit={async (data) => { await updateReservation({ id: editTarget.id, data }); setEditTarget(null) }}
         />
       )}
 
-      {/* cancel confirmation */}
       {cancelTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setCancelTarget(null)}>
           <div className="relative w-full max-w-sm rounded-xl border bg-card p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>

@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
 const ROLES = ["ADMIN", "STAFF", "MEMBER", "GUEST"] as const
 type Role = typeof ROLES[number]
@@ -24,36 +25,59 @@ const ROLE_COLORS: Record<Role, string> = {
 const PAGE_SIZE = 20
 
 export default function UserAdministrationPage() {
-    const [users, setUsers] = useState<UserDTO[]>([])
-    const [total, setTotal] = useState(0)
     const [page, setPage] = useState(1)
     const [search, setSearch] = useState("")
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
 
-    // role change state
     const [roleTarget, setRoleTarget] = useState<UserDTO | null>(null)
     const [selectedRole, setSelectedRole] = useState<Role>("MEMBER")
-    const [roleLoading, setRoleLoading] = useState(false)
     const [roleError, setRoleError] = useState<string | null>(null)
 
-    const load = async () => {
-        setLoading(true)
-        setError(null)
-        try {
+    const queryClient = useQueryClient()
+
+    const usersQueryKey = ["users", page]
+
+    const { data, isPending: loading, isError } = useQuery({
+        queryKey: usersQueryKey,
+        queryFn: async () => {
             const res = await fetch(`/api/users?page=${page}&size=${PAGE_SIZE}`, { credentials: "include" })
             if (!res.ok) throw new Error("Failed to fetch users")
-            const data = await res.json()
-            setUsers(data.users)
-            setTotal(data.total)
-        } catch (e: any) {
-            setError(e.message)
-        } finally {
-            setLoading(false)
-        }
-    }
+            return res.json() as Promise<{ users: UserDTO[]; total: number }>
+        },
+    })
 
-    useEffect(() => { load() }, [page])
+    const users: UserDTO[] = data?.users ?? []
+    const total = data?.total ?? 0
+    const error = isError ? "Failed to fetch users" : null
+
+    const { mutate: updateRole, isPending: roleLoading } = useMutation({
+        mutationFn: async ({ userId, role }: { userId: number; role: Role }) => {
+            const res = await fetch(`/api/users/${userId}/role`, {
+                method: "PUT",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ role }),
+            })
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}))
+                throw new Error((body as any).message ?? "Failed to update role")
+            }
+        },
+        onSuccess: (_data, variables) => {
+            queryClient.setQueryData(usersQueryKey, (old: { users: UserDTO[]; total: number } | undefined) => {
+                if (!old) return old
+                return {
+                    ...old,
+                    users: old.users.map((u) =>
+                        u.id === variables.userId ? { ...u, role: variables.role } : u
+                    ),
+                }
+            })
+            setRoleTarget(null)
+        },
+        onError: (e: any) => {
+            setRoleError(e.message ?? "Failed to update role")
+        },
+    })
 
     const filtered = users.filter((u) =>
         `${u.firstName} ${u.lastName} ${u.email}`.toLowerCase().includes(search.toLowerCase())
@@ -67,38 +91,15 @@ export default function UserAdministrationPage() {
         setRoleError(null)
     }
 
-    async function handleRoleChange() {
+    function handleRoleChange() {
         if (!roleTarget) return
-        setRoleLoading(true)
-        setRoleError(null)
-        try {
-            const res = await fetch(`/api/users/${roleTarget.id}/role`, {
-                method: "PUT",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ role: selectedRole }),
-            })
-            if (!res.ok) {
-                const body = await res.json().catch(() => ({}))
-                throw new Error(body.message ?? "Failed to update role")
-            }
-            // Update the row in local state directly — no re-fetch needed
-            setUsers(prev => prev.map(u =>
-                u.id === roleTarget.id ? { ...u, role: selectedRole } : u
-            ))
-            setRoleTarget(null)
-        } catch (e: any) {
-            setRoleError(e.message)
-        } finally {
-            setRoleLoading(false)
-        }
+        updateRole({ userId: roleTarget.id, role: selectedRole })
     }
 
     return (
         <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
             <h1 className="mb-6 text-3xl font-extrabold">Správa uživatelů</h1>
 
-            {/* search */}
             <div className="mb-4 relative w-full sm:max-w-xs">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -109,7 +110,6 @@ export default function UserAdministrationPage() {
                 />
             </div>
 
-            {/* table */}
             <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
                 {loading && <p className="p-6 text-muted-foreground">Načítám…</p>}
                 {error && <p className="p-6 text-destructive">{error}</p>}
@@ -150,7 +150,6 @@ export default function UserAdministrationPage() {
                 )}
             </div>
 
-            {/* pagination */}
             {totalPages > 1 && (
                 <div className="mt-4 flex items-center justify-end gap-2 text-sm">
                     <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
@@ -159,7 +158,6 @@ export default function UserAdministrationPage() {
                 </div>
             )}
 
-            {/* role change modal */}
             {roleTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setRoleTarget(null)}>
                     <div className="relative w-full max-w-sm rounded-xl border bg-card p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>

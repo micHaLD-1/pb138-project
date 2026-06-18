@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "required": ["bookId", "content", "rating"],
+  "properties": {
+    "bookId": { "type": "integer" },
+    "content": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "rating": { "type": "integer", "minimum": 0, "maximum": 5 }
+  },
+  "x-readme-ref-name": "ReviewCreationRequest"
+}

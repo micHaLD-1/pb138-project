@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["userEmail", "text"],
+  "properties": {
+    "userEmail": { "type": "string", "format": "email" },
+    "text": { "type": "string", "minLength": 1 }
+  },
+  "x-readme-ref-name": "FeedbackCreationRequest"
+}

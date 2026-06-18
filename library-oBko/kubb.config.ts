@@ -1,0 +1,30 @@
+import { defineConfig } from '@kubb/core'
+import { pluginOas } from '@kubb/plugin-oas'
+import { pluginTs } from '@kubb/plugin-ts'
+import { pluginClient } from '@kubb/plugin-client'
+import { pluginReactQuery } from '@kubb/plugin-react-query'
+
+export default defineConfig({
+  input: {
+    path: '../backend/openapi.yaml',
+  },
+  output: {
+    path: './src/gen',
+    clean: true,
+  },
+  plugins: [
+    pluginOas(),
+    pluginTs(),
+    pluginClient({
+      baseURL: '/api',
+      requestConfig: {
+        credentials: 'include',
+      },
+    }),
+    pluginReactQuery({
+      output: {
+        path: './hooks',
+      },
+    }),
+  ],
+})

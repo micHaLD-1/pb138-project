@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "userId": { "type": "integer" },
+        "role": { "type": "string" }
+      }
+    }
+  },
+  "x-readme-ref-name": "AuthLoginResponse"
+}

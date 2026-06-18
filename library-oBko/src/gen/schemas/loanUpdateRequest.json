@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["expectedReturnDate", "price"],
+  "properties": {
+    "expectedReturnDate": { "type": "string", "format": "date" },
+    "price": { "type": "number", "minimum": 0 }
+  },
+  "x-readme-ref-name": "LoanUpdateRequest"
+}

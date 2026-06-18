@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Pencil, Plus, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+import { useQueryClient } from "@tanstack/react-query"
+import { useGetPublishers, getPublishersQueryKey } from "@/gen/hooks/useGetPublishers"
+import { usePostPublishers } from "@/gen/hooks/usePostPublishers"
+import { usePutPublishersId } from "@/gen/hooks/usePutPublishersId"
+import { useDeletePublishersId } from "@/gen/hooks/useDeletePublishersId"
 
 type PublisherDTO = {
   id: number
@@ -14,61 +17,6 @@ type PublisherDTO = {
 type PublisherFormData = {
   name: string
 }
-
-
-// ── API helpers ───────────────────────────────────────────────────────────────
-
-const BASE = "/api/publishers"
-
-async function fetchPublishers(page: number, size: number): Promise<{ publishers: PublisherDTO[]; total: number }> {
-  // Mock — replace with real fetch when backend is ready:
-  const res = await fetch(`${BASE}?page=${page}&size=${size}`, { credentials: "include" })
-  if (!res.ok) throw new Error("Failed to fetch publishers")
-  const data = await res.json()
-  return { publishers: data.publishers, total: data.total }
-
-}
-
-async function createPublisher(data: PublisherFormData): Promise<PublisherDTO> {
-  const res = await fetch(BASE, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to create publisher")
-  }
-  const json = await res.json()
-  return json.publisher
-}
-
-async function updatePublisher(id: number, data: PublisherFormData): Promise<void> {
-  const res = await fetch(`${BASE}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to update publisher")
-  }
-}
-
-async function deletePublisher(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? "Failed to delete publisher")
-  }
-}
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
 
 type ModalProps = {
   title: string
@@ -145,41 +93,54 @@ function PublisherModal({ title, initial, onClose, onSubmit }: ModalProps) {
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
-
 const PAGE_SIZE = 20
 
 export default function PublisherAdministrationPage() {
-  const [publishers, setPublishers] = useState<PublisherDTO[]>([])
-  const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const [addOpen, setAddOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<PublisherDTO | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<PublisherDTO | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [deleteLoading, setDeleteLoading] = useState(false)
 
-  const load = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await fetchPublishers(page, PAGE_SIZE)
-      setPublishers(data.publishers)
-      setTotal(data.total)
-    } catch (e: any) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    load()
-  }, [page])
+  const { data, isPending: loading, isError } = useGetPublishers({ page, size: PAGE_SIZE })
+  const publishers: PublisherDTO[] = (data?.publishers ?? []).map((p) => ({
+    id: p.id ?? 0,
+    name: p.name ?? "",
+  }))
+  const total = data?.total ?? 0
+  const error = isError ? "Failed to fetch publishers" : null
+
+  const { mutateAsync: createPublisher } = usePostPublishers({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getPublishersQueryKey({ page, size: PAGE_SIZE }) })
+      },
+    },
+  })
+
+  const { mutateAsync: updatePublisher } = usePutPublishersId({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getPublishersQueryKey({ page, size: PAGE_SIZE }) })
+      },
+    },
+  })
+
+  const { mutate: deletePublisher, isPending: deleteLoading } = useDeletePublishersId({
+    mutation: {
+      onSuccess: () => {
+        setDeleteTarget(null)
+        queryClient.invalidateQueries({ queryKey: getPublishersQueryKey({ page, size: PAGE_SIZE }) })
+      },
+      onError: (e: any) => {
+        setDeleteError(e.message ?? "Failed to delete publisher")
+      },
+    },
+  })
 
   const filtered = publishers.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -187,26 +148,16 @@ export default function PublisherAdministrationPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deleteTarget) return
-    setDeleteLoading(true)
     setDeleteError(null)
-    try {
-      await deletePublisher(deleteTarget.id)
-      setDeleteTarget(null)
-      load()
-    } catch (e: any) {
-      setDeleteError(e.message)
-    } finally {
-      setDeleteLoading(false)
-    }
+    deletePublisher({ id: deleteTarget.id })
   }
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="mb-6 text-3xl font-extrabold">Publishers</h1>
 
-      {/* toolbar */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -223,7 +174,6 @@ export default function PublisherAdministrationPage() {
         </Button>
       </div>
 
-      {/* table */}
       <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
         {loading && <p className="p-6 text-muted-foreground">Loading…</p>}
         {error && <p className="p-6 text-destructive">{error}</p>}
@@ -277,7 +227,6 @@ export default function PublisherAdministrationPage() {
         )}
       </div>
 
-      {/* pagination */}
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-end gap-2 text-sm">
           <Button
@@ -302,33 +251,29 @@ export default function PublisherAdministrationPage() {
         </div>
       )}
 
-      {/* add modal */}
       {addOpen && (
         <PublisherModal
           title="Add publisher"
           initial={{ name: "" }}
           onClose={() => setAddOpen(false)}
-          onSubmit={async (data) => {
-            await createPublisher(data)
-            load()
+          onSubmit={async (form) => {
+            await createPublisher({ data: form })
           }}
         />
       )}
 
-      {/* edit modal */}
       {editTarget && (
         <PublisherModal
           title="Edit publisher"
           initial={{ name: editTarget.name }}
           onClose={() => setEditTarget(null)}
-          onSubmit={async (data) => {
-            await updatePublisher(editTarget.id, data)
-            load()
+          onSubmit={async (form) => {
+            await updatePublisher({ id: editTarget.id, data: form })
+            setEditTarget(null)
           }}
         />
       )}
 
-      {/* delete confirmation */}
       {deleteTarget && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
