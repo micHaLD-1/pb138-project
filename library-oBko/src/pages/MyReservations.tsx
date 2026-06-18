@@ -1,5 +1,5 @@
 import { useAuth } from '@/context/AuthContext'
-import { useGetReservations } from '@/gen/hooks/useGetReservations'
+import { useGetReservationsMe } from '@/gen/hooks/useGetReservationsMe'
 
 type Reservation = {
     id: number
@@ -21,13 +21,12 @@ const STATUS_COLORS: Record<string, string> = {
 export default function MyReservations() {
     const { user } = useAuth()
 
-    const { data, isPending, isError } = useGetReservations(
+    const { data, isPending, isError } = useGetReservationsMe(
         { page: 1, pageSize: 100 },
         { query: { enabled: !!user } }
     )
 
     const reservations: Reservation[] = (data?.reservations ?? [])
-        .filter((r) => r.userId === user?.userId)
         .map((r) => ({
             id: r.id ?? 0,
             userId: r.userId ?? 0,
