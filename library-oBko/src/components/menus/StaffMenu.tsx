@@ -55,8 +55,14 @@ function StaffMenu({ user }: StaffMenuProps) {
                 <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/reservations' })}>
                     Administrace rezervaci
                 </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/reviews' })}>
+                    Administrace recenzí
+                </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/newsletter' })}>
                     Newsletter
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/feedbacks')}>
+                    Feedbacky
                 </DropdownMenuItem>
 
                 {user.role === 'ADMIN' && (

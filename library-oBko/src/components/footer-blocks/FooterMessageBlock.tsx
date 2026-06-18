@@ -22,41 +22,62 @@ function FooterMessageBlock() {
     const { user } = useAuth()
 
     async function handleMessageSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault()
-        setIsSubmitting(true)
-        setFooterErrors({})
-        setSubmitStatus("idle")
+    event.preventDefault()
+    setIsSubmitting(true)
+    setFooterErrors({})
+    setSubmitStatus("idle")
 
-        const formData = new FormData(event.currentTarget)
-        const data = {
-            email: formData.get("email") as string,
-            message: formData.get("message") as string,
-        }
+    const formData = new FormData(event.currentTarget)
+    const data = {
+        email: formData.get("email") as string,
+        message: formData.get("message") as string,
+    }
 
-        const result = footerMessageSchema.safeParse(data)
+    const result = footerMessageSchema.safeParse(data)
 
-        if (!result.success) {
-            const errors: FooterMessageErrors = {}
-            result.error.issues.forEach((error: any) => {
-                const field = error.path[0] as keyof FooterMessageData
-                errors[field] = error.message
-            })
-            setFooterErrors(errors)
+    if (!result.success) {
+        const errors: FooterMessageErrors = {}
+        result.error.issues.forEach((error: any) => {
+            const field = error.path[0] as keyof FooterMessageData
+            errors[field] = error.message
+        })
+        setFooterErrors(errors)
+        setSubmitStatus("error")
+        setIsSubmitting(false)
+        return
+    }
+
+    try {
+        const res = await fetch("/api/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userEmail: result.data.email, text: result.data.message }),
+        })
+
+        if (!res.ok) {
+            const body = await res.json().catch(() => ({}))
+            setFooterErrors({ email: body.message ?? "Something went wrong. Please try again." })
             setSubmitStatus("error")
             setIsSubmitting(false)
             return
         }
-
-        setSubmitStatus("success")
-
-        const form = event.currentTarget
-        setTimeout(() => {
-            form.reset()
-            setFooterErrors({})
-            setSubmitStatus("idle")
-            setIsSubmitting(false)
-        }, 5000)
+    } catch {
+        setFooterErrors({ email: "Network error. Please try again." })
+        setSubmitStatus("error")
+        setIsSubmitting(false)
+        return
     }
+
+    setSubmitStatus("success")
+
+    const form = event.currentTarget
+    setTimeout(() => {
+        form.reset()
+        setFooterErrors({})
+        setSubmitStatus("idle")
+        setIsSubmitting(false)
+    }, 5000)
+}
 
     return (
         <section className="flex h-full w-full rounded-lg border border-border bg-background p-4 md:order-3 md:col-span-2 md:mx-auto md:max-w-3xl md:p-5 lg:order-2 lg:col-span-1 lg:mx-0 lg:max-w-none">

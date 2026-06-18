@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Star } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -11,32 +11,46 @@ const REVIEW_MAX_LENGTH = 1000
 
 export type ReviewInputData = {
     bookId: number
-    email: string
     rating: number
-    text: string
+    content: string
 }
 
 type ReviewInputProps = {
     bookId: number
-    onSubmit?: (data: ReviewInputData) => Promise<void> | void
+    reviewId?: number
+    initialRating?: number
+    initialContent?: string
+    submitLabel?: string
+    onSuccess?: () => void
     className?: string
 }
 
 type ReviewErrors = Partial<Record<'rating' | 'text' | 'submit', string>>
 
-export default function ReviewInput({ bookId, onSubmit, className }: ReviewInputProps) {
+export default function ReviewInput({
+    bookId,
+    reviewId,
+    initialRating = 0,
+    initialContent = '',
+    submitLabel,
+    onSuccess,
+    className,
+}: ReviewInputProps) {
     const { user, isLoading } = useAuth()
-    const [rating, setRating] = useState<number>(0)
-    const [text, setText] = useState('')
+    const [rating, setRating] = useState<number>(initialRating)
+    const [text, setText] = useState(initialContent)
     const [errors, setErrors] = useState<ReviewErrors>({})
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
+    useEffect(() => {
+        setRating(initialRating)
+        setText(initialContent)
+    }, [initialRating, initialContent, reviewId])
+
     if (isLoading || !user || (user.role !== "MEMBER" && user.role !== "GUEST")) {
         return null
     }
-
-    const currentUser = user
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -66,13 +80,41 @@ export default function ReviewInput({ bookId, onSubmit, className }: ReviewInput
 
         const payload: ReviewInputData = {
             bookId,
-            email: currentUser.email,
             rating,
-            text: trimmedText,
+            content: trimmedText,
         }
 
         try {
-            await onSubmit?.(payload)
+            const response = await fetch(reviewId ? `/api/reviews/${reviewId}` : '/api/reviews', {
+                method: reviewId ? 'PUT' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(reviewId ? { rating, content: trimmedText } : payload),
+            })
+
+            if (!response.ok) {
+                let backendMessage = 'Odeslání recenze selhalo'
+
+                try {
+                    const body = await response.json() as { message?: string }
+                    if (body?.message) {
+                        backendMessage = body.message
+                    }
+                } catch {
+                    // Keep fallback message when response is not JSON.
+                }
+
+                throw new Error(backendMessage)
+            }
+
+            window.dispatchEvent(new CustomEvent('reviews:changed', {
+                detail: { bookId },
+            }))
+
+            onSuccess?.()
+
             setSubmitStatus('success')
             setRating(0)
             setText('')
@@ -87,6 +129,8 @@ export default function ReviewInput({ bookId, onSubmit, className }: ReviewInput
             setIsSubmitting(false)
         }
     }
+
+    const buttonLabel = submitLabel ?? (reviewId ? 'Uložit změny' : 'Odeslat recenzi')
 
     return (
         <form className={className ?? 'grid gap-4'} onSubmit={handleSubmit}>
@@ -143,7 +187,7 @@ export default function ReviewInput({ bookId, onSubmit, className }: ReviewInput
 
             <div className="flex flex-wrap items-center gap-3">
                 <Button type="submit" disabled={isSubmitting}>
-                    {submitStatus === 'success' ? '✓ Odesláno' : 'Odeslat recenzi'}
+                    {submitStatus === 'success' ? '✓ Uloženo' : buttonLabel}
                 </Button>
                 {errors.submit && <p className="text-sm font-medium text-destructive">{errors.submit}</p>}
             </div>
