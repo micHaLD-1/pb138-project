@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "publishers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" }
+        },
+        "x-readme-ref-name": "PublisherResponse"
+      }
+    },
+    "page": { "type": "integer" },
+    "pageSize": { "type": "integer" },
+    "total": { "type": "integer" }
+  },
+  "x-readme-ref-name": "PublishersResponse"
+}

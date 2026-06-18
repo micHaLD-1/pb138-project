@@ -1,0 +1,5 @@
+{
+  "type": "object",
+  "properties": { "id": { "type": "integer" }, "name": { "type": "string" } },
+  "x-readme-ref-name": "GenreResponse"
+}

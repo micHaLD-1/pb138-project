@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { useGetReservationsMe } from '@/gen/hooks/useGetReservationsMe'
 
 type Reservation = {
     id: number
@@ -20,25 +20,26 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function MyReservations() {
     const { user } = useAuth()
-    const [reservations, setReservations] = useState<Reservation[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (!user) return
-        setLoading(true)
-        fetch(`/api/reservations?page=1&pageSize=100`, { credentials: 'include' })
-            .then(r => r.json())
-            .then(data => {
-                const mine = (data.reservations as Reservation[]).filter(r => r.userId === user.userId)
-                setReservations(mine)
-            })
-            .catch(() => setError('Nepodařilo se načíst rezervace.'))
-            .finally(() => setLoading(false))
-    }, [user])
+    const { data, isPending, isError } = useGetReservationsMe(
+        { page: 1, pageSize: 100 },
+        { query: { enabled: !!user } }
+    )
 
-    if (loading) return <p className="p-8 text-muted-foreground">Načítám…</p>
-    if (error)   return <p className="p-8 text-destructive">{error}</p>
+    const reservations: Reservation[] = (data?.reservations ?? [])
+        .map((r) => ({
+            id: r.id ?? 0,
+            userId: r.userId ?? 0,
+            bookId: r.bookId ?? 0,
+            bookCopyId: r.bookCopyId ?? 0,
+            fromDate: r.fromDate ?? "",
+            toDate: r.toDate ?? "",
+            price: r.price ?? 0,
+            status: (r as any).status ?? "",
+        }))
+
+    if (isPending) return <p className="p-8 text-muted-foreground">Načítám…</p>
+    if (isError)   return <p className="p-8 text-destructive">Nepodařilo se načíst rezervace.</p>
 
     return (
         <section className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">

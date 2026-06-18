@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "required": ["userId", "bookId", "fromDate", "toDate", "price"],
+  "properties": {
+    "userId": { "type": "integer" },
+    "bookId": { "type": "integer" },
+    "fromDate": { "type": "string", "format": "date" },
+    "toDate": { "type": "string", "format": "date" },
+    "price": { "type": "number", "minimum": 0 }
+  },
+  "x-readme-ref-name": "ReservationCreationRequest"
+}

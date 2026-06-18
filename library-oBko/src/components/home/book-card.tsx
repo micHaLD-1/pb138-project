@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { Link } from "react-router-dom"
+import { Link } from "@tanstack/react-router"
 
 type Book = {
   id: string
@@ -13,16 +13,9 @@ type BookCardProps = {
   book: Book
 }
 
-const images = ["https://covers.openlibrary.org/b/id/7984916-L.jpg",
-  "https://covers.openlibrary.org/b/id/8101356-L.jpg",
-  "https://covers.openlibrary.org/b/id/7222246-L.jpg",
-  "https://covers.openlibrary.org/b/id/6979861-L.jpg",
-  "https://covers.openlibrary.org/b/id/7984916-L.jpg",
-]
-
 export default function BookCard({ book }: BookCardProps) {
   return (
-    <Link to={`/books/${book.id}`}>
+    <Link to="/books/$id" params={{ id: book.id }}>
     <Card className="overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-lg">
       <CardContent className="p-0">
         <div className="aspect-[3/4] overflow-hidden">

@@ -1,6 +1,6 @@
 import userIcon from '@/assets/user.svg'
 import { useAuth } from '@/context/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -36,29 +36,29 @@ function StaffMenu({ user }: StaffMenuProps) {
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="min-w-44">
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/profile' })}>
                     Profil
                 </DropdownMenuItem>
 
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/authors')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/authors' })}>
                     Administrace autoru
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/genres')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/genres' })}>
                     Administrace zanru
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/publishers')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/publishers' })}>
                     Administrace vydavatelu
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/books_adm')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/books_adm' })}>
                     Administrace knih
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/reservations')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/reservations' })}>
                     Administrace rezervaci
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/reviews')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/reviews' })}>
                     Administrace recenzí
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/newsletters')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/newsletter' })}>
                     Newsletter
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/feedbacks')}>
@@ -66,16 +66,16 @@ function StaffMenu({ user }: StaffMenuProps) {
                 </DropdownMenuItem>
 
                 {user.role === 'ADMIN' && (
-                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/users')}>
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/users' })}>
                         Správa uživatelů
                     </DropdownMenuItem>
                 )}
-                
+
                 <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => {
-                        logout()
-                        navigate('/')
+                        void logout()
+                        void navigate({ to: '/' })
                     }}
                 >
                     Odhlásit se

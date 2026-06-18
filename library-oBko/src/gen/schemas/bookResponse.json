@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "title": { "type": "string" },
+    "language": { "type": "string" },
+    "publisherId": { "type": "integer" },
+    "publisherName": { "type": "string" },
+    "yearPublished": { "type": "integer" },
+    "description": { "type": "string" },
+    "authors": { "type": "array", "items": { "type": "string" } },
+    "genres": { "type": "array", "items": { "type": "string" } },
+    "availableCopies": { "type": "integer" },
+    "totalCopies": { "type": "integer" }
+  },
+  "x-readme-ref-name": "BookResponse"
+}

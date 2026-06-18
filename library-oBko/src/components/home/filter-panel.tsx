@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import {
   Drawer,
   DrawerTrigger,
@@ -7,6 +7,8 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
+import { useGetGenres } from "@/gen/hooks/useGetGenres"
+import { useGetAuthors } from "@/gen/hooks/useGetAuthors"
 
 type Genre = { id: number; name: string }
 type Author = { id: number; name: string }
@@ -21,24 +23,14 @@ type Props = {
 }
 
 export default function FilterPanel({ onFilterChange }: Props) {
-  const [genres, setGenres] = useState<Genre[]>([])
-  const [authors, setAuthors] = useState<Author[]>([])
-
   const [selectedGenreId, setSelectedGenreId] = useState<number | null>(null)
   const [selectedAuthorId, setSelectedAuthorId] = useState<number | null>(null)
 
-  // Fetch all genres and authors once on mount
-  useEffect(() => {
-    fetch("/api/genres?page=1&size=200")
-      .then((r) => r.json())
-      .then((data) => setGenres(data.genres ?? []))
-      .catch(() => {})
+  const genresQuery = useGetGenres({ page: 1, size: 100 })
+  const authorsQuery = useGetAuthors({ page: 1, size: 100 })
 
-    fetch("/api/authors?page=1&size=200")
-      .then((r) => r.json())
-      .then((data) => setAuthors(data.authors ?? []))
-      .catch(() => {})
-  }, [])
+  const genres: Genre[] = (genresQuery.data?.genres ?? []).map((g) => ({ id: g.id ?? 0, name: g.name ?? "" }))
+  const authors: Author[] = (authorsQuery.data?.authors ?? []).map((a) => ({ id: a.id ?? 0, name: a.name ?? "" }))
 
   const handleFilter = () => {
     onFilterChange({ genreId: selectedGenreId, authorId: selectedAuthorId })
@@ -55,7 +47,6 @@ export default function FilterPanel({ onFilterChange }: Props) {
   return (
     <div className="w-full flex flex-col gap-4 md:flex-row md:items-center md:justify-center my-6">
 
-      {/* Author filter drawer */}
       <Drawer direction="left">
         <DrawerTrigger asChild>
           <Button variant="outline">
@@ -71,7 +62,6 @@ export default function FilterPanel({ onFilterChange }: Props) {
           </DrawerHeader>
 
           <div className="p-4 flex flex-col gap-2 overflow-y-auto">
-            {/* "Any" option to clear selection */}
             <button
               className={`text-left px-2 py-1 rounded hover:bg-muted ${selectedAuthorId === null ? "font-semibold text-primary" : ""}`}
               onClick={() => setSelectedAuthorId(null)}
@@ -91,7 +81,6 @@ export default function FilterPanel({ onFilterChange }: Props) {
         </DrawerContent>
       </Drawer>
 
-      {/* Apply button */}
       <Button
         className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 px-10"
         onClick={handleFilter}
@@ -99,14 +88,12 @@ export default function FilterPanel({ onFilterChange }: Props) {
         Filtruj
       </Button>
 
-      {/* Reset button — only shown when a filter is active */}
       {hasActiveFilter && (
         <Button variant="ghost" onClick={handleReset}>
           Zrušit filtry
         </Button>
       )}
 
-      {/* Genre filter drawer */}
       <Drawer direction="right">
         <DrawerTrigger asChild>
           <Button variant="outline">
@@ -122,7 +109,6 @@ export default function FilterPanel({ onFilterChange }: Props) {
           </DrawerHeader>
 
           <div className="p-4 flex flex-col gap-2 overflow-y-auto">
-            {/* "Any" option to clear selection */}
             <button
               className={`text-left px-2 py-1 rounded hover:bg-muted ${selectedGenreId === null ? "font-semibold text-primary" : ""}`}
               onClick={() => setSelectedGenreId(null)}

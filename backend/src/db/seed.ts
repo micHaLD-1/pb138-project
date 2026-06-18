@@ -287,7 +287,7 @@ async function main() {
             bookId: 13
         }
     ]);
-
+    
     await bookCoverSeedService.seedFromFolder();
 
     console.log("✅ Databáze byla úspěšně naplněna daty!");

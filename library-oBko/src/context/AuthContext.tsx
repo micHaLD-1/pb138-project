@@ -8,7 +8,7 @@ interface User {
   email: string;
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
   isLoading: boolean;

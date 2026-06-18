@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { useParams } from '@tanstack/react-router'
 import { Star } from 'lucide-react'
 import fallbackImage from '@/assets/hero.png'
 import wishlistIcon from '@/assets/Subtract.png'
@@ -8,67 +8,23 @@ import ReviewSection from '@/components/reviews/ReviewSection'
 import ReviewDisplay from '../components/reviews/ReviewDisplay'
 import ReservationDialog from '@/components/book/ReservationDialog'
 import { mockReviews } from '@/lib/mock-reviews'
+import { useGetBooksId } from '@/gen/hooks/useGetBooksId'
 
 const STAR_COUNT = 5
-
-type BookDetail = {
-    id: number
-    title: string
-    language: string
-    publisherName: string
-    yearPublished: number
-    description: string
-    genres: string[]
-    authors: string[]
-    availableCopies: number
-    totalCopies: number
-}
-
-type LoadState = 'loading' | 'ready' | 'not-found'
 
 function formatAvailability(available: number, total: number): string {
     return `${available} / ${total}`
 }
 
 export default function BookDetail() {
-    const { id } = useParams<{ id: string }>()
-    const [loadState, setLoadState] = useState<LoadState>('loading')
-    const [book, setBook] = useState<BookDetail | null>(null)
+    const { id } = useParams({ from: '/books/$id' })
     const [imageFailed, setImageFailed] = useState(false)
 
     const { addToWishlist } = useWishlist()
 
-    useEffect(() => {
-        window.scrollTo(0, 0)
-    }, [])
+    const { data: book, isPending, isError } = useGetBooksId(Number(id))
 
-    useEffect(() => {
-        if (!id) {
-            setLoadState('not-found')
-            return
-        }
-
-        setLoadState('loading')
-        setImageFailed(false)
-
-        fetch(`/api/books/${id}`, { credentials: 'include' })
-            .then((res) => {
-                if (res.status === 404) {
-                    setLoadState('not-found')
-                    return null
-                }
-                if (!res.ok) throw new Error('Failed to fetch book')
-                return res.json()
-            })
-            .then((data) => {
-                if (!data) return
-                setBook(data)
-                setLoadState('ready')
-            })
-            .catch(() => setLoadState('not-found'))
-    }, [id])
-
-    if (loadState === 'loading') {
+    if (isPending) {
         return (
             <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
                 <div className="rounded-xl border bg-card p-8 shadow-sm">
@@ -78,7 +34,7 @@ export default function BookDetail() {
         )
     }
 
-    if (loadState === 'not-found' || !book) {
+    if (isError || !book) {
         return (
             <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
                 <div className="rounded-xl border bg-card p-8 shadow-sm">
@@ -135,9 +91,9 @@ export default function BookDetail() {
 
                             <div className="flex flex-wrap items-center gap-3">
                                 <ReservationDialog
-                                    bookId={book.id}
-                                    bookTitle={book.title}
-                                    availableCopies={book.availableCopies}
+                                    bookId={book.id ?? 0}
+                                    bookTitle={book.title ?? ""}
+                                    availableCopies={book.availableCopies ?? 0}
                                 />
 
                                 <button
@@ -159,12 +115,12 @@ export default function BookDetail() {
 
                         <div className="flex items-baseline gap-2">
                             <p className="text-md uppercase tracking-wide text-muted-foreground">Žánr:</p>
-                            <p className="text-md">{book.genres.join(', ')}</p>
+                            <p className="text-md">{(book.genres ?? []).join(', ')}</p>
                         </div>
 
                         <div className="mt-4 flex items-baseline gap-2">
                             <p className="text-md uppercase tracking-wide text-muted-foreground">Autor:</p>
-                            <p className="text-md font-bold">{book.authors.join(', ')}</p>
+                            <p className="text-md font-bold">{(book.authors ?? []).join(', ')}</p>
                         </div>
 
                         <div className="mt-4 flex items-baseline gap-2">
@@ -185,7 +141,7 @@ export default function BookDetail() {
                         <div className="mt-4 flex items-baseline gap-2">
                             <p className="text-md uppercase tracking-wide text-muted-foreground">Dostupnost:</p>
                             <p className="text-md">
-                                {formatAvailability(book.availableCopies, book.totalCopies)} kopií
+                                {formatAvailability(book.availableCopies ?? 0, book.totalCopies ?? 0)} kopií
                             </p>
                         </div>
                     </section>

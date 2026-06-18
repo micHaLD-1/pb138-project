@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "userEmail": { "type": "string" },
+    "createdAt": { "type": "string" },
+    "text": { "type": "string" }
+  },
+  "x-readme-ref-name": "FeedbackResponse"
+}

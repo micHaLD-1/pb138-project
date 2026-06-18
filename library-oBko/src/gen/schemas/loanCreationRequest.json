@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "required": [
+    "userId",
+    "bookCopyId",
+    "loanDate",
+    "expectedReturnDate",
+    "actualReturnDate",
+    "price"
+  ],
+  "properties": {
+    "userId": { "type": "integer" },
+    "bookCopyId": { "type": "integer" },
+    "loanDate": { "type": "string", "format": "date" },
+    "expectedReturnDate": { "type": "string", "format": "date" },
+    "actualReturnDate": { "type": "string", "format": "date" },
+    "price": { "type": "number", "minimum": 0 }
+  },
+  "x-readme-ref-name": "LoanCreationRequest"
+}

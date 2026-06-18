@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "feedbacks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "userEmail": { "type": "string" },
+          "createdAt": { "type": "string" },
+          "text": { "type": "string" }
+        },
+        "x-readme-ref-name": "FeedbackResponse"
+      }
+    },
+    "page": { "type": "integer" },
+    "pageSize": { "type": "integer" },
+    "total": { "type": "integer" }
+  },
+  "x-readme-ref-name": "FeedbacksResponse"
+}

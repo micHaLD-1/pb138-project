@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -6,16 +6,11 @@ import { useAuth } from '@/context/AuthContext'
 
 function UserProfile() {
   const { user, updateUser } = useAuth()
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
+  const [firstName, setFirstName] = useState(user?.firstName ?? '')
+  const [lastName, setLastName] = useState(user?.lastName ?? '')
   const [saving, setSaving] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-
-  useEffect(() => {
-    setFirstName(user?.firstName ?? '')
-    setLastName(user?.lastName ?? '')
-  }, [user])
 
   if (!user) {
     return null

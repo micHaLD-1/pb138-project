@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "required": [
+    "title",
+    "language",
+    "publisherId",
+    "yearPublished",
+    "description",
+    "genreIds",
+    "authorIds",
+    "copyCount"
+  ],
+  "properties": {
+    "title": { "type": "string" },
+    "language": { "type": "string" },
+    "publisherId": { "type": "integer" },
+    "yearPublished": { "type": "integer" },
+    "description": { "type": "string", "maxLength": 1000 },
+    "genreIds": { "type": "array", "items": { "type": "integer" } },
+    "authorIds": { "type": "array", "items": { "type": "integer" } },
+    "copyCount": { "type": "integer", "minimum": 1 }
+  },
+  "x-readme-ref-name": "BookCreationRequest"
+}
