@@ -61,7 +61,7 @@ function StaffMenu({ user }: StaffMenuProps) {
                 <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/newsletter' })}>
                     Newsletter
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/feedbacks')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => void navigate({ to: '/feedbacks' })}>
                     Feedbacky
                 </DropdownMenuItem>
 

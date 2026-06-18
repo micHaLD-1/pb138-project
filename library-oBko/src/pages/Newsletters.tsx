@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Search, X, Eye, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from '@tanstack/react-router'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -150,7 +150,7 @@ export default function NewsletterAdministrationPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button onClick={() => navigate('/new_newsletter')} className="ml-2 flex items-center gap-1">
+        <Button onClick={() => navigate({ to: '/new_newsletter' })} className="ml-2 flex items-center gap-1">
           <Plus className="mr-2 h-4 w-4" />
           Add newsletter
         </Button>

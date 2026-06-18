@@ -255,37 +255,37 @@ async function main() {
             content: "Úžasná kniha! Tolkien vytvořil neuvěřitelný svět plný magie a dobrodružství.",
             rating: 5,
             createdAt: new Date("2026-03-15T10:30:00"),
-            userId: 4,
+            userId: 1,
             bookId: 1
         },
         {
             content: "Varovná kniha pro každou dobu. Orwellova vize totalitarismu je děsivě aktuální.",
             rating: 5,
             createdAt: new Date("2026-03-20T14:00:00"),
-            userId: 5,
+            userId: 2,
             bookId: 2
         },
         {
             content: "Herbert napsal mistrovské dílo. Komplexní svět s hlubokou filozofií.",
             rating: 5,
             createdAt: new Date("2026-04-01T09:15:00"),
-            userId: 6,
+            userId: 3,
             bookId: 3
         },
         {
             content: "Klasika, která nikdy nezestárne. Dokonalé napětí až do poslední stránky.",
             rating: 4,
             createdAt: new Date("2026-04-05T16:45:00"),
-            userId: 7,
+            userId: 4,
             bookId: 6
         },
-        {
-            content: "Jedna z nejkrásnějších knih, které jsem kdy četla. Dojemné a hluboké.",
-            rating: 5,
-            createdAt: new Date("2026-04-10T11:00:00"),
-            userId: 8,
-            bookId: 13
-        }
+        // {
+        //     content: "Jedna z nejkrásnějších knih, které jsem kdy četla. Dojemné a hluboké.",
+        //     rating: 5,
+        //     createdAt: new Date("2026-04-10T11:00:00"),
+        //     userId: 8,
+        //     bookId: 13
+        // }
     ]);
     
     await bookCoverSeedService.seedFromFolder();

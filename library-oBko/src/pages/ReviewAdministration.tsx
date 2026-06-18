@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from '@tanstack/react-router'
 import { Search, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -129,7 +129,7 @@ export default function ReviewAdministrationPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => navigate(`/reviews/${book.id}`)}
+                      onClick={() => navigate({ to: `/_staff/reviews/${book.id}` })}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>

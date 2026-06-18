@@ -15,16 +15,20 @@ import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BooksIdRouteImport } from './routes/books/$id'
+import { Route as StaffReviewsRouteImport } from './routes/_staff/reviews'
 import { Route as StaffReservationsRouteImport } from './routes/_staff/reservations'
 import { Route as StaffPublishersRouteImport } from './routes/_staff/publishers'
 import { Route as StaffNewsletterRouteImport } from './routes/_staff/newsletter'
+import { Route as StaffNew_newsletterRouteImport } from './routes/_staff/new_newsletter'
 import { Route as StaffGenresRouteImport } from './routes/_staff/genres'
+import { Route as StaffFeedbacksRouteImport } from './routes/_staff/feedbacks'
 import { Route as StaffBooks_admRouteImport } from './routes/_staff/books_adm'
 import { Route as StaffAuthorsRouteImport } from './routes/_staff/authors'
 import { Route as ProtectedWishlistRouteImport } from './routes/_protected/wishlist'
 import { Route as ProtectedProfileRouteImport } from './routes/_protected/profile'
 import { Route as ProtectedMyReservationsRouteImport } from './routes/_protected/my-reservations'
 import { Route as AdminUsersRouteImport } from './routes/_admin/users'
+import { Route as StaffReviewsIdRouteImport } from './routes/_staff/reviews/$id'
 
 const O_nasRoute = O_nasRouteImport.update({
   id: '/o_nas',
@@ -53,6 +57,11 @@ const BooksIdRoute = BooksIdRouteImport.update({
   path: '/books/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaffReviewsRoute = StaffReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => StaffRoute,
+} as any)
 const StaffReservationsRoute = StaffReservationsRouteImport.update({
   id: '/reservations',
   path: '/reservations',
@@ -68,9 +77,19 @@ const StaffNewsletterRoute = StaffNewsletterRouteImport.update({
   path: '/newsletter',
   getParentRoute: () => StaffRoute,
 } as any)
+const StaffNew_newsletterRoute = StaffNew_newsletterRouteImport.update({
+  id: '/new_newsletter',
+  path: '/new_newsletter',
+  getParentRoute: () => StaffRoute,
+} as any)
 const StaffGenresRoute = StaffGenresRouteImport.update({
   id: '/genres',
   path: '/genres',
+  getParentRoute: () => StaffRoute,
+} as any)
+const StaffFeedbacksRoute = StaffFeedbacksRouteImport.update({
+  id: '/feedbacks',
+  path: '/feedbacks',
   getParentRoute: () => StaffRoute,
 } as any)
 const StaffBooks_admRoute = StaffBooks_admRouteImport.update({
@@ -103,6 +122,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const StaffReviewsIdRoute = StaffReviewsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => StaffReviewsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -113,11 +137,15 @@ export interface FileRoutesByFullPath {
   '/wishlist': typeof ProtectedWishlistRoute
   '/authors': typeof StaffAuthorsRoute
   '/books_adm': typeof StaffBooks_admRoute
+  '/feedbacks': typeof StaffFeedbacksRoute
   '/genres': typeof StaffGenresRoute
+  '/new_newsletter': typeof StaffNew_newsletterRoute
   '/newsletter': typeof StaffNewsletterRoute
   '/publishers': typeof StaffPublishersRoute
   '/reservations': typeof StaffReservationsRoute
+  '/reviews': typeof StaffReviewsRouteWithChildren
   '/books/$id': typeof BooksIdRoute
+  '/reviews/$id': typeof StaffReviewsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -128,11 +156,15 @@ export interface FileRoutesByTo {
   '/wishlist': typeof ProtectedWishlistRoute
   '/authors': typeof StaffAuthorsRoute
   '/books_adm': typeof StaffBooks_admRoute
+  '/feedbacks': typeof StaffFeedbacksRoute
   '/genres': typeof StaffGenresRoute
+  '/new_newsletter': typeof StaffNew_newsletterRoute
   '/newsletter': typeof StaffNewsletterRoute
   '/publishers': typeof StaffPublishersRoute
   '/reservations': typeof StaffReservationsRoute
+  '/reviews': typeof StaffReviewsRouteWithChildren
   '/books/$id': typeof BooksIdRoute
+  '/reviews/$id': typeof StaffReviewsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -147,11 +179,15 @@ export interface FileRoutesById {
   '/_protected/wishlist': typeof ProtectedWishlistRoute
   '/_staff/authors': typeof StaffAuthorsRoute
   '/_staff/books_adm': typeof StaffBooks_admRoute
+  '/_staff/feedbacks': typeof StaffFeedbacksRoute
   '/_staff/genres': typeof StaffGenresRoute
+  '/_staff/new_newsletter': typeof StaffNew_newsletterRoute
   '/_staff/newsletter': typeof StaffNewsletterRoute
   '/_staff/publishers': typeof StaffPublishersRoute
   '/_staff/reservations': typeof StaffReservationsRoute
+  '/_staff/reviews': typeof StaffReviewsRouteWithChildren
   '/books/$id': typeof BooksIdRoute
+  '/_staff/reviews/$id': typeof StaffReviewsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -164,11 +200,15 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/authors'
     | '/books_adm'
+    | '/feedbacks'
     | '/genres'
+    | '/new_newsletter'
     | '/newsletter'
     | '/publishers'
     | '/reservations'
+    | '/reviews'
     | '/books/$id'
+    | '/reviews/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -179,11 +219,15 @@ export interface FileRouteTypes {
     | '/wishlist'
     | '/authors'
     | '/books_adm'
+    | '/feedbacks'
     | '/genres'
+    | '/new_newsletter'
     | '/newsletter'
     | '/publishers'
     | '/reservations'
+    | '/reviews'
     | '/books/$id'
+    | '/reviews/$id'
   id:
     | '__root__'
     | '/'
@@ -197,11 +241,15 @@ export interface FileRouteTypes {
     | '/_protected/wishlist'
     | '/_staff/authors'
     | '/_staff/books_adm'
+    | '/_staff/feedbacks'
     | '/_staff/genres'
+    | '/_staff/new_newsletter'
     | '/_staff/newsletter'
     | '/_staff/publishers'
     | '/_staff/reservations'
+    | '/_staff/reviews'
     | '/books/$id'
+    | '/_staff/reviews/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -257,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BooksIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_staff/reviews': {
+      id: '/_staff/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof StaffReviewsRouteImport
+      parentRoute: typeof StaffRoute
+    }
     '/_staff/reservations': {
       id: '/_staff/reservations'
       path: '/reservations'
@@ -278,11 +333,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffNewsletterRouteImport
       parentRoute: typeof StaffRoute
     }
+    '/_staff/new_newsletter': {
+      id: '/_staff/new_newsletter'
+      path: '/new_newsletter'
+      fullPath: '/new_newsletter'
+      preLoaderRoute: typeof StaffNew_newsletterRouteImport
+      parentRoute: typeof StaffRoute
+    }
     '/_staff/genres': {
       id: '/_staff/genres'
       path: '/genres'
       fullPath: '/genres'
       preLoaderRoute: typeof StaffGenresRouteImport
+      parentRoute: typeof StaffRoute
+    }
+    '/_staff/feedbacks': {
+      id: '/_staff/feedbacks'
+      path: '/feedbacks'
+      fullPath: '/feedbacks'
+      preLoaderRoute: typeof StaffFeedbacksRouteImport
       parentRoute: typeof StaffRoute
     }
     '/_staff/books_adm': {
@@ -327,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_staff/reviews/$id': {
+      id: '/_staff/reviews/$id'
+      path: '/$id'
+      fullPath: '/reviews/$id'
+      preLoaderRoute: typeof StaffReviewsIdRouteImport
+      parentRoute: typeof StaffReviewsRoute
+    }
   }
 }
 
@@ -356,22 +432,40 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
   ProtectedRouteChildren,
 )
 
+interface StaffReviewsRouteChildren {
+  StaffReviewsIdRoute: typeof StaffReviewsIdRoute
+}
+
+const StaffReviewsRouteChildren: StaffReviewsRouteChildren = {
+  StaffReviewsIdRoute: StaffReviewsIdRoute,
+}
+
+const StaffReviewsRouteWithChildren = StaffReviewsRoute._addFileChildren(
+  StaffReviewsRouteChildren,
+)
+
 interface StaffRouteChildren {
   StaffAuthorsRoute: typeof StaffAuthorsRoute
   StaffBooks_admRoute: typeof StaffBooks_admRoute
+  StaffFeedbacksRoute: typeof StaffFeedbacksRoute
   StaffGenresRoute: typeof StaffGenresRoute
+  StaffNew_newsletterRoute: typeof StaffNew_newsletterRoute
   StaffNewsletterRoute: typeof StaffNewsletterRoute
   StaffPublishersRoute: typeof StaffPublishersRoute
   StaffReservationsRoute: typeof StaffReservationsRoute
+  StaffReviewsRoute: typeof StaffReviewsRouteWithChildren
 }
 
 const StaffRouteChildren: StaffRouteChildren = {
   StaffAuthorsRoute: StaffAuthorsRoute,
   StaffBooks_admRoute: StaffBooks_admRoute,
+  StaffFeedbacksRoute: StaffFeedbacksRoute,
   StaffGenresRoute: StaffGenresRoute,
+  StaffNew_newsletterRoute: StaffNew_newsletterRoute,
   StaffNewsletterRoute: StaffNewsletterRoute,
   StaffPublishersRoute: StaffPublishersRoute,
   StaffReservationsRoute: StaffReservationsRoute,
+  StaffReviewsRoute: StaffReviewsRouteWithChildren,
 }
 
 const StaffRouteWithChildren = StaffRoute._addFileChildren(StaffRouteChildren)

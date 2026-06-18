@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from '@tanstack/react-router'
 import { ChevronLeft, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -55,7 +55,9 @@ async function deleteReview(reviewId: number): Promise<void> {
 const PAGE_SIZE = 20
 
 export default function BookReviewsPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = useParams({
+    from: '/_staff/reviews/$id',
+  })
   const bookId = Number(id)
   const navigate = useNavigate()
 
@@ -123,7 +125,7 @@ export default function BookReviewsPage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate("/reviews")}
+          onClick={() => navigate({ to: ".." })}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
